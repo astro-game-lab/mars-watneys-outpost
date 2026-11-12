@@ -114,12 +114,16 @@ function drawTileStatic(c, t) {
   }
 }
 
-// Changes whenever anything drawn into the static layer would change.
+const TERRAIN_CODE = Object.fromEntries(Object.keys(TERRAIN).map((k, i) => [k, i]));
+
+// Changes whenever anything drawn into the static layer would change,
+// including the terrain, which differs between missions and seeds.
 function staticSignature() {
   let sig = `${canvas.width}x${canvas.height}|${view.size}|${bg.complete && bg.naturalWidth ? 1 : 0}|`;
   for (const k of BUILD_ORDER) sig += BUILDINGS[k].img.naturalWidth ? 1 : 0;
   for (const t of state.tiles) {
     const b = t.building;
+    sig += TERRAIN_CODE[t.terrain];
     sig += b ? `${b.type[0]}${b.type[1]}${b.reinforced ? "r" : ""}${b.disabled > 0 ? "d" : ""},` : ".";
   }
   return sig;
