@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 120 120">
+<!-- Watney's Outpost building sprite: radiation shield -->
+<defs>
+<radialGradient id="r-shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000000" stop-opacity=".55"></stop><stop offset=".6" stop-color="#000000" stop-opacity=".3"></stop><stop offset="1" stop-color="#000000" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="r-dome" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#E9FBFF" stop-opacity=".9"></stop><stop offset=".55" stop-color="#7FD4F0" stop-opacity=".55"></stop><stop offset="1" stop-color="#2D7FA8" stop-opacity=".7"></stop></radialGradient>
+</defs>
+<ellipse cx="60" cy="96" rx="58" ry="18" fill="url(#r-shadow)"></ellipse>
+<polygon points="60,62 100,80 60,98 20,80" fill="#F4F6F9"></polygon>
+<polygon points="20,80 60,98 60,104 20,86" fill="#D9DEE5"></polygon>
+<polygon points="100,80 60,98 60,104 100,86" fill="#9FA9B6"></polygon>
+<path d="M24,80 A36,44 0 0 1 96,80 A36,16 0 0 1 24,80 Z" fill="url(#r-dome)" stroke="#BFEFFF" stroke-width="1.2"></path>
+<path d="M34,62 A30,30 0 0 1 60,40" stroke="#FFFFFF" stroke-width="2" fill="none" opacity=".7" stroke-linecap="round"></path>
+<path d="M60,36 V80 M30,66 A30,10 0 0 0 90,66" stroke="#BFEFFF" stroke-width="1" fill="none" opacity=".6"></path>
+<circle cx="60" cy="68" r="9" fill="#F2C94C" stroke="#3A424D" stroke-width="1.5"></circle>
+<path d="M60,68 L55,60 A9,9 0 0 1 65,60 Z M60,68 L69,68 A9,9 0 0 1 64,76 Z M60,68 L56,76 A9,9 0 0 1 51,68 Z" fill="#3A424D"></path>
+<circle cx="60" cy="68" r="2" fill="#F2C94C"></circle>
+<circle cx="60" cy="35" r="2.5" fill="#F28C28"></circle>
+</svg>

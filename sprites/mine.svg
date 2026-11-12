@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 120 120">
+<!-- Watney's Outpost building sprite: mine -->
+<defs>
+<linearGradient id="r-window" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFFAF2"></stop><stop offset="1" stop-color="#2E9C92"></stop></linearGradient>
+<radialGradient id="r-shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000000" stop-opacity=".55"></stop><stop offset=".6" stop-color="#000000" stop-opacity=".3"></stop><stop offset="1" stop-color="#000000" stop-opacity="0"></stop></radialGradient>
+</defs>
+<ellipse cx="58" cy="96" rx="58" ry="18" fill="url(#r-shadow)"></ellipse>
+<polygon points="60,50 96,68 60,86 24,68" fill="#F4F6F9"></polygon>
+<polygon points="24,68 60,86 60,98 24,80" fill="#D9DEE5"></polygon>
+<polygon points="96,68 60,86 60,98 96,80" fill="#9FA9B6"></polygon>
+<polygon points="96,72 60,90 60,93 96,75" fill="#F28C28"></polygon>
+<polygon points="24,72 60,90 60,93 24,75" fill="#F28C28" opacity=".75"></polygon>
+<polygon points="60,54 88,68 60,82 32,68" fill="none" stroke="#C9D0D9" stroke-width="1"></polygon>
+<ellipse cx="60" cy="68" rx="10" ry="5" fill="#2A3039"></ellipse>
+<ellipse cx="60" cy="69" rx="6" ry="3" fill="#12151A"></ellipse>
+<path d="M60,61 L60,10" stroke="#F28C28" stroke-width="2.5" opacity=".55"></path>
+<path d="M60,10 V72" stroke="#2A3039" stroke-width="2.5"></path>
+<path d="M47.2,58 H72.8 M50.4,46 H69.6 M53.6,34 H66.4 M56.8,22 H63.2 M47.2,58 L69.6,46 M72.8,58 L50.4,46 M50.4,46 L66.4,34 M69.6,46 L53.6,34 M53.6,34 L63.2,22 M66.4,34 L56.8,22" stroke="#F28C28" stroke-width="1.8" stroke-linecap="round"></path>
+<path d="M44,70 L60,10 L76,70" fill="none" stroke="#F28C28" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"></path>
+<path d="M44,70 L60,10 L76,70" fill="none" stroke="#000000" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" opacity=".12"></path>
+<polygon points="60,5 65,7.5 60,10 55,7.5" fill="#F4F6F9"></polygon>
+<polygon points="55,7.5 60,10 60,14 55,11.5" fill="#D9DEE5"></polygon>
+<polygon points="65,7.5 60,10 60,14 65,11.5" fill="#9FA9B6"></polygon>
+<circle cx="60" cy="3.5" r="2.2" fill="#F28C28"></circle>
+<polygon points="82,57 92,62 82,67 72,62" fill="#F4F6F9"></polygon>
+<polygon points="72,62 82,67 82,79 72,74" fill="#D9DEE5"></polygon>
+<polygon points="92,62 82,67 82,79 92,74" fill="#9FA9B6"></polygon>
+<polygon points="74,65 80,68 80,72 74,69" fill="url(#r-window)"></polygon>
+<path d="M6,102 Q14,80 28,88 Q36,78 46,92 Q50,96 50,102 Z" fill="#B5582F"></path>
+<path d="M28,88 Q36,78 46,92 Q50,96 50,102 L34,102 Q34,94 28,88 Z" fill="#8A3B2A" opacity=".6"></path>
+<circle cx="16" cy="95" r="3" fill="#D9804F"></circle><circle cx="30" cy="97" r="2.5" fill="#8A3B2A"></circle><circle cx="40" cy="93" r="2.5" fill="#D9804F"></circle><circle cx="22" cy="89" r="2" fill="#E39A6A"></circle>
+</svg>

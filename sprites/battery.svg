@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 120 120">
+<!-- Watney's Outpost building sprite: battery bank -->
+<defs>
+<radialGradient id="r-shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000000" stop-opacity=".55"></stop><stop offset=".6" stop-color="#000000" stop-opacity=".3"></stop><stop offset="1" stop-color="#000000" stop-opacity="0"></stop></radialGradient>
+<linearGradient id="r-cell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9BF07A"></stop><stop offset="1" stop-color="#2E9C4A"></stop></linearGradient>
+</defs>
+<g transform="translate(0,-6)">
+<ellipse cx="60" cy="96" rx="58" ry="18" fill="url(#r-shadow)"></ellipse>
+<!-- base slab -->
+<polygon points="60,58 100,78 60,98 20,78" fill="#F4F6F9"></polygon>
+<polygon points="20,78 60,98 60,103 20,83" fill="#D9DEE5"></polygon>
+<polygon points="100,78 60,98 60,103 100,83" fill="#9FA9B6"></polygon>
+<!-- back cabinet -->
+<polygon points="66,36 88,47 66,58 44,47" fill="#F4F6F9"></polygon>
+<polygon points="44,47 66,58 66,80 44,69" fill="#D9DEE5"></polygon>
+<polygon points="88,47 66,58 66,80 88,69" fill="#9FA9B6"></polygon>
+<polygon points="47,53 63,61 63,66 47,58" fill="url(#r-cell)"></polygon>
+<polygon points="47,61 63,69 63,74 47,66" fill="url(#r-cell)"></polygon>
+<!-- front cabinet -->
+<polygon points="46,48 68,59 46,70 24,59" fill="#F4F6F9"></polygon>
+<polygon points="24,59 46,70 46,92 24,81" fill="#D9DEE5"></polygon>
+<polygon points="68,59 46,70 46,92 68,81" fill="#9FA9B6"></polygon>
+<polygon points="27,65 43,73 43,78 27,70" fill="url(#r-cell)"></polygon>
+<polygon points="27,73 43,81 43,86 27,78" fill="url(#r-cell)"></polygon>
+<path d="M29,66 L41,72" stroke="#FFFFFF" stroke-width="1" opacity=".6"></path>
+<!-- orange accent stripe + terminals -->
+<polygon points="68,74 46,85 46,88 68,77" fill="#F28C28"></polygon>
+<rect x="40" y="52" width="4" height="5" fill="#3A424D"></rect>
+<rect x="48" y="56" width="4" height="5" fill="#3A424D"></rect>
+<circle cx="42" cy="51.5" r="2" fill="#F28C28"></circle>
+<circle cx="50" cy="55.5" r="2" fill="#5C6673"></circle>
+<!-- lightning bolt on side -->
+<path d="M58,66 L53,75 L57,75 L54,83 L61,72 L57,72 L60,66 Z" fill="#F2C94C" stroke="#3A424D" stroke-width=".8"></path>
+</g>
+</svg>

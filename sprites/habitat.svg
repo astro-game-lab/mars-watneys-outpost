@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 120 120">
+<!-- Watney's Outpost building sprite: habitat -->
+<defs>
+<linearGradient id="r-cyl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF"></stop><stop offset=".35" stop-color="#E6EAEF"></stop><stop offset=".7" stop-color="#B9C1CC"></stop><stop offset="1" stop-color="#7E8896"></stop></linearGradient>
+<linearGradient id="r-shade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".3"></stop><stop offset=".4" stop-color="#FFFFFF" stop-opacity="0"></stop><stop offset=".6" stop-color="#000000" stop-opacity="0"></stop><stop offset="1" stop-color="#000000" stop-opacity=".4"></stop></linearGradient>
+<radialGradient id="r-dome" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFFFFF"></stop><stop offset=".5" stop-color="#E3E7EC"></stop><stop offset="1" stop-color="#A2ACB8"></stop></radialGradient>
+<radialGradient id="r-shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000000" stop-opacity=".55"></stop><stop offset=".6" stop-color="#000000" stop-opacity=".3"></stop><stop offset="1" stop-color="#000000" stop-opacity="0"></stop></radialGradient>
+</defs>
+<ellipse cx="60" cy="94" rx="56" ry="20" fill="url(#r-shadow)"></ellipse>
+<path d="M18,54 L18,82 A42,21 0 0 0 102,82 L102,54 Z" fill="url(#r-cyl)"></path>
+<path d="M18,78 L18,82 A42,21 0 0 0 102,82 L102,78 A42,21 0 0 1 18,78 Z" fill="#5C6673"></path>
+<path d="M18,64 L18,70 A42,21 0 0 0 102,70 L102,64 A42,21 0 0 1 18,64 Z" fill="#F28C28"></path>
+<path d="M18,64 L18,70 A42,21 0 0 0 102,70 L102,64 A42,21 0 0 1 18,64 Z" fill="url(#r-shade)"></path>
+<ellipse cx="60" cy="54" rx="42" ry="21" fill="#EEF1F5" stroke="#FFFFFF" stroke-width="1"></ellipse>
+<path d="M26,52 A34,34 0 0 1 94,52 A34,17 0 0 1 26,52 Z" fill="url(#r-dome)"></path>
+<path d="M60,18 Q42,26 40,65.7 M60,18 Q60,40 60,69 M60,18 Q78,26 80,65.7 M28.2,40 A31.8,13 0 0 0 91.8,40" fill="none" stroke="#AEB7C2" stroke-width="1" opacity=".85"></path>
+<ellipse cx="60" cy="21" rx="7" ry="3.5" fill="#5C6673"></ellipse>
+<ellipse cx="60" cy="20.5" rx="4" ry="2" fill="#F28C28"></ellipse>
+<path d="M33,44 Q38,30 52,23" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" opacity=".9"></path>
+<circle cx="36" cy="77" r="4.5" fill="#3A424D"></circle><circle cx="36" cy="77" r="3" fill="#9FF3E8"></circle>
+<circle cx="60" cy="80" r="4.5" fill="#3A424D"></circle><circle cx="60" cy="80" r="3" fill="#9FF3E8"></circle>
+<circle cx="84" cy="77" r="4.5" fill="#3A424D"></circle><circle cx="84" cy="77" r="3" fill="#6FD3C6"></circle>
+<circle cx="35" cy="76" r="1" fill="#FFFFFF"></circle><circle cx="59" cy="79" r="1" fill="#FFFFFF"></circle><circle cx="83" cy="76" r="1" fill="#FFFFFF"></circle>
+<path d="M84,32 L92,10" stroke="#5C6673" stroke-width="2" stroke-linecap="round"></path>
+<path d="M87,22 L95,25" stroke="#5C6673" stroke-width="1.5" stroke-linecap="round"></path>
+<circle cx="92" cy="9" r="3" fill="#F28C28"></circle>
+<polygon points="26,72.5 37,78 26,83.5 15,78" fill="#F4F6F9"></polygon>
+<polygon points="15,78 26,83.5 26,101.5 15,96" fill="#D9DEE5"></polygon>
+<polygon points="37,78 26,83.5 26,101.5 37,96" fill="#9FA9B6"></polygon>
+<polygon points="17.5,83 23.5,86 23.5,97.5 17.5,94.5" fill="#2A3039"></polygon>
+<circle cx="20.5" cy="81.5" r="1.4" fill="#F28C28"></circle>
+</svg>

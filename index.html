@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mars: Watney's Outpost</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="hud" class="box">
+    <h1>🚀 MARS: WATNEY'S OUTPOST</h1>
+    <div id="resources"></div>
+    <div id="power-note" class="crit-text"></div>
+    <hr>
+    <div class="kv"><span>👨‍🚀 Crew</span><span id="crew"></span></div>
+    <div id="arrival" class="small"></div>
+    <div class="kv"><span>☢️ Radiation</span><span id="radiation"></span></div>
+    <div class="kv"><span>❤️ Health</span><span id="health-val"></span></div>
+    <div class="bar"><div id="health-bar"></div></div>
+    <hr>
+    <div id="goal"></div>
+    <div id="effects"></div>
+    <div class="help">Click a dashed tile to build · Click a building for info<br>Space pause · 1/2/3 speed · Esc close</div>
+  </div>
+
+  <div id="clockbox" class="box">
+    <div class="clockrow"><b id="sol"></b><span id="clock"></span></div>
+    <div class="sky"><span id="sun">☀️</span></div>
+    <div class="clockrow"><span id="phase"></span><span id="solar-pct"></span></div>
+    <div id="speed"></div>
+  </div>
+
+  <div id="panel" class="box" hidden></div>
+
+  <div id="messages"></div>
+
+  <div id="end" hidden>
+    <div class="box endbox">
+      <h2 id="end-title"></h2>
+      <p id="end-text"></p>
+      <p id="end-stats" class="sub"></p>
+      <button id="restart">New mission</button>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/hexmap.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/events.js"></script>
+  <script src="js/simulation.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

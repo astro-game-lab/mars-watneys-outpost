@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 120 120">
+<!-- Watney's Outpost building sprite: lab -->
+<defs>
+<linearGradient id="r-window" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFFAF2"></stop><stop offset="1" stop-color="#2E9C92"></stop></linearGradient>
+<radialGradient id="r-shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000000" stop-opacity=".55"></stop><stop offset=".6" stop-color="#000000" stop-opacity=".3"></stop><stop offset="1" stop-color="#000000" stop-opacity="0"></stop></radialGradient>
+</defs>
+<ellipse cx="60" cy="96" rx="58" ry="18" fill="url(#r-shadow)"></ellipse>
+<polygon points="60,33 98,52 60,71 22,52" fill="#F4F6F9"></polygon>
+<polygon points="22,52 60,71 60,101 22,82" fill="#D9DEE5"></polygon>
+<polygon points="98,52 60,71 60,101 98,82" fill="#9FA9B6"></polygon>
+<polygon points="60,37 90,52 60,67 30,52" fill="#E6EAF0"></polygon>
+<polygon points="25,60 57,76 57,84 25,68" fill="url(#r-window)"></polygon>
+<path d="M33,64 V72 M41,68 V76 M49,72 V80" stroke="#D9DEE5" stroke-width="1"></path>
+<path d="M27,61 L55,75" stroke="#FFFFFF" stroke-width="1" opacity=".7"></path>
+<polygon points="98,72 60,91 60,94 98,75" fill="#F28C28"></polygon>
+<polygon points="68,82 76,78 76,92 68,96" fill="#3A424D"></polygon>
+<polygon points="70,83.5 74,81.5 74,85 70,87" fill="#6FE0D2"></polygon>
+<polygon points="82,64 92,59 92,64 82,69" fill="url(#r-window)"></polygon>
+<polygon points="44,44 50,47 44,50 38,47" fill="#F4F6F9"></polygon>
+<polygon points="38,47 44,50 44,54 38,51" fill="#D9DEE5"></polygon>
+<polygon points="50,47 44,50 44,54 50,51" fill="#9FA9B6"></polygon>
+<path d="M36,48 V20 M32,26 H40" stroke="#5C6673" stroke-width="2" stroke-linecap="round"></path>
+<circle cx="36" cy="19" r="2.5" fill="#F28C28"></circle>
+<path d="M70,44 L70,52 A4,2 0 0 0 78,52 L78,44 Z" fill="#9FA9B6"></path>
+<path d="M74,44 L76,36" stroke="#5C6673" stroke-width="2.5"></path>
+<ellipse cx="76" cy="34" rx="15" ry="7" transform="rotate(-25 76 34)" fill="#F4F6F9" stroke="#9FA9B6" stroke-width="1"></ellipse>
+<ellipse cx="76" cy="34" rx="11" ry="4.8" transform="rotate(-25 76 34)" fill="#D3DAE2"></ellipse>
+<path d="M76,34 L86,22" stroke="#2A3039" stroke-width="1.5"></path>
+<circle cx="86" cy="22" r="2.2" fill="#F28C28"></circle>
+</svg>

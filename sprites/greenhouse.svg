@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 120 120">
+<!-- Watney's Outpost building sprite: greenhouse -->
+<defs>
+<linearGradient id="r-cyl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF"></stop><stop offset=".35" stop-color="#E6EAEF"></stop><stop offset=".7" stop-color="#B9C1CC"></stop><stop offset="1" stop-color="#7E8896"></stop></linearGradient>
+<linearGradient id="r-shade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".3"></stop><stop offset=".4" stop-color="#FFFFFF" stop-opacity="0"></stop><stop offset=".6" stop-color="#000000" stop-opacity="0"></stop><stop offset="1" stop-color="#000000" stop-opacity=".4"></stop></linearGradient>
+<linearGradient id="r-glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D8FFF9" stop-opacity=".75"></stop><stop offset=".5" stop-color="#7FE3D6" stop-opacity=".32"></stop><stop offset="1" stop-color="#2E8F86" stop-opacity=".6"></stop></linearGradient>
+<radialGradient id="r-shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000000" stop-opacity=".55"></stop><stop offset=".6" stop-color="#000000" stop-opacity=".3"></stop><stop offset="1" stop-color="#000000" stop-opacity="0"></stop></radialGradient>
+</defs>
+<ellipse cx="60" cy="94" rx="58" ry="20" fill="url(#r-shadow)"></ellipse>
+<path d="M14,70 L14,78 A46,23 0 0 0 106,78 L106,70 Z" fill="url(#r-cyl)"></path>
+<path d="M14,74 L14,77 A46,23 0 0 0 106,77 L106,74 A46,23 0 0 1 14,74 Z" fill="#F28C28"></path>
+<path d="M14,74 L14,77 A46,23 0 0 0 106,77 L106,74 A46,23 0 0 1 14,74 Z" fill="url(#r-shade)"></path>
+<ellipse cx="60" cy="70" rx="44" ry="22" fill="#7A5A43"></ellipse>
+<ellipse cx="60" cy="70" rx="40" ry="20" fill="#8C6A4E"></ellipse>
+<circle cx="66" cy="46" r="6" fill="#4E9E43"></circle>
+<circle cx="54" cy="50" r="7" fill="#6BC25A"></circle>
+<circle cx="76" cy="58" r="7" fill="#5BB04E"></circle>
+<circle cx="46" cy="60" r="8" fill="#6BC25A"></circle>
+<circle cx="62" cy="64" r="9" fill="#7FD06A"></circle>
+<circle cx="40" cy="70" r="8" fill="#4E9E43"></circle>
+<circle cx="82" cy="68" r="8" fill="#4E9E43"></circle>
+<circle cx="54" cy="76" r="9" fill="#3E8E3A"></circle>
+<circle cx="70" cy="76" r="9" fill="#5BB04E"></circle>
+<circle cx="44" cy="57" r="2.5" fill="#B4EB9A"></circle><circle cx="60" cy="61" r="3" fill="#B4EB9A"></circle><circle cx="74" cy="55" r="2.5" fill="#A6E38E"></circle><circle cx="52" cy="73" r="2.5" fill="#A6E38E"></circle><circle cx="68" cy="72" r="2.5" fill="#B4EB9A"></circle><circle cx="80" cy="65" r="2" fill="#A6E38E"></circle>
+<path d="M16,70 A44,44 0 0 1 104,70 A44,22 0 0 1 16,70 Z" fill="url(#r-glass)" stroke="#E6FFFB" stroke-width="1.5"></path>
+<path d="M60,26 Q34,34 32,87 M60,26 Q60,50 60,92 M60,26 Q86,34 88,87 M21.9,48 A38.1,19 0 0 0 98.1,48 M32.1,36 A27.9,14 0 0 0 87.9,36" fill="none" stroke="#E6FFFB" stroke-width="1.4" opacity=".7"></path>
+<path d="M26,62 Q30,40 46,31" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity=".75"></path>
+<path d="M33,72 Q34,64 37,58" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity=".5"></path>
+<path d="M87,80 L87,90 A9,4.5 0 0 0 105,90 L105,80 Z" fill="url(#r-cyl)"></path>
+<ellipse cx="96" cy="80" rx="9" ry="4.5" fill="#F4F6F9"></ellipse>
+<circle cx="99" cy="86" r="1.8" fill="#F28C28"></circle>
+</svg>
