@@ -170,7 +170,7 @@ function renderPanel() {
     const b = BUILDINGS[t.building.type];
     panel.innerHTML = `
       <div class="ptitle">${b.icon} ${b.name}<button class="close" data-act="close">✕</button></div>
-      <div class="sub">Tile (${t.col}, ${t.row}) · ${terrain}</div>
+      <div class="sub">${terrain}</div>
       <div id="live"></div>
       <div class="kv"><span>Consumes</span><span>${fmtList(b.consumes, true)}</span></div>
       <div class="kv"><span>Produces</span><span>${makesText(b)}</span></div>
@@ -194,14 +194,14 @@ function renderPanel() {
   } else if (canPlaceOn(t)) {
     panel.innerHTML = `
       <div class="ptitle">🏗️ Build<button class="close" data-act="close">✕</button></div>
-      <div class="sub">Tile (${t.col}, ${t.row}) · ${terrain}</div>
+      <div class="sub">${terrain}</div>
       ${BUILD_ORDER.filter(buildingUnlocked).map((k) => buildOption(k, t)).join("")}`;
   } else {
     const reason = t.terrain === "impassable" ? "Impassable terrain — nothing can be built here."
       : "Too far from the outpost. Build next to an existing structure.";
     panel.innerHTML = `
       <div class="ptitle">${terrain}<button class="close" data-act="close">✕</button></div>
-      <div class="sub">Tile (${t.col}, ${t.row})</div><p>${reason}</p>`;
+      <p>${reason}</p>`;
   }
 }
 
