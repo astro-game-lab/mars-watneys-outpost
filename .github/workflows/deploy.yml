@@ -1,0 +1,71 @@
+name: Deploy
+
+# The game is static files with no build step, so a push to `main` publishes it
+# directly. Only the files the game loads are staged — docs and repo metadata are
+# not part of the site.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never cancel a deploy in flight; a half-applied one is a broken site.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Stage site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Actions are pinned to full commit SHAs rather than tags. A tag can be
+      # moved to point at different code; a SHA cannot.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Stage site files
+        run: |
+          mkdir _site
+          cp -r index.html style.css js sprites assets _site/
+
+      # A missing script or image fails silently in the browser, so check that
+      # every local file index.html and the scripts reference made it in.
+      - name: Check references
+        run: |
+          missing=0
+          for ref in $(grep -ohE '(src|href)="[^":]+"' _site/index.html | sed -E 's/.*="([^"]+)"/\1/') \
+                     $(grep -ohE '"(assets|sprites)/[^"$`]+"' _site/js/*.js | tr -d '"'); do
+            [ -e "_site/$ref" ] || { echo "missing: $ref"; missing=1; }
+          done
+          for s in $(sed -nE 's/.*sprite: "([a-z]+)".*/\1/p' _site/js/data.js); do
+            [ -e "_site/sprites/$s.svg" ] || { echo "missing: sprites/$s.svg"; missing=1; }
+          done
+          exit $missing
+
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
