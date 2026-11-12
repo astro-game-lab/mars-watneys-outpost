@@ -23,7 +23,7 @@ The org defaults assume a physics core in SI units with a deterministic, fixed-s
 | **Separation** | The core has no DOM and no UI calls | **Deviation.** `js/simulation.js` calls `say()` and `endGame()` from `js/ui.js` directly, and every module shares the global scope. |
 | **Precision** | Float64 for state | Float64 (JavaScript numbers). Resources are clamped to `≥ 0`, and power to `≤` battery capacity, after each step. |
 
-Fixing the timestep and threading a seeded RNG through the simulation are the first steps toward org compliance. See [`DESIGN.md`](DESIGN.md#open-questions).
+Fixing the timestep and threading a seeded RNG through the simulation are the first steps toward org compliance.
 
 ## Constants
 

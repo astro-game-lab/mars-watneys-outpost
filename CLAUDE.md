@@ -15,7 +15,7 @@ An [astro-game-lab](https://github.com/astro-game-lab) game, and an unofficial f
 | Document | What it is | When it binds you |
 | --- | --- | --- |
 | [`docs/PHYSICS.md`](docs/PHYSICS.md) | What the model claims, every gameplay departure, the scientific claims in the building texts and their sources, and where the repo deviates from org conventions | **Any change to a rate, rule, event or `why` text updates it in the same commit.** A new departure gets a row. A new claim to the player gets a row with a source. |
-| [`docs/DESIGN.md`](docs/DESIGN.md) | What the game is, the loop, scope and open questions | Game-design and UI work |
+| [`docs/DESIGN.md`](docs/DESIGN.md) | What the game is, the loop and scope | Game-design and UI work |
 | [`ATTRIBUTIONS.md`](ATTRIBUTIONS.md) | Provenance of every third-party asset and the *Martian* material | Adding any asset, image or borrowed code |
 
 ## Architecture
