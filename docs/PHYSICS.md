@@ -39,11 +39,11 @@ There are no physical constants in the code. These are the real values the game'
 ## What is modelled
 
 - **Production and consumption.** Each building has fixed per-second rates (`BUILDINGS` in `js/data.js`), scaled by a terrain bonus and, for Solar Arrays, by daylight. Crew consume water, food and oxygen at a fixed rate each (`CREW_NEEDS`).
-- **Shortages.** These are resolved in order: power first, then water. If stored power is empty and demand exceeds supply, every power consumer runs at the fraction `supply / demand`. Water works the same way, after power has been applied to the extractors. Food and oxygen can run out, but they don't throttle anything. They only damage health.
+- **Shortages.** These are resolved in order: power first, then water. If stored power is empty and demand exceeds supply, every power consumer runs at the fraction `supply / demand`. Water works the same way, after power has been applied to the extractors, except that the crew drinks first: water consumers share only what production leaves after the crew's needs. Food and oxygen can run out, but they don't throttle anything. They only damage health.
 - **Storage.** Power is capped at 200 plus 150 per Battery Bank. Other resources have no cap.
 - **Day/night.** Solar output follows a step function over the sol: 0 at night, 0.4 in the morning, 1.0 at midday, 0.3 in the evening.
 - **Radiation.** Exposure = 35 + 40 during a flare − shielding, clamped to 0–100. Shielding is 5 per working Habitat, 15 per working Radiation Shield (scaled by its power level), and 5 per reinforced building, which works even while the building is damaged.
-- **Health.** Health falls by 2 per second for each of water or food at zero, by 4 per second if oxygen is at zero, and by 0.08 per point of exposure above 50. Otherwise it regenerates at 0.5 per second, up to 100.
+- **Health.** Health falls by 2 per second for each of water or food, and by 4 per second for oxygen, when its stock is at zero and current production doesn't cover the crew's needs. It also falls by 0.08 per point of exposure above 50. Otherwise it regenerates at 0.5 per second, up to 100.
 - **Events.** Weighted random draws every 40–70 game seconds. See `EVENTS` in `js/events.js`.
 
 ## What is neglected

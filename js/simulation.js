@@ -41,15 +41,19 @@ function computeFlows() {
   }
   if (state.resources.power <= 0.01 && pCons > pProd) factor.power = pCons ? pProd / pCons : 1;
 
-  // Water: extractors depend on power.
-  let wProd = 0, wCons = CREW_NEEDS.water;
+  // Water: extractors depend on power. The crew drinks first and isn't
+  // throttled, so buildings share only what's left after the crew's needs.
+  const crewWater = CREW_NEEDS.water * state.crew;
+  let wProd = 0, wBuild = 0;
   for (const t of list) {
     const b = BUILDINGS[t.building.type];
     const lv = level(t);
     wProd += (b.produces.water || 0) * outputMultiplier(t) * lv;
-    wCons += (b.consumes.water || 0) * (t.building.disabled > 0 ? 0 : factor.power);
+    wBuild += (b.consumes.water || 0) * (t.building.disabled > 0 ? 0 : factor.power);
   }
-  if (state.resources.water <= 0.01 && wCons > wProd) factor.water = wCons ? wProd / wCons : 1;
+  if (state.resources.water <= 0.01 && crewWater + wBuild > wProd) {
+    factor.water = wBuild ? Math.max(0, wProd - crewWater) / wBuild : 1;
+  }
 
   // Final flows.
   let crewCapacity = 0, shielding = 0, powerCapacity = POWER_CAPACITY;
@@ -107,7 +111,10 @@ function updateGame(dt) {
 
   // Crew health
   let dmg = 0;
-  for (const k of ["water", "food", "oxygen"]) if (res[k] <= 0) dmg += k === "oxygen" ? 4 : 2;
+  // A need hurts only when the stock is empty and production can't cover the crew.
+  for (const k of ["water", "food", "oxygen"]) {
+    if (res[k] <= 0 && (flows.prod[k] || 0) < CREW_NEEDS[k] * state.crew) dmg += k === "oxygen" ? 4 : 2;
+  }
   if (state.radiation > 50) dmg += (state.radiation - 50) * 0.08;
   if (dmg > 0) state.health -= dmg * dt;
   else state.health = Math.min(100, state.health + 0.5 * dt);
@@ -153,7 +160,7 @@ function timeLeft(key) {
 // "good" | "warn" | "crit"
 function resourceStatus(key) {
   if (key === "materials" || key === "credits") return "good";
-  if (state.resources[key] <= 0.01 && (state.rates[key] || 0) <= 0) return "crit";
+  if (state.resources[key] <= 0.01 && (state.rates[key] || 0) < 0.001) return "crit";
   const tl = timeLeft(key);
   if (tl < 20) return "crit";
   if (tl < 60) return "warn";
