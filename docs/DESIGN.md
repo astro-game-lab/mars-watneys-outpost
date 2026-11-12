@@ -38,7 +38,7 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 
 ## Difficulty and onboarding
 
-- **First five minutes:** the starting outpost (two Habitats, a Lab and a Solar Array) has power and oxygen in daylight, but it has no food production, and water runs out in about two sols. The first lessons are a Greenhouse and a Water Extractor. The next one is the first night, when a single Solar Array can't carry the load.
+- **First five minutes:** the starting outpost (two Habitats, a Lab and a Solar Array) makes oxygen and runs a power surplus only at midday, and it has no food production, and water runs out in about two sols. The first lessons are a Greenhouse and a Water Extractor. The next one is the first night, when a single Solar Array can't carry the load.
 - **Assumed knowledge:** none. Every building explains why it exists, and Watney comments on each warning as it fires.
 - **Assists:** time-to-empty on every resource, warn and crit colouring, and a reason given whenever a build, demolish or crew arrival is blocked.
 - **Failure:** health reaches zero. The end screen gives the sol, buildings, credits earned and exposure, plus a general hint to watch the rates. It doesn't yet explain *what* went wrong.
