@@ -2,30 +2,64 @@
 
 let state = null;
 
-function createState() {
+// A fresh mission. The seed and the player's inputs fully determine what
+// happens next: all randomness comes from state.rng.
+function createState(mission, seed, difficulty = "normal") {
+  const diff = DIFFICULTIES[difficulty];
+  const start = { ...DEFAULT_START, ...mission.start };
+  const resources = { ...DEFAULT_START.resources, ...(mission.start && mission.start.resources) };
+  for (const k of ["water", "food", "oxygen"]) resources[k] = Math.round(resources[k] * diff.start);
+  const events = mission.events === null
+    ? { ...EVENT_DEFAULTS, weights: {}, scripted: [] }
+    : {
+        ...EVENT_DEFAULTS, ...mission.events,
+        durations: { ...EVENT_DEFAULTS.durations, ...(mission.events && mission.events.durations) },
+      };
+  const rng = createRng(seed);
+  const startTime = start.time * SOL_SECONDS;
+
   state = {
-    time: 0.3 * SOL_SECONDS,   // start in the morning
+    mission,
+    seed,
+    difficulty,
+    rng,
+    events,                    // this mission's event settings
+    tick: 0,                   // simulation steps since the mission started
+    startTime,
+    time: startTime,           // game seconds since the start of Sol 1
     sol: 1,
     speed: 1,
     paused: false,
     over: null,                // null | "win" | "lose"
-    resources: { water: 320, food: 60, oxygen: 800, power: 100, materials: 100, credits: 500 },
+    endCause: null,            // why it ended: "objectives" | "health" | "blackout" | "deadline"
+    resources,
     rates: {},
     creditsEarned: 0,
     health: 100,
     radiation: BASE_RADIATION,
-    crew: 1,
-    nextArrivalSol: 1 + CREW_ARRIVAL_SOLS,
+    crew: start.crew,
+    nextArrivalSol: 1 + (mission.crewArrivalSols || CREW_ARRIVAL_SOLS),
     crewCapacity: 0,
     powerCapacity: POWER_CAPACITY,
     efficiency: 1,             // power-limited operating fraction
     effects: [],               // active events: { kind, label, remaining }
-    nextEventIn: 45,
-    tiles: createTiles(),
+    nextEventIn: events.first * diff.eventGap,
+    nextScripted: 0,           // index into events.scripted
+    // For the debrief: health lost to each cause, and when each need first ran out.
+    stats: { damage: { water: 0, food: 0, oxygen: 0, radiation: 0 }, firstEmpty: {} },
+    tiles: createTiles(rng, mission.map),
     selected: null,
     hovered: null,
   };
-  placeStartingOutpost();
+  placeStartingOutpost(start.outpost);
+}
+
+function difficulty() {
+  return DIFFICULTIES[state.difficulty];
+}
+
+function buildingUnlocked(type) {
+  return !state.mission.buildings || state.mission.buildings.includes(type);
 }
 
 function makeBuilding(type) {
@@ -51,12 +85,11 @@ function reinforce(t) {
   return true;
 }
 
-// Two habitats, a lab and a solar array on a passable cluster near the centre.
-function placeStartingOutpost() {
+// The starting buildings on the centre tile and its neighbours, cleared to
+// regolith. The centre gets the first type, so a Lab placed later touches it.
+function placeStartingOutpost(types) {
   const center = tileAt(Math.floor(COLS / 2) - 1, Math.floor(ROWS / 2));
-  const cluster = [center, ...neighbors(center)].slice(0, 4);
-  const types = ["habitat", "habitat", "lab", "solar"];
-  // Order: centre is habitat; make sure the lab touches a habitat (all neighbours of centre do).
+  const cluster = [center, ...neighbors(center)].slice(0, types.length);
   cluster.forEach((t, i) => {
     t.terrain = "regolith";
     t.building = makeBuilding(types[i]);
@@ -73,6 +106,7 @@ function touchesHabitat(t) {
 
 // Reason a building can't be placed on a tile, or null if it can.
 function buildBlocker(type, t) {
+  if (!buildingUnlocked(type)) return "Not available in this mission";
   if (!canPlaceOn(t)) return "Must be next to the outpost";
   if (BUILDINGS[type].needsHabitat && !touchesHabitat(t)) return "Must touch a Habitat";
   if (!canAfford(type)) return "Not enough resources";

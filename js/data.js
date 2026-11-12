@@ -4,10 +4,45 @@ const COLS = 11;
 const ROWS = 8;
 
 const SOL_SECONDS = 120;        // one Mars sol in real seconds
-const WIN_SOL = 8;              // reach the start of this sol...
-const WIN_CREDITS = 1000;       // ...with this many credits earned in total
 const POWER_CAPACITY = 200;     // base battery size (Battery Banks add more)
 const BASE_RADIATION = 35;      // % exposure with no protection
+const FLARE_RADIATION = 40;     // % exposure added during a solar flare
+
+// Fixed simulation step, in game seconds. The frame loop accumulates game time
+// and runs whole steps, so a mission plays out the same at any frame rate.
+const SIM_STEP = 0.05;
+
+// What a mission starts with unless it says otherwise (see js/missions.js).
+// `time` is the fraction of Sol 1 the mission starts at. The outpost is placed
+// on the centre tile and its neighbours, in this order, so the first entry
+// should be a Habitat (Science Labs must touch one).
+const DEFAULT_START = {
+  time: 0.3,
+  crew: 1,
+  outpost: ["habitat", "habitat", "lab", "solar"],
+  resources: { water: 320, food: 60, oxygen: 800, power: 100, materials: 100, credits: 500 },
+};
+
+// Random events unless a mission overrides them. A random event fires every
+// `interval` game seconds (uniform in [min, max]); the first after `first`.
+const EVENT_DEFAULTS = {
+  first: 45,
+  interval: [40, 70],
+  weights: { dust: 3, flare: 2, meteor: 2, failure: 2, supply: 2 },
+  durations: { dust: 30, flare: 20, meteor: 30, failure: 25 },
+  supply: { materials: 50, credits: 100 },
+  scripted: [],                 // [{ sol, at: fraction of the sol, kind }]
+};
+
+// Difficulty tiers, unlocked once the campaign is finished. They scale crew
+// consumption, the starting water, food and oxygen (not the build budget),
+// and the gap between random events.
+const DIFFICULTIES = {
+  normal:  { name: "Normal",  needs: 1,    start: 1,    eventGap: 1,    blurb: "The missions as designed." },
+  hard:    { name: "Hard",    needs: 1.2,  start: 0.9,  eventGap: 0.8,  blurb: "Hungrier crew, thinner supplies, more frequent trouble." },
+  martian: { name: "Martian", needs: 1.4,  start: 0.8,  eventGap: 0.6,  blurb: "A crew that eats like it's training for something, short supplies, and trouble every half-minute or so." },
+};
+const DIFFICULTY_ORDER = ["normal", "hard", "martian"];
 
 const TERRAIN = {
   regolith:   { name: "Regolith", color: "#c9824f" },
@@ -19,6 +54,8 @@ const TERRAIN = {
 const TERRAIN_WEIGHTS = [
   ["regolith", 5], ["rocky", 3], ["ice", 1], ["resource", 1], ["impassable", 1],
 ];
+// Characters for handmade mission maps (one string per row, COLS long).
+const TERRAIN_CHARS = { ".": "regolith", r: "rocky", i: "ice", $: "resource", "#": "impassable" };
 
 const RESOURCES = [
   { key: "water",     icon: "💧", name: "Water" },

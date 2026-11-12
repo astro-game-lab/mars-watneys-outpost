@@ -18,6 +18,18 @@ they relied on has moved.
   `docs/DESIGN.md`, `CLAUDE.md`, `ATTRIBUTIONS.md`, `LICENSE-ASSETS.md`,
   `.editorconfig`, `.gitattributes` and `.gitignore`.
 - Deployment to GitHub Pages on every push to `main`.
+- An intro screen in Watney's voice: the story, how the outpost works, and the
+  controls. It shows on the first visit and reopens with `H`.
+- A six-mission campaign, each mission teaching one piece of Mars science: *First
+  Night*, *Ice Line*, *Dust Season*, *Flare Watch*, *Crew Rotation* and *The
+  Outpost*. Each has its own map, starting supplies, buildings, events, objectives
+  and ways to lose. Mission select (`M`) shows a briefing for each, and the HUD
+  tracks objectives live.
+- A debrief on the end screen. It names what ended the mission and suggests what
+  to try. The seed is shown, and *Retry* replays it.
+- Difficulty tiers, *Hard* and *Martian*, unlocked by finishing the campaign.
+- Campaign progress saved in the browser.
+- `?seed=N` in the URL to replay a map and its events in *The Outpost*.
 
 ### Physics
 - Water shortages now feed the crew first. Buildings share only the water left
@@ -26,8 +38,19 @@ they relied on has moved.
   empty *and* production can't cover the crew. Previously a shortage could hold
   water at zero and keep damaging the crew even when production covered them.
   See `docs/PHYSICS.md` § What is modelled.
+- The simulation is deterministic. All randomness comes from a seeded generator
+  (`js/rng.js`), and the simulation advances in fixed 0.05 s steps instead of by
+  frame time, so results no longer depend on frame rate. See `docs/PHYSICS.md`
+  § Conventions and § Numerical notes.
+- New game rules, each listed in `docs/PHYSICS.md` § Gameplay departures: mission
+  objectives, blackout and deadline failures, mission-specific event rates, a
+  crew landing every sol in *Crew Rotation*, and difficulty scaling of crew
+  consumption, starting water, food and oxygen, and event frequency.
+- The original mission is now *The Outpost*, the campaign's last. Its rules are
+  unchanged.
 
 ### Known gaps
-- The simulation isn't deterministic. It uses `Math.random` and steps by
-  frame time rather than on a fixed timestep. See `docs/PHYSICS.md` § Conventions.
+- The simulation still calls the UI directly (`say()`, `endGame()`), so it
+  can't run headless. See `docs/PHYSICS.md` § Conventions.
+- Mission balance was checked with scripted build orders, not with players.
 - No tests, lint or CI.

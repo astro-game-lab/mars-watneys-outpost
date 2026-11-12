@@ -1,22 +1,17 @@
 // Hex map: pointy-top hexes in "odd-r" offset layout (from tile-game-demo).
+// The terrain generator uses the mission's seeded generator (js/rng.js).
 
 const SQRT3 = Math.sqrt(3);
 const view = { size: 40, originX: 0, originY: 0 };
 
-function randomTerrain() {
-  const total = TERRAIN_WEIGHTS.reduce((s, [, w]) => s + w, 0);
-  let n = Math.random() * total;
-  for (const [key, w] of TERRAIN_WEIGHTS) {
-    if ((n -= w) < 0) return key;
-  }
-  return "regolith";
-}
-
-function createTiles() {
+// Terrain from a handmade map (rows of TERRAIN_CHARS), or drawn from the
+// mission's seeded generator.
+function createTiles(rng, map) {
   const tiles = [];
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
-      tiles.push({ col, row, terrain: randomTerrain(), building: null });
+      const terrain = map ? TERRAIN_CHARS[map[row][col]] : pickWeighted(rng, TERRAIN_WEIGHTS);
+      tiles.push({ col, row, terrain, building: null });
     }
   }
   return tiles;

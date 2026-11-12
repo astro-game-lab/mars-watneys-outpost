@@ -1,45 +1,32 @@
-// Random events. Timed effects live in state.effects.
+// Random and scripted events. Timed effects live in state.effects. Event
+// settings (weights, gaps, durations, scripted events) come from the mission,
+// merged over EVENT_DEFAULTS in createState(). All draws use the seeded rand().
 
-const EVENTS = [
-  {
-    kind: "dust", weight: 3,
-    start() {
-      addEffect("dust", "🌪️ Dust storm: solar −70%", 30);
-      say("Dust storm incoming! My solar panels are going to hate this.", "bad");
-    },
+const EVENTS = {
+  dust() {
+    addEffect("dust", "🌪️ Dust storm: solar −70%", state.events.durations.dust);
+    say("Dust storm incoming! My solar panels are going to hate this.", "bad");
   },
-  {
-    kind: "flare", weight: 2,
-    start() {
-      addEffect("flare", "☢️ Solar flare: radiation +40%", 20);
-      say("Solar flare! Staying inside the shielded areas.", "bad");
-    },
+  flare() {
+    addEffect("flare", `☢️ Solar flare: radiation +${FLARE_RADIATION}%`, state.events.durations.flare);
+    say("Solar flare! Staying inside the shielded areas.", "bad");
   },
-  {
-    kind: "meteor", weight: 2,
-    start() {
-      const list = buildings();
-      const t = list[Math.floor(Math.random() * list.length)];
-      t.building.disabled = 30;
-      say(`Micrometeorite hit the ${BUILDINGS[t.building.type].name}! Repairs will take a while.`, "bad");
-    },
+  meteor() {
+    const list = buildings();
+    const t = list[Math.floor(rand() * list.length)];
+    t.building.disabled = state.events.durations.meteor;
+    say(`Micrometeorite hit the ${BUILDINGS[t.building.type].name}! Repairs will take a while.`, "bad");
   },
-  {
-    kind: "failure", weight: 2,
-    start() {
-      addEffect("failure", "🔧 Pump failure: water −50%", 25);
-      say("Water pump is acting up. Output's down until I fix it.", "bad");
-    },
+  failure() {
+    addEffect("failure", "🔧 Pump failure: water −50%", state.events.durations.failure);
+    say("Water pump is acting up. Output's down until I fix it.", "bad");
   },
-  {
-    kind: "supply", weight: 2,
-    start() {
-      state.resources.materials += 50;
-      state.resources.credits += 100;
-      say("Supply drop from NASA! +50 materials, +100 credits. Thanks, Earth!", "good");
-    },
+  supply() {
+    const drop = state.events.supply;
+    for (const [k, v] of Object.entries(drop)) state.resources[k] += v;
+    say(`Supply drop from NASA! ${Object.entries(drop).map(([k, v]) => `+${v} ${k}`).join(", ")}. Thanks, Earth!`, "good");
   },
-];
+};
 
 function addEffect(kind, label, duration) {
   const existing = state.effects.find((e) => e.kind === kind);
@@ -51,6 +38,11 @@ function hasEffect(kind) {
   return state.effects.some((e) => e.kind === kind);
 }
 
+// Game time at which a scripted event fires.
+function scriptedTime(e) {
+  return (e.sol - 1 + e.at) * SOL_SECONDS;
+}
+
 function updateEvents(dt) {
   for (const e of state.effects) e.remaining -= dt;
   state.effects = state.effects.filter((e) => e.remaining > 0);
@@ -58,13 +50,17 @@ function updateEvents(dt) {
     if (t.building.disabled > 0) t.building.disabled = Math.max(0, t.building.disabled - dt);
   }
 
+  const cfg = state.events;
+  while (state.nextScripted < cfg.scripted.length && state.time >= scriptedTime(cfg.scripted[state.nextScripted])) {
+    EVENTS[cfg.scripted[state.nextScripted++].kind]();
+  }
+
+  const weights = Object.entries(cfg.weights).filter(([, w]) => w > 0);
+  if (!weights.length) return;
   state.nextEventIn -= dt;
   if (state.nextEventIn <= 0) {
-    state.nextEventIn = 40 + Math.random() * 30;
-    const total = EVENTS.reduce((s, e) => s + e.weight, 0);
-    let n = Math.random() * total;
-    for (const e of EVENTS) {
-      if ((n -= e.weight) < 0) { e.start(); break; }
-    }
+    const [min, max] = cfg.interval;
+    state.nextEventIn = (min + rand() * (max - min)) * difficulty().eventGap;
+    EVENTS[pickWeighted(state.rng, weights)]();
   }
 }

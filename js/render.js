@@ -178,13 +178,15 @@ function drawHighlight(t, color, width, glow) {
   ctx.restore();
 }
 
-// Crew members wander between buildings. Walker 0 is Watney.
+// Crew members wander between buildings. Walker 0 is Watney. Purely cosmetic,
+// with its own generator so it can never change what the simulation draws.
 const CREW_SPRITES = ["👨‍🚀", "👩‍🚀"];  // avoid 🧑‍🚀: not supported by older emoji fonts
+const crewRng = createRng(0x5eed);
 
 function updateAstronauts(dt) {
   const list = buildings();
   if (!list.length) return;
-  const pick = () => list[Math.floor(Math.random() * list.length)];
+  const pick = () => list[Math.floor(rngNext(crewRng) * list.length)];
   // New arrivals appear at a habitat (or any building).
   while (astronauts.length < state.crew) {
     const home = list.find((t) => t.building.type === "habitat") || list[0];
@@ -204,7 +206,7 @@ function updateAstronauts(dt) {
       a.x += (dx / dist) * speed;
       a.y += (dy / dist) * speed;
     } else if ((a.wait -= dt) <= 0) {
-      a.wait = 1.5 + Math.random() * 2;
+      a.wait = 1.5 + rngNext(crewRng) * 2;
       a.target = pick();
     }
   }

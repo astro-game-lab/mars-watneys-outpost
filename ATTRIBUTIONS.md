@@ -18,7 +18,7 @@ Art, audio, models, fonts, and other authored media.
 
 | What | Owner | Use here |
 | --- | --- | --- |
-| Mark Watney, *The Martian* | Andy Weir and the rights holders of the novel and film | The game's name and the narrator's voice in `js/data.js` (`WATNEY_LINES`), which includes paraphrased lines from the book and film. This is an unofficial fan work. See the [fan work notice](README.md#fan-work-notice). Neither licence in this repository grants any rights in this material. |
+| Mark Watney, *The Martian* | Andy Weir and the rights holders of the novel and film | The game's name and the narrator's voice: `WATNEY_LINES` in `js/data.js`, which includes paraphrased lines from the book and film, and the intro story and mission briefings in `js/missions.js`, which are original text written in the character's voice. This is an unofficial fan work. See the [fan work notice](README.md#fan-work-notice). Neither licence in this repository grants any rights in this material. |
 
 ## Data
 

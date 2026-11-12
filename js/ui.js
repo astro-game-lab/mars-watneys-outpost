@@ -1,10 +1,52 @@
-// DOM UI: HUD, clock, build menu, building info, Watney messages, end screen.
+// DOM UI: HUD, clock, objectives, build menu, building info, Watney messages.
+// The full-screen overlays (intro, missions, end screen) are in js/screens.js.
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => Math.floor(n).toLocaleString();
 const fmtRate = (r) => (r >= 0 ? "+" : "−") + Math.abs(r).toFixed(1) + "/s";
 const fmtList = (obj, perSec) => Object.entries(obj)
   .map(([k, v]) => `${ICON[k]} ${perSec ? v + "/s" : v}`).join("  ") || "—";
+
+// Clock time for a fraction of a sol (a sol is about 24.65 hours).
+function clockText(t) {
+  const hours = Math.floor(t * 24.65);
+  const mins = Math.floor((t * 24.65 - hours) * 60);
+  return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
+}
+// "Sol 3 at 14:20" for a game time.
+function whenText(time) {
+  return `Sol ${Math.floor(time / SOL_SECONDS) + 1} at ${clockText((time % SOL_SECONDS) / SOL_SECONDS)}`;
+}
+
+// ---------- Objectives ----------
+const resourceName = (k) => RESOURCES.find((r) => r.key === k).name.toLowerCase();
+
+function objectiveLabel(o) {
+  switch (o.type) {
+    case "sol": return `Reach Sol ${o.value}`;
+    case "credits": return `Earn ${fmt(o.value)} 💰 in total`;
+    case "crew": return `Grow the crew to ${o.value} 👨‍🚀`;
+    case "stock": return `Store ${fmt(o.value)} ${ICON[o.resource]} ${resourceName(o.resource)}`;
+    case "radiation": return `Bring exposure down to ${o.value}% ☢️`;
+  }
+}
+
+function objectiveProgress(o) {
+  const v = objectiveValue(o);
+  if (o.type === "sol") return `now ${v}`;
+  if (o.type === "radiation") return `now ${Math.round(v)}%`;
+  return fmt(v);
+}
+
+function failureLabel(f) {
+  if (f.type === "blackout") return "The batteries go flat (a blackout)";
+  if (f.type === "deadline") return `Sol ${f.sol} starts before you've finished`;
+}
+
+function failureHud(f) {
+  if (f.type === "blackout") return "Don't let the batteries go flat";
+  if (f.type === "deadline") return `Deadline: start of Sol ${f.sol}`;
+}
 
 // Production plus non-resource effects (crew space, shielding, storage).
 function makesText(b) {
@@ -64,26 +106,34 @@ function updateHud() {
   }
 
   $("crew").textContent = `${state.crew} / ${state.crewCapacity}`;
-  const blocker = arrivalBlocker();
-  $("arrival").innerHTML = `Next crew landing: Sol ${state.nextArrivalSol}` +
-    (blocker ? ` <span class="warn-text">· blocked: ${blocker}</span>` : "");
+  if (state.mission.crewArrivals === false) {
+    $("arrival").textContent = "No crew landings this mission";
+  } else {
+    const blocker = arrivalBlocker();
+    $("arrival").innerHTML = `Next crew landing: Sol ${state.nextArrivalSol}` +
+      (blocker ? ` <span class="warn-text">· blocked: ${blocker}</span>` : "");
+  }
   const rad = $("radiation");
   rad.textContent = `${Math.round(state.radiation)}%`;
   rad.className = state.radiation > 50 ? "crit-text" : state.radiation > 25 ? "warn-text" : "";
   $("health-bar").style.width = `${state.health}%`;
   $("health-bar").className = state.health < 30 ? "crit" : state.health < 60 ? "warn" : "";
   $("health-val").textContent = `${Math.ceil(state.health)}%`;
-  $("goal").innerHTML =
-    `Reach <b>Sol ${WIN_SOL}</b> (now ${state.sol}) · Earn <b>${WIN_CREDITS}</b> 💰 (${fmt(state.creditsEarned)})`;
+  const m = state.mission;
+  const diff = state.difficulty !== "normal" ? ` <span class="badge">${difficulty().name}</span>` : "";
+  $("goal").innerHTML = `<div class="mtitle">${m.name}${diff}</div>` +
+    m.objectives.map((o) => {
+      const met = objectiveMet(o);
+      return `<div class="obj ${met ? "met" : ""}">${met ? "✓" : "○"} ${objectiveLabel(o)} <span class="prog">(${objectiveProgress(o)})</span></div>`;
+    }).join("") +
+    m.failures.map((f) => `<div class="obj fail">⚠ ${failureHud(f)}</div>`).join("");
   $("power-note").textContent = state.efficiency < 0.99
     ? `⚠ Power shortage: buildings at ${Math.round(state.efficiency * 100)}%` : "";
 
   // Clock
   const t = solTime();
-  const hours = Math.floor(t * 24.65);
-  const mins = Math.floor((t * 24.65 - hours) * 60);
   $("sol").textContent = `SOL ${state.sol}`;
-  $("clock").textContent = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
+  $("clock").textContent = clockText(t);
   $("phase").textContent = dayPhase(t);
   $("solar-pct").textContent = `Solar ${Math.round(daylight(t) * (hasEffect("dust") ? 30 : 100))}%`;
   const sun = $("sun");
@@ -145,7 +195,7 @@ function renderPanel() {
     panel.innerHTML = `
       <div class="ptitle">🏗️ Build<button class="close" data-act="close">✕</button></div>
       <div class="sub">Tile (${t.col}, ${t.row}) · ${terrain}</div>
-      ${BUILD_ORDER.map((k) => buildOption(k, t)).join("")}`;
+      ${BUILD_ORDER.filter(buildingUnlocked).map((k) => buildOption(k, t)).join("")}`;
   } else {
     const reason = t.terrain === "impassable" ? "Impassable terrain — nothing can be built here."
       : "Too far from the outpost. Build next to an existing structure.";
@@ -214,16 +264,3 @@ $("panel").addEventListener("click", (e) => {
     renderPanel();
   } else if (act === "demolish" && demolish(t)) renderPanel();
 });
-
-// ---------- End screen ----------
-function endGame(result) {
-  state.over = result;
-  const win = result === "win";
-  $("end").hidden = false;
-  $("end-title").textContent = win ? "🎉 MISSION SUCCESS" : "💀 MISSION FAILED";
-  $("end-text").innerHTML = win
-    ? `Watney survived until Sol ${state.sol} and his science earned ${fmt(state.creditsEarned)} credits. NASA is sending a ride home!`
-    : `Watney didn't make it on Sol ${state.sol}. Look at the rates: a big stockpile means nothing if it's falling fast.`;
-  $("end-stats").innerHTML =
-    `Buildings: ${buildings().length} · Credits earned: ${fmt(state.creditsEarned)} · Radiation: ${Math.round(state.radiation)}%`;
-}

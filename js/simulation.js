@@ -1,8 +1,14 @@
 // Resource simulation: production, consumption, power/water shortages,
-// day/night, radiation, crew health, win/lose.
+// day/night, radiation, crew health, objectives, win/lose.
+// updateGame() advances exactly one fixed SIM_STEP.
 
 function solTime() {
   return (state.time % SOL_SECONDS) / SOL_SECONDS;
+}
+
+// What the whole crew consumes of a need per second, at this difficulty.
+function crewNeed(k) {
+  return CREW_NEEDS[k] * state.crew * difficulty().needs;
 }
 
 // Production multiplier for a building, before input shortages.
@@ -43,7 +49,7 @@ function computeFlows() {
 
   // Water: extractors depend on power. The crew drinks first and isn't
   // throttled, so buildings share only what's left after the crew's needs.
-  const crewWater = CREW_NEEDS.water * state.crew;
+  const crewWater = crewNeed("water");
   let wProd = 0, wBuild = 0;
   for (const t of list) {
     const b = BUILDINGS[t.building.type];
@@ -69,23 +75,27 @@ function computeFlows() {
     powerCapacity += b.storage || 0;
     shielding += (b.radiation || 0) * lv;
   }
-  for (const [k, v] of Object.entries(CREW_NEEDS)) add(cons, k, v * state.crew);
+  for (const k of Object.keys(CREW_NEEDS)) add(cons, k, crewNeed(k));
 
   const rates = {};
   for (const r of RESOURCES) rates[r.key] = (prod[r.key] || 0) - (cons[r.key] || 0);
   return { rates, prod, factor, crewCapacity, shielding, powerCapacity };
 }
 
-function updateGame(dt) {
+// One fixed simulation step. Time comes from the tick count rather than a
+// running sum, so sol boundaries land on the same step every run.
+function updateGame() {
   if (state.over || state.paused) return;
+  const dt = SIM_STEP;
 
   const prevPhase = dayPhase(solTime());
-  state.time += dt;
+  state.tick++;
+  state.time = state.startTime + state.tick * SIM_STEP;
   const newSol = Math.floor(state.time / SOL_SECONDS) + 1;
   if (newSol !== state.sol) {
     state.sol = newSol;
     say(`Sol ${newSol}. Still alive. Log entry complete.`, "good");
-    if (newSol >= state.nextArrivalSol) tryCrewArrival();
+    if (state.mission.crewArrivals !== false && newSol >= state.nextArrivalSol) tryCrewArrival();
   }
   if (prevPhase !== dayPhase(solTime()) && dayPhase(solTime()) === "🌑 Night") sayOnce("night");
 
@@ -107,25 +117,61 @@ function updateGame(dt) {
 
   // Radiation: baseline + flare − shielding
   state.radiation = Math.max(0, Math.min(100,
-    BASE_RADIATION + (hasEffect("flare") ? 40 : 0) - flows.shielding));
+    BASE_RADIATION + (hasEffect("flare") ? FLARE_RADIATION : 0) - flows.shielding));
 
-  // Crew health
-  let dmg = 0;
-  // A need hurts only when the stock is empty and production can't cover the crew.
+  // Crew health. A need hurts only when the stock is empty and production
+  // can't cover the crew. Each cause is tallied for the debrief.
+  const stats = state.stats;
+  const harm = {};
   for (const k of ["water", "food", "oxygen"]) {
-    if (res[k] <= 0 && (flows.prod[k] || 0) < CREW_NEEDS[k] * state.crew) dmg += k === "oxygen" ? 4 : 2;
+    if (res[k] <= 0 && (flows.prod[k] || 0) < crewNeed(k)) {
+      harm[k] = k === "oxygen" ? 4 : 2;
+      if (stats.firstEmpty[k] === undefined) stats.firstEmpty[k] = state.time;
+    }
   }
-  if (state.radiation > 50) dmg += (state.radiation - 50) * 0.08;
+  if (state.radiation > 50) harm.radiation = (state.radiation - 50) * 0.08;
+  const dmg = Object.values(harm).reduce((s, v) => s + v, 0);
+  for (const [k, v] of Object.entries(harm)) stats.damage[k] += v * dt;
   if (dmg > 0) state.health -= dmg * dt;
   else state.health = Math.min(100, state.health + 0.5 * dt);
 
   checkWarnings();
+  checkEnd();
+}
 
+// ---------- Objectives and failures ----------
+
+// Current value of an objective, and whether it holds.
+const OBJECTIVE_TYPES = {
+  sol:       { value: () => state.sol,                         met: (o, v) => v >= o.value },
+  credits:   { value: () => state.creditsEarned,               met: (o, v) => v >= o.value },
+  crew:      { value: () => state.crew,                        met: (o, v) => v >= o.value },
+  stock:     { value: (o) => state.resources[o.resource],      met: (o, v) => v >= o.value },
+  radiation: { value: () => state.radiation,                   met: (o, v) => v <= o.value },
+};
+
+function objectiveValue(o) {
+  return OBJECTIVE_TYPES[o.type].value(o);
+}
+
+function objectiveMet(o) {
+  return OBJECTIVE_TYPES[o.type].met(o, objectiveValue(o));
+}
+
+function objectivesMet() {
+  return state.mission.objectives.every(objectiveMet);
+}
+
+// Death first, then a win, then the mission's own failure conditions.
+function checkEnd() {
   if (state.health <= 0) {
     state.health = 0;
-    endGame("lose");
-  } else if (state.sol >= WIN_SOL && state.creditsEarned >= WIN_CREDITS) {
-    endGame("win");
+    return endGame("lose", "health");
+  }
+  if (objectivesMet()) return endGame("win", "objectives");
+  for (const f of state.mission.failures) {
+    if (f.type === "blackout" && state.resources.power <= 0.01) return endGame("lose", "blackout");
+    if (f.type === "deadline" && state.sol >= f.sol) return endGame("lose", "deadline");
   }
 }
 
@@ -147,7 +193,7 @@ function tryCrewArrival() {
   }
   const name = CREW_NAMES[(state.crew - 1) % CREW_NAMES.length];
   state.crew++;
-  state.nextArrivalSol = state.sol + CREW_ARRIVAL_SOLS;
+  state.nextArrivalSol = state.sol + (state.mission.crewArrivalSols || CREW_ARRIVAL_SOLS);
   say(`${name} just landed! Crew is now ${state.crew}. More science, but more mouths to feed.`, "good");
 }
 

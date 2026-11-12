@@ -22,7 +22,11 @@
     <hr>
     <div id="goal"></div>
     <div id="effects"></div>
-    <div class="help">Click a dashed tile to build · Click a building for info<br>Space pause · 1/2/3 speed · Esc close</div>
+    <div class="hud-buttons">
+      <button id="btn-help" title="How to play (H)">❔ How to play</button>
+      <button id="btn-missions" title="Missions (M)">🗺️ Missions</button>
+    </div>
+    <div class="help">Click a dashed tile to build · Click a building for info<br>Space pause · 1/2/3 speed · Esc close · H help · M missions</div>
   </div>
 
   <div id="clockbox" class="box">
@@ -36,22 +40,68 @@
 
   <div id="messages"></div>
 
-  <div id="end" hidden>
-    <div class="box endbox">
+  <div id="intro" class="overlay" hidden>
+    <div class="box screen" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+      <h2 id="intro-title">🚀 Mars: Watney's Outpost</h2>
+      <div id="intro-story" class="story"></div>
+      <h3>How the outpost works</h3>
+      <div class="cards">
+        <div class="card"><b>⚡ Power</b>Runs everything. Solar Arrays only work in daylight, so bank power in Battery Banks for the night.</div>
+        <div class="card"><b>💧 Water</b>Water Extractors pull it out of the ground, using power. Habitats and Greenhouses use it, and so does the crew.</div>
+        <div class="card"><b>O₂ 🥔 Air and food</b>Habitats turn water and power into oxygen. Greenhouses grow food.</div>
+        <div class="card"><b>💰 Credits</b>Science Labs earn them. Spend them, with materials from Mines, on new buildings.</div>
+      </div>
+      <p class="note">🌅 The Sun sets every sol, and solar power goes with it. Watch each resource's rate and time left in the HUD: a big stockpile means nothing if it's falling fast. If crew health reaches zero, the mission is over.</p>
+      <h3>Controls</h3>
+      <table class="controls">
+        <tr><td>Click a dashed tile</td><td>Build next to the outpost</td></tr>
+        <tr><td>Click a building</td><td>Why it matters, reinforce, demolish</td></tr>
+        <tr><td>Right-click / Esc</td><td>Close the panel</td></tr>
+        <tr><td>Space</td><td>Pause</td></tr>
+        <tr><td>1 / 2 / 3</td><td>Speed ×1 / ×2 / ×4</td></tr>
+        <tr><td>H / M</td><td>This screen / missions</td></tr>
+      </table>
+      <div class="screen-actions"><button id="intro-go" class="primary">Choose a mission</button></div>
+    </div>
+  </div>
+
+  <div id="missions" class="overlay" hidden>
+    <div class="box screen wide" role="dialog" aria-modal="true" aria-labelledby="missions-title">
+      <div class="ptitle"><h2 id="missions-title">Missions</h2><button id="missions-close" class="close" title="Back to the outpost (Esc)" aria-label="Back to the outpost">✕</button></div>
+      <div class="mission-layout">
+        <div>
+          <ol id="mission-list" class="mission-list"></ol>
+          <div id="difficulty"></div>
+        </div>
+        <div id="briefing" class="briefing"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="end" class="overlay" hidden>
+    <div class="box screen endbox" role="dialog" aria-modal="true" aria-labelledby="end-title">
       <h2 id="end-title"></h2>
       <p id="end-text"></p>
+      <div id="end-debrief"></div>
       <p id="end-stats" class="sub"></p>
-      <button id="restart">New mission</button>
+      <div class="screen-actions">
+        <button id="end-retry">↻ Retry</button>
+        <button id="end-missions">🗺️ Missions</button>
+        <button id="end-next" class="primary">Next mission ▶</button>
+      </div>
     </div>
   </div>
 
   <script src="js/data.js"></script>
+  <script src="js/missions.js"></script>
+  <script src="js/rng.js"></script>
   <script src="js/hexmap.js"></script>
   <script src="js/state.js"></script>
   <script src="js/events.js"></script>
   <script src="js/simulation.js"></script>
   <script src="js/render.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/screens.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

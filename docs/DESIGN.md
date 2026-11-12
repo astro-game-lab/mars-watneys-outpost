@@ -15,7 +15,7 @@ You're the stranded engineer turned colony founder: improvising, rationing, and 
 3. **Balance the loop.** Power runs everything, water feeds the Habitats and Greenhouses, Habitats make oxygen and house crew, and Labs earn the credits that pay for more.
 4. **Survive the sol.** Night kills solar. Events hit at random. Shortages throttle whatever depends on them.
 5. **Grow.** New crew land every two sols if there's a bed and supplies are healthy. More crew means more science and more mouths.
-6. **Win** by reaching sol 8 with 1 000 credits earned in total. A mission takes about 16 minutes at 1× (eight 120 s sols).
+6. **Win** the mission's objectives before the outpost fails. The campaign builds up one hazard at a time. It ends with *The Outpost*: reach Sol 8 with 1 000 credits earned in total, which takes about 16 minutes at 1× (eight 120 s sols).
 
 ## The science
 
@@ -38,10 +38,18 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 
 ## Difficulty and onboarding
 
-- **First five minutes:** the starting outpost (two Habitats, a Lab and a Solar Array) makes oxygen and runs a power surplus only at midday, and it has no food production, and water runs out in about two sols. The first lessons are a Greenhouse and a Water Extractor. The next one is the first night, when a single Solar Array can't carry the load.
+- **First visit:** an intro screen in Watney's voice tells the story, explains the power → water → air and food → credits loop in four cards, and lists the controls. It reopens with `H`.
+- **The campaign is the tutorial.** Each mission isolates one lesson, with a briefing that gives the science, the objectives, how you can lose, the buildings available, and three first moves.
+  1. *First Night*: storage. Survive two nights without a blackout, using Solar, Battery, Water and Greenhouse only.
+  2. *Ice Line*: water from the ground. Bank 2 000 water before Sol 4 on a handmade map whose ice sits past a ridge. Regolith alone falls short.
+  3. *Dust Season*: nuclear power. Earn 1 000 credits before Sol 6 through constant storms. Solar alone falls short.
+  4. *Flare Watch*: shielding. Reach Sol 5 with exposure at 10% or less, through frequent flares and one scripted flare.
+  5. *Crew Rotation*: life support for a growing crew. A lander arrives every sol. Reach a crew of six before Sol 9.
+  6. *The Outpost*: everything at once, on a fresh random map each run.
 - **Assumed knowledge:** none. Every building explains why it exists, and Watney comments on each warning as it fires.
-- **Assists:** time-to-empty on every resource, warn and crit colouring, and a reason given whenever a build, demolish or crew arrival is blocked.
-- **Failure:** health reaches zero. The end screen gives the sol, buildings, credits earned and exposure, plus a general hint to watch the rates. It doesn't yet explain *what* went wrong.
+- **Assists:** live objective progress in the HUD, time-to-empty on every resource, warn and crit colouring, and a reason given whenever a build, demolish or crew arrival is blocked.
+- **Failure:** health reaches zero, or the mission's own condition (a blackout or a deadline). The debrief names the cause, such as the need that did the most harm and when it first ran out, or the objectives still missing, and gives a hint.
+- **Difficulty:** *Hard* and *Martian* unlock after the campaign. They scale crew consumption, starting water, food and oxygen, and how often events come. Every mission stays winnable at every tier.
 
 ## Presentation
 
@@ -51,6 +59,6 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 
 ## Scope
 
-- **In the prototype:** one mission, one map size, nine buildings, five events.
+- **In the prototype:** a six-mission campaign, three difficulty tiers, one map size, nine buildings, five events, and progress saved in the browser.
 - **Explicitly out of scope:** orbital logistics. That's the roadmap's *Mars Colony Logistics*.
-- **Deferred:** saving, settings, sound, touch, keyboard play, a tutorial, and a debrief that explains a loss.
+- **Deferred:** saving a mission in progress, settings, sound, touch, full keyboard play, Watney prompts at teachable moments, and input replays.
