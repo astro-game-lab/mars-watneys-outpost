@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 120 120">
+<!-- Watney's Outpost building sprite: moxie (Oxygen Plant) -->
+<defs>
+<linearGradient id="r-cyl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF"></stop><stop offset=".35" stop-color="#E6EAEF"></stop><stop offset=".7" stop-color="#B9C1CC"></stop><stop offset="1" stop-color="#7E8896"></stop></linearGradient>
+<linearGradient id="r-shade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".3"></stop><stop offset=".4" stop-color="#FFFFFF" stop-opacity="0"></stop><stop offset=".6" stop-color="#000000" stop-opacity="0"></stop><stop offset="1" stop-color="#000000" stop-opacity=".4"></stop></linearGradient>
+<linearGradient id="r-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7D36B"></stop><stop offset="1" stop-color="#D9A62A"></stop></linearGradient>
+<radialGradient id="r-shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000000" stop-opacity=".55"></stop><stop offset=".6" stop-color="#000000" stop-opacity=".3"></stop><stop offset="1" stop-color="#000000" stop-opacity="0"></stop></radialGradient>
+</defs>
+<ellipse cx="60" cy="96" rx="58" ry="18" fill="url(#r-shadow)"></ellipse>
+<!-- base plate -->
+<polygon points="60,58 98,77 60,96 22,77" fill="#F4F6F9"></polygon>
+<polygon points="22,77 60,96 60,104 22,85" fill="#D9DEE5"></polygon>
+<polygon points="98,77 60,96 60,104 98,85" fill="#9FA9B6"></polygon>
+<polygon points="22,80 60,99 60,101 22,82" fill="#6FE0D2" opacity=".8"></polygon>
+<polygon points="98,80 60,99 60,101 98,82" fill="#6FE0D2"></polygon>
+<!-- electrolysis unit: a gold, insulated box -->
+<polygon points="44,40 66,51 44,62 22,51" fill="url(#r-gold)"></polygon>
+<polygon points="22,51 44,62 44,86 22,75" fill="#E8B83A"></polygon>
+<polygon points="66,51 44,62 44,86 66,75" fill="#C9981F"></polygon>
+<path d="M22,51 L44,62 L66,51" fill="none" stroke="#FFF1C2" stroke-width="1" opacity=".8"></path>
+<!-- intake grille on top -->
+<path d="M33,47 L49,55 M37,45 L53,53 M41,43 L57,51" stroke="#8A6A12" stroke-width="1.6" stroke-linecap="round"></path>
+<!-- ribbing on the front face -->
+<path d="M26,58 L26,74 M30,60 L30,76 M34,62 L34,78 M38,64 L38,80" stroke="#B88A17" stroke-width="1.2"></path>
+<!-- exhaust vent for carbon monoxide -->
+<path d="M28,44 L28,52 A4,2 0 0 0 36,52 L36,44 Z" fill="#7E8896"></path>
+<ellipse cx="32" cy="44" rx="4" ry="2" fill="#5C6673"></ellipse>
+<ellipse cx="32" cy="43.6" rx="2.2" ry="1.1" fill="#2A3039"></ellipse>
+<!-- pipe to the tanks -->
+<path d="M66,64 C70,63 72,64 74,66" fill="none" stroke="#5C6673" stroke-width="3" stroke-linecap="round"></path>
+<!-- oxygen tanks -->
+<path d="M70,50 L70,80 A7,3.5 0 0 0 84,80 L84,50 Z" fill="url(#r-cyl)"></path>
+<path d="M70,60 L70,63 A7,3.5 0 0 0 84,63 L84,60 A7,3.5 0 0 1 70,60 Z" fill="#6FE0D2"></path>
+<path d="M70,50 L70,80 A7,3.5 0 0 0 84,80 L84,50 Z" fill="url(#r-shade)" opacity=".6"></path>
+<ellipse cx="77" cy="50" rx="7" ry="3.5" fill="#F4F6F9"></ellipse>
+<path d="M84,56 L84,84 A7,3.5 0 0 0 98,84 L98,56 Z" fill="url(#r-cyl)"></path>
+<path d="M84,66 L84,69 A7,3.5 0 0 0 98,69 L98,66 A7,3.5 0 0 1 84,66 Z" fill="#6FE0D2"></path>
+<path d="M84,56 L84,84 A7,3.5 0 0 0 98,84 L98,56 Z" fill="url(#r-shade)" opacity=".6"></path>
+<ellipse cx="91" cy="56" rx="7" ry="3.5" fill="#F4F6F9"></ellipse>
+<path d="M77,50 V45 M91,56 V51" stroke="#5C6673" stroke-width="1.5"></path>
+<circle cx="77" cy="44" r="2" fill="#5C6673"></circle>
+<circle cx="91" cy="50" r="2" fill="#5C6673"></circle>
+<!-- status lights -->
+<circle cx="56" cy="64" r="2" fill="#9FF3E8"></circle>
+<circle cx="60" cy="62" r="1.6" fill="#F28C28"></circle>
+</svg>

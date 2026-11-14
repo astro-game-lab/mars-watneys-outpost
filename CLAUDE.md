@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 An [astro-game-lab](https://github.com/astro-game-lab) game, and an unofficial fan work inspired by *The Martian*. Unlike the org's other games it has no orbital mechanics. Its science is life support: power, water, oxygen, food and radiation on the Martian surface.
 
-**Status: playable prototype.** A six-mission campaign with difficulty tiers, nine buildings, five events. No build step. The simulation runs headless under Node, with tests and CI. `README.md` describes what exists and is kept honest. Trust it over assumptions.
+**Status: playable prototype.** A six-mission campaign with difficulty tiers, ten buildings, five events. No build step. The simulation runs headless under Node, with tests and CI. `README.md` describes what exists and is kept honest. Trust it over assumptions.
 
 ## The documents
 

@@ -12,7 +12,7 @@ To run it locally, see [Development](#development) below.
 
 ## Status
 
-**A playable prototype.** A six-mission campaign on an 11 × 8 hex map, with nine buildings, crew arrivals, a day/night cycle and five kinds of event. Each mission teaches one piece of Mars science. Difficulty tiers unlock once you finish it.
+**A playable prototype.** A six-mission campaign on an 11 × 8 hex map, with ten buildings, crew arrivals, a day/night cycle and five kinds of event. Each mission teaches one piece of Mars science. Difficulty tiers unlock once you finish it.
 
 | | |
 | --- | --- |

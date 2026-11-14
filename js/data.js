@@ -122,6 +122,14 @@ const BUILDINGS = {
     priority: "normal",
     why: "Growing food locally reduces how much must be shipped from Earth, but plants need water, energy, warmth and light. As a bonus, photosynthesis adds a little oxygen.",
   },
+  moxie: {
+    name: "Oxygen Plant", icon: "⚗️", sprite: "moxie",
+    cost: { materials: 40, credits: 150 },
+    consumes: { power: 3 },
+    produces: { oxygen: 1 },
+    priority: "critical",       // life support, like the Habitats
+    why: "Mars' air is about 95% carbon dioxide. An Oxygen Plant splits it, pulling out oxygen and venting carbon monoxide, so it needs power but no water. NASA's MOXIE experiment did exactly this on the Perseverance rover, making 122 grams of oxygen in 16 runs before it finished in 2023.",
+  },
   solar: {
     name: "Solar Array", icon: "☀️", sprite: "solar",
     cost: { materials: 20, credits: 80 },
@@ -182,7 +190,7 @@ const REINFORCE = {
   why: "Martian soil (regolith) is free shielding. Piling a couple of metres of it over a structure blocks a large share of cosmic rays and solar particles. NASA studies for Mars habitats often propose exactly this, or 3D-printing walls from regolith.",
 };
 
-const BUILD_ORDER = ["habitat", "water", "greenhouse", "solar", "nuclear", "battery", "mine", "lab", "shield"];
+const BUILD_ORDER = ["habitat", "water", "greenhouse", "moxie", "solar", "nuclear", "battery", "mine", "lab", "shield"];
 
 for (const key of BUILD_ORDER) BUILDINGS[key].key = key;
 

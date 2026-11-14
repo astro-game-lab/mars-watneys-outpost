@@ -87,6 +87,7 @@ The game's qualitative claims hold for the whole game. Its numbers are valid now
 | Science is paid for with credits, and Labs scale with crew | `lab` in `BUILDINGS` | Gives the economy a currency | Yes |
 | Health regenerates whenever nothing is harming it | `updateGame()` | Forgiving. Real radiation dose doesn't heal. | Partly. The health bar recovers. |
 | Habitats make oxygen by electrolysis from water and power | `habitat` in `BUILDINGS` | Real, but folded into one building, with no separate life-support system | Yes, in the building's info |
+| An Oxygen Plant makes oxygen at outpost scale | `moxie` in `BUILDINGS` | MOXIE was a small technology demonstration. A plant big enough to supply a crew hasn't been built, so the rates are balance values, set so a Habitat is the better buy when water is plentiful. The plant needs no heating, which matches MOXIE's hot electrolysis but is a simplification. | Yes, in the building's info |
 
 ## Claims the game makes to the player
 
@@ -102,6 +103,8 @@ Each building's `why` text in `js/data.js` makes a factual claim, and so do the 
 | Habitat | Electrolysis turns water and power into oxygen | Standard. The ISS Oxygen Generation System works this way. | Agrees |
 | Habitat | Habitats need heating, hardest at night, because the thin air holds little of the day's warmth and nights are far colder than days | Diurnal temperature range at the Viking 1 landing site: 184 K to 242 K (−89 °C to −31 °C). NASA Mars Fact Sheet (NSSDCA). The thin, dry atmosphere stores and re-radiates little heat. | Agrees |
 | Greenhouse | Photosynthesis adds a little oxygen | Standard | Agrees |
+| Oxygen Plant | Mars' air is about 95% carbon dioxide | 95.1% CO₂ by volume. NASA Mars Fact Sheet (NSSDCA). | Agrees |
+| Oxygen Plant | Splitting carbon dioxide yields oxygen and carbon monoxide, with power and no water. NASA's MOXIE did this on Perseverance, making 122 g of oxygen in 16 runs before it finished in 2023 | NASA, "NASA's Oxygen-Generating Experiment MOXIE Completes Mars Mission", 6 September 2023: 122 g in total, 16 runs, oxygen removed from each CO₂ molecule by an electrochemical process. | Agrees |
 | Radiation Shield, regolith reinforcement | No global magnetic field and a thin atmosphere let radiation reach the surface, and a couple of metres of regolith blocks a large share | Hassler et al. (2014) for surface dose | **Partly.** Regolith blocks solar particle events very well. Against galactic cosmic rays the reduction is real but modest, because secondary particles build up. "A large share" overstates it for cosmic rays. |
 | Story | The nearest hardware store is about 225 million kilometres away | The mean Earth–Mars distance is about 225 million km. It ranges from about 55 to 400 million km over the synodic cycle. NASA Mars facts. | Agrees, as an average |
 | *First Night* | Mars gets well under half the sunlight Earth does, and none of it at night | ≈ 43% of Earth's irradiance (see [Constants](#constants)) | Agrees |

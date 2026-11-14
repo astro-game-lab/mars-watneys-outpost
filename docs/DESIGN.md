@@ -12,7 +12,7 @@ You're the stranded engineer turned colony founder: improvising, rationing, and 
 
 1. **Read the outpost.** The HUD shows each resource with its net rate and time to empty, plus crew, exposure, health and the clock.
 2. **Expand.** Click a dashed tile next to the outpost to build. Terrain matters: Water Extractors do double on ice, and Mines do 1.5× on rock and 2× on high-resource tiles.
-3. **Balance the loop.** Power runs everything, water feeds the Habitats and Greenhouses, Habitats make oxygen and house crew, and Labs earn the credits that pay for more. When power or water runs short, each building's priority decides who goes without: life support first, science last by default. Switching a building off saves its share for the night.
+3. **Balance the loop.** Power runs everything, water feeds the Habitats and Greenhouses, Habitats make oxygen and house crew, Oxygen Plants pull oxygen out of the air with power alone, and Labs earn the credits that pay for more. When power or water runs short, each building's priority decides who goes without: life support first, science last by default. Switching a building off saves its share for the night.
 4. **Survive the sol.** Night kills solar. Events hit at random. Shortages throttle whatever depends on them.
 5. **Grow.** New crew land every two sols if there's a bed and supplies are healthy. More crew means more science and more mouths.
 6. **Win** the mission's objectives before the outpost fails. The campaign builds up one hazard at a time. It ends with *The Outpost*: reach Sol 8 with 1 000 credits earned in total, which takes about 16 minutes at 1× (eight 120 s sols).
@@ -34,7 +34,7 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 | Solar depends on daylight and dust, and storage and nuclear power are the answers | Every quantity: rates are balance values, not hardware figures |
 | Water and materials come from the ground | A 120 s sol, crew every 2 sols, random resupply |
 | Shielding and regolith reduce exposure | Exposure is a 0–100 score, and its damage heals |
-| Habitats make oxygen from water and power, and nights cost heating | Heating is a four-step curve with no insulation. No recycling, no seasons. |
+| Habitats make oxygen from water and power, an Oxygen Plant makes it from the CO₂ in the air, and nights cost heating | Heating is a four-step curve with no insulation. No recycling, no seasons. |
 
 ## Difficulty and onboarding
 
@@ -59,6 +59,6 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 
 ## Scope
 
-- **In the prototype:** a six-mission campaign, three difficulty tiers, one map size, nine buildings, five events, and progress saved in the browser.
+- **In the prototype:** a six-mission campaign, three difficulty tiers, one map size, ten buildings, five events, and progress saved in the browser.
 - **Explicitly out of scope:** orbital logistics. That's the roadmap's *Mars Colony Logistics*.
 - **Deferred:** saving a mission in progress, settings, sound, touch, full keyboard play, Watney prompts at teachable moments, and input replays.

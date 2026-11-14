@@ -41,6 +41,9 @@ they relied on has moved.
   *normal* or *low*, set from its panel, and can be switched *off* (except
   Habitats). The HUD's shortage note shows how much each tier is getting, and a
   switched-off building is dimmed on the map. *First Night* turns priorities off.
+- The Oxygen Plant, a tenth building. It splits the carbon dioxide in the air
+  into oxygen, using power and no water, like NASA's MOXIE on Perseverance.
+  It's available wherever a mission allows every building.
 
 ### Changed
 - The simulation no longer touches the page. It queues messages on
