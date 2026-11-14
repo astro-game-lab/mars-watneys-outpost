@@ -184,7 +184,10 @@ function updateHud() {
   $("sol").textContent = `SOL ${state.sol}`;
   $("clock").textContent = clockText(t);
   $("phase").textContent = dayPhase(t);
-  $("solar-pct").textContent = `Solar ${Math.round(daylight(t) * (hasEffect("dust") ? 30 : 100))}%`;
+  // What a clean array makes now, as a share of its rating: daylight, storms
+  // and the mission's sunlight (weak winter sun on Long Night).
+  const solarShare = daylight(t) * (hasEffect("dust") ? 0.3 : 1) * (state.mission.sunlight ?? 1);
+  $("solar-pct").textContent = `Solar ${Math.round(solarShare * 100)}%`;
   $("outside-temp").textContent = `Outside ${fmtC(outsideTempK(t))}`;
   const sun = $("sun");
   const day = Math.min(1, Math.max(0, (t - 0.2) / 0.65));
