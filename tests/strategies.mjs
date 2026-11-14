@@ -83,10 +83,15 @@ export const STRATEGIES = {
   },
 
   "the-outpost": {
-    win: [{ build: "greenhouse" }, water, { build: "battery" }, { build: "solar" }, mine, { build: "lab" },
-      { build: "solar" }, { build: "habitat" }, { build: "greenhouse" }, water, { build: "shield" },
-      { build: "nuclear" }, { build: "lab" }, { build: "battery" }, { build: "greenhouse" }, water,
-      { build: "habitat" }, { build: "nuclear" }, { build: "lab" }],
+    // Life support, then nuclear power early so the Mines keep running (raised
+    // to normal priority), then shielding so no one's dose nears the career
+    // limit. Without the early power, materials stall on some maps; without
+    // the shielding, crew start going home around Sol 7.
+    win: [{ build: "greenhouse" }, water, { build: "solar" }, mine, { priority: "mine", to: "normal" },
+      { build: "nuclear" }, { build: "shield" }, { build: "lab" }, { build: "battery" }, { build: "habitat" },
+      { build: "greenhouse" }, water, { build: "shield" }, { build: "lab" }, { reinforce: "habitat" },
+      { reinforce: "habitat" }, { build: "nuclear" }, { build: "greenhouse" }, water, { build: "habitat" },
+      { build: "lab" }, { reinforce: "lab" }],
     // The tips: a Greenhouse and a Water Extractor before the first night.
     warned: {
       why: "power and science, but no Greenhouse or Water Extractor",

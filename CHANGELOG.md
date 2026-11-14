@@ -44,6 +44,9 @@ they relied on has moved.
 - The Oxygen Plant, a tenth building. It splits the carbon dioxide in the air
   into oxygen, using power and no water, like NASA's MOXIE on Perseverance.
   It's available wherever a mission allows every building.
+- A crew roster in the HUD: one health bar per crew member, with the share of
+  maximum health lost to radiation dose hatched at its end. The debrief names
+  who died or who went home.
 - Dust devils, a sixth kind of event. One sweeps most of the dust off some
   of the Solar Arrays. They're in the default mix and in *Dust Season*.
 
@@ -54,6 +57,13 @@ they relied on has moved.
   to `js/render.js`. No change for players. See `docs/PHYSICS.md` § Conventions.
 
 ### Physics
+- Health is per crew member, and radiation dose adds up. Everyone takes the
+  same harm from shortages and acute radiation, but each member builds up a
+  dose that never heals. It lowers their maximum health, and at the career
+  limit they go home. If anyone dies, or Watney reaches the limit, the
+  mission is lost. Unshielded, the limit arrives around Sol 7 of *The
+  Outpost*, so its winning build now shields early. See `docs/PHYSICS.md`
+  § What is modelled.
 - Dust settles on Solar Arrays and cuts their output: 4% a sol, five times
   faster in a dust storm, up to 60%. That's about 20 times the real rate, so
   it shows within a mission. Clean an array by hand (10 s offline) or let a

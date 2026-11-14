@@ -64,9 +64,18 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .kv { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; }
 .kv span:last-child { text-align: right; }
 .bar { height: 8px; background: rgba(255, 255, 255, 0.12); border-radius: 4px; overflow: hidden; margin: 3px 0 2px; }
-#health-bar { height: 100%; background: #4caf50; transition: width 0.2s; }
-#health-bar.warn { background: #f2c94c; }
-#health-bar.crit { background: #ff4d4d; }
+#roster { margin: 4px 0 2px; }
+.crew-row { display: grid; grid-template-columns: 74px 1fr 30px; gap: 6px; align-items: center; font-size: 12px; }
+.crew-row .cname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crew-row .cval { text-align: right; }
+.crew-row .bar { position: relative; margin: 2px 0; }
+.crew-row .fill { height: 100%; background: #4caf50; transition: width 0.2s; }
+.crew-row .fill.warn { background: #f2c94c; }
+.crew-row .fill.crit { background: #ff4d4d; }
+/* the share of maximum health lost to radiation dose, at the bar's right end */
+.crew-row .lost { position: absolute; top: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(135deg, rgba(255, 120, 80, 0.55) 0 2px, rgba(0, 0, 0, 0.35) 2px 4px); }
+.crew-more { font-size: 11px; opacity: 0.75; }
 .warn-text { color: #f2c94c; }
 .crit-text { color: #ff6b5a; font-weight: bold; }
 #power-note { font-size: 12px; }

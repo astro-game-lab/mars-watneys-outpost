@@ -83,6 +83,15 @@ const CREW_ARRIVAL_SOLS = 2;
 const CREW_SCIENCE_BONUS = 0.25;  // Science Lab output per extra crew member
 const CREW_NAMES = ["Okafor", "Lindqvist", "Tanaka", "Moreau", "Silva", "Novak", "Reyes", "Chen"];
 
+// Radiation dose. Each crew member builds up dose at (exposure / 100) per
+// second: one unit is a second at 100% exposure. It never heals. As it grows,
+// that member's maximum health falls linearly from 100 to MIN_MAX_HEALTH, and
+// at DOSE_LIMIT they go home. Tuned so that a crew left at the 35% baseline
+// reaches the limit around Sol 7 of The Outpost; real limits are in mSv.
+const DOSE_LIMIT = 240;
+const MIN_MAX_HEALTH = 50;
+const DOSE_WARNING = 0.75;      // share of the limit at which Watney warns
+
 // Consumption per crew member per second
 const CREW_NEEDS = { water: 0.3, food: 0.25, oxygen: 0.5 };
 
@@ -236,5 +245,6 @@ const WATNEY_LINES = {
   lowOxygen: "Oxygen is dropping. I kind of need that.",
   highRadiation: "My dosimeter is clicking a lot. More shielding would be nice.",
   lowHealth: "I don't feel so good...",
+  highDose: "Somebody's career radiation dose is getting up there. More shielding, please. It doesn't wash off.",
   night: "Sun's going down. Hope the batteries are charged.",
 };

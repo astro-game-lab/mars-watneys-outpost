@@ -211,11 +211,32 @@ function updateGame() {
   if (state.radiation > 50) harm.radiation = (state.radiation - 50) * 0.08;
   const dmg = Object.values(harm).reduce((s, v) => s + v, 0);
   for (const [k, v] of Object.entries(harm)) stats.damage[k] += v * dt;
-  if (dmg > 0) state.health -= dmg * dt;
-  else state.health = Math.min(100, state.health + 0.5 * dt);
+
+  // Everyone shares the air and the stores, so harm hits every member alike.
+  // Dose builds up for everyone and never heals; it lowers each member's
+  // maximum health, and recovery stops there.
+  for (const m of state.crewMembers) {
+    m.dose += (state.radiation / 100) * dt;
+    if (dmg > 0) m.health -= dmg * dt;
+    else m.health += 0.5 * dt;
+    m.health = Math.min(m.health, maxHealth(m));
+  }
+  updateCareerLimits();
 
   checkWarnings();
   checkEnd();
+}
+
+// Crew who reach the career dose limit go home. If it's Watney, the mission
+// is over.
+function updateCareerLimits() {
+  for (const m of [...state.crewMembers]) {
+    if (m.dose < DOSE_LIMIT) continue;
+    state.stats.left.push({ name: m.name, time: state.time });
+    if (m === state.crewMembers[0]) return finish("lose", "dose");
+    removeCrewMember(m);
+    emit(`${m.name} has reached the career radiation dose limit and is heading home. Crew is now ${state.crew}.`, "bad");
+  }
 }
 
 // ---------- Objectives and failures ----------
@@ -243,8 +264,11 @@ function objectivesMet() {
 
 // Death first, then a win, then the mission's own failure conditions.
 function checkEnd() {
-  if (state.health <= 0) {
-    state.health = 0;
+  if (state.over) return;   // already ended this step, by a dose limit
+  const dead = state.crewMembers.find((m) => m.health <= 0);
+  if (dead) {
+    dead.health = 0;
+    state.stats.lost = { name: dead.name, time: state.time };
     return finish("lose", "health");
   }
   if (objectivesMet()) return finish("win", "objectives");
@@ -276,8 +300,7 @@ function tryCrewArrival() {
     state.nextArrivalSol = state.sol + 1;
     return;
   }
-  const name = CREW_NAMES[(state.crew - 1) % CREW_NAMES.length];
-  state.crew++;
+  const { name } = addCrewMember();
   state.nextArrivalSol = state.sol + (state.mission.crewArrivalSols || CREW_ARRIVAL_SOLS);
   emit(`${name} just landed! Crew is now ${state.crew}. More science, but more mouths to feed.`, "good");
 }
@@ -304,5 +327,6 @@ function checkWarnings() {
   if (resourceStatus("food") !== "good") emitLine("lowFood");
   if (resourceStatus("oxygen") !== "good") emitLine("lowOxygen");
   if (state.radiation > 50) emitLine("highRadiation");
-  if (state.health < 40) emitLine("lowHealth");
+  if (lowestHealth() < 40) emitLine("lowHealth");
+  if (state.crewMembers.some((m) => m.dose >= DOSE_WARNING * DOSE_LIMIT)) emitLine("highDose", 120);
 }

@@ -111,7 +111,7 @@ function renderMissions() {
     <h4>To win</h4>
     <ul>${m.objectives.map((o) => `<li>${objectiveLabel(o)}</li>`).join("")}</ul>
     <h4>You lose if</h4>
-    <ul><li>Crew health reaches zero</li>${m.failures.map((f) => `<li>${failureLabel(f)}</li>`).join("")}</ul>
+    <ul><li>A crew member dies</li><li>Watney reaches the career radiation dose limit</li>${m.failures.map((f) => `<li>${failureLabel(f)}</li>`).join("")}</ul>
     <h4>Buildings</h4>
     <div class="chips">${(m.buildings || BUILD_ORDER).map((k) =>
       `<span class="chip">${BUILDINGS[k].icon} ${BUILDINGS[k].name}</span>`).join("")}</div>
@@ -166,6 +166,7 @@ const NEED_HINTS = {
   oxygen: "Habitats make oxygen from water and power. When either runs short, so does the air.",
   radiation: "Exposure above 50% hurts the crew. Radiation Shields and regolith reinforcement bring it down, and flares push it up.",
 };
+const DOSE_HINT = "Every percent of exposure adds to everyone's dose, and it never heals. Shield early, not just during flares: Radiation Shields and regolith over buildings bring the everyday exposure down.";
 
 function lossDebrief(cause) {
   if (cause === "blackout") {
@@ -182,14 +183,30 @@ function lossDebrief(cause) {
         "The objective list in the HUD shows how far along you are."],
     };
   }
-  // Health: name the cause that did the most harm.
+  if (cause === "dose") {
+    const last = state.stats.left[state.stats.left.length - 1];
+    const others = state.stats.left.slice(0, -1).map((l) => l.name);
+    return {
+      text: `Watney reached the career radiation dose limit on ${whenText(last.time)}, and NASA called the mission off.` +
+        (others.length ? ` ${others.join(" and ")} had already gone home for the same reason.` : ""),
+      hints: [DOSE_HINT],
+    };
+  }
+  // Health: name who died, and the cause that did the most harm.
   const [worst] = Object.entries(state.stats.damage).sort((a, b) => b[1] - a[1])[0];
   const first = state.stats.firstEmpty[worst];
   const what = worst === "radiation" ? "radiation exposure" : `running out of ${worst}`;
+  const lost = state.stats.lost;
+  const who = lost ? `${lost.name} didn't make it` : "The crew didn't make it";
+  const hints = [NEED_HINTS[worst], "A big stockpile means nothing if it's falling fast. Watch the rates."];
+  const dosed = state.crewMembers.find((m) => lost && m.name === lost.name);
+  if (dosed && dosed.dose > 0.25 * DOSE_LIMIT) {
+    hints.push(`${lost.name}'s radiation dose had already cut their maximum health to ${Math.round(maxHealth(dosed))}. The most exposed crew are the most fragile.`);
+  }
   return {
-    text: `The crew didn't make it. Most of the harm came from ${what}` +
+    text: `${who}. Most of the harm came from ${what}` +
       (first !== undefined ? `, which first ran out on ${whenText(first)}.` : "."),
-    hints: [NEED_HINTS[worst], "A big stockpile means nothing if it's falling fast. Watch the rates."],
+    hints,
   };
 }
 
@@ -221,7 +238,8 @@ function endGame(result, cause) {
   $("end-debrief").innerHTML = debrief;
   $("end-stats").textContent =
     `${DIFFICULTIES[state.difficulty].name} · Buildings: ${buildings().length} · Credits earned: ${fmt(state.creditsEarned)} · ` +
-    `Radiation: ${Math.round(state.radiation)}% · Seed ${state.seed}`;
+    `Radiation: ${Math.round(state.radiation)}% · Highest dose: ${Math.round(100 * Math.max(0, ...state.crewMembers.map((m) => m.dose)) / DOSE_LIMIT)}% of the limit · ` +
+    `Seed ${state.seed}`;
   const next = win && i < MISSIONS.length - 1 ? MISSIONS[i + 1] : null;
   $("end-next").hidden = !next;
   $("end").hidden = false;

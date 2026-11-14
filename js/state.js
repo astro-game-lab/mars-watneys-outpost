@@ -35,9 +35,10 @@ function createState(mission, seed, difficulty = "normal") {
     resources,
     rates: {},
     creditsEarned: 0,
-    health: 100,
     radiation: BASE_RADIATION,
-    crew: start.crew,
+    crew: 0,                   // the count; always crewMembers.length
+    crewMembers: [],           // { name, arrival, health, dose, landedAt }; member 0 is Watney
+    arrivals: 0,               // crew landed so far, which names the next one
     nextArrivalSol: 1 + (mission.crewArrivalSols || CREW_ARRIVAL_SOLS),
     crewCapacity: 0,
     powerCapacity: POWER_CAPACITY,
@@ -48,7 +49,7 @@ function createState(mission, seed, difficulty = "normal") {
     nextEventIn: events.first * diff.eventGap,
     nextScripted: 0,           // index into events.scripted
     // For the debrief: health lost to each cause, and when each need first ran out.
-    stats: { damage: { water: 0, food: 0, oxygen: 0, radiation: 0 }, firstEmpty: {} },
+    stats: { damage: { water: 0, food: 0, oxygen: 0, radiation: 0 }, firstEmpty: {}, lost: null, left: [] },
     outbox: [],                // messages for the UI: { kind: "say", text, tone } | { kind: "line", key }
     lastSaid: {},              // game time each keyed line was last queued, for its cooldown
     tiles: createTiles(rng, mission.map),
@@ -56,6 +57,38 @@ function createState(mission, seed, difficulty = "normal") {
     hovered: null,
   };
   placeStartingOutpost(start.outpost);
+  addCrewMember("Watney");
+  for (let i = 1; i < start.crew; i++) addCrewMember();
+}
+
+// ---------- Crew ----------
+// The crew is a list of members; state.crew is its length, kept in step here.
+function addCrewMember(name) {
+  const member = {
+    name: name || CREW_NAMES[(state.arrivals - 1) % CREW_NAMES.length],
+    arrival: state.arrivals,
+    health: 100,
+    dose: 0,
+    landedAt: state.time,
+  };
+  state.arrivals++;
+  state.crewMembers.push(member);
+  state.crew = state.crewMembers.length;
+  return member;
+}
+
+function removeCrewMember(member) {
+  state.crewMembers = state.crewMembers.filter((m) => m !== member);
+  state.crew = state.crewMembers.length;
+}
+
+// A member's maximum health, which falls as their dose builds up.
+function maxHealth(member) {
+  return 100 - (100 - MIN_MAX_HEALTH) * Math.min(1, member.dose / DOSE_LIMIT);
+}
+
+function lowestHealth() {
+  return Math.min(...state.crewMembers.map((m) => m.health));
 }
 
 // ---------- Messages ----------

@@ -266,13 +266,16 @@ function updateAstronauts(dt) {
   const list = buildings();
   if (!list.length) return;
   const pick = () => list[Math.floor(rngNext(crewRng) * list.length)];
-  // New arrivals appear at a habitat (or any building).
-  while (astronauts.length < state.crew) {
+  // One figure per crew member: those who've left disappear, and new arrivals
+  // appear at a habitat (or any building).
+  const here = new Set(state.crewMembers.map((m) => m.arrival));
+  for (let i = astronauts.length - 1; i >= 0; i--) if (!here.has(astronauts[i].arrival)) astronauts.splice(i, 1);
+  for (const m of state.crewMembers) {
+    if (astronauts.some((a) => a.arrival === m.arrival)) continue;
     const home = list.find((t) => t.building.type === "habitat") || list[0];
     const c = tileCenter(home);
-    astronauts.push({ x: c.x, y: c.y + view.size * 0.45, target: null, wait: 0 });
+    astronauts.push({ arrival: m.arrival, x: c.x, y: c.y + view.size * 0.45, target: null, wait: 0 });
   }
-  astronauts.length = Math.min(astronauts.length, state.crew);
 
   for (const a of astronauts) {
     if (!a.target || !a.target.building) a.target = pick();
@@ -297,10 +300,10 @@ function drawAstronauts(time) {
   ctx.textBaseline = "middle";
   ctx.shadowColor = "rgba(0,0,0,0.6)";
   ctx.shadowBlur = 4;
-  astronauts.forEach((a, i) => {
-    const bob = Math.sin(time * 8 + i * 1.7) * 1.5;
-    ctx.fillText(CREW_SPRITES[i % CREW_SPRITES.length], a.x, a.y + bob);
-  });
+  for (const a of astronauts) {
+    const bob = Math.sin(time * 8 + a.arrival * 1.7) * 1.5;
+    ctx.fillText(CREW_SPRITES[a.arrival % CREW_SPRITES.length], a.x, a.y + bob);
+  }
   ctx.shadowBlur = 0;
 }
 

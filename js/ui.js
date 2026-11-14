@@ -129,9 +129,7 @@ function updateHud() {
   const rad = $("radiation");
   rad.textContent = `${Math.round(state.radiation)}%`;
   rad.className = state.radiation > 50 ? "crit-text" : state.radiation > 25 ? "warn-text" : "";
-  $("health-bar").style.width = `${state.health}%`;
-  $("health-bar").className = state.health < 30 ? "crit" : state.health < 60 ? "warn" : "";
-  $("health-val").textContent = `${Math.ceil(state.health)}%`;
+  renderRoster();
   const m = state.mission;
   const diff = state.difficulty !== "normal" ? ` <span class="badge">${difficulty().name}</span>` : "";
   $("goal").innerHTML = `<div class="mtitle">${m.name}${diff}</div>` +
@@ -161,6 +159,32 @@ function updateHud() {
     .map((e) => `<div class="effect">${e.label} · ${Math.ceil(e.remaining)}s</div>`).join("");
 
   if (state.selected) updatePanelLive();
+}
+
+// ---------- Crew roster ----------
+// One row per crew member: health, with the share of maximum health lost to
+// radiation dose hatched at the right end. Past ROSTER_MAX rows, the healthiest
+// are summarised so the HUD stays compact.
+const ROSTER_MAX = 8;
+
+function renderRoster() {
+  let shown = state.crewMembers;
+  if (shown.length > ROSTER_MAX) {
+    shown = [...shown].sort((a, b) => a.health - b.health || a.arrival - b.arrival).slice(0, ROSTER_MAX - 2)
+      .sort((a, b) => a.arrival - b.arrival);
+  }
+  $("roster").innerHTML = shown.map((m) => {
+    const max = maxHealth(m);
+    const doseShare = Math.min(1, m.dose / DOSE_LIMIT);
+    const level = m.health < 30 ? "crit" : m.health < 60 ? "warn" : "";
+    const tip = `${m.name}: health ${Math.ceil(m.health)} / ${Math.round(max)} · dose ${Math.round(doseShare * 100)}% of the career limit`;
+    return `<div class="crew-row" title="${tip}">
+      <span class="cname">${m.arrival === 0 ? "⭐ " : ""}${m.name}</span>
+      <div class="bar"><div class="fill ${level}" style="width:${m.health}%"></div><div class="lost" style="width:${100 - max}%"></div></div>
+      <span class="cval">${Math.ceil(m.health)}</span>
+    </div>`;
+  }).join("") + (shown.length < state.crewMembers.length
+    ? `<div class="crew-more">+${state.crewMembers.length - shown.length} more, all healthier</div>` : "");
 }
 
 // ---------- Side panel: build menu / building info ----------

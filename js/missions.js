@@ -112,7 +112,7 @@ const MISSIONS = [
     name: "Flare Watch",
     lesson: "With no global magnetic field and a thin atmosphere, radiation reaches the surface. The answer is mass between you and the sky.",
     briefing: [
-      "Mars has no global magnetic field and only a thin atmosphere, so much of the radiation that Earth keeps out reaches the ground here. Curiosity measured it: a steady background dose, with spikes when the Sun flares up.",
+      "Mars has no global magnetic field and only a thin atmosphere, so much of the radiation that Earth keeps out reaches the ground here. Curiosity measured it: a steady background dose, with spikes when the Sun flares up. And it adds up: NASA caps how much radiation an astronaut may take over a whole career, so every bit of exposure counts.",
       "The Sun is in a mood this week. Flares will come often, and one is forecast for midday on Sol 2. Each one pushes exposure way up for a while.",
       "Get the outpost's everyday exposure down to 10% and hold out until Sol 5. Radiation Shields help. So does shovelling regolith over buildings, which needs no power at all.",
     ],
@@ -120,6 +120,7 @@ const MISSIONS = [
       "Exposure above 50% hurts the crew. Watch it during a flare.",
       "A Radiation Shield blocks 15% while it has power.",
       "Reinforcing any building with regolith blocks another 5%, power or not.",
+      "Dose never heals. The hatched end of each health bar in the crew roster is maximum health it has already cost.",
     ],
     seed: 4401,
     buildings: null,
