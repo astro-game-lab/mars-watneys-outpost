@@ -40,12 +40,16 @@ function objectiveProgress(o) {
   return fmt(v);
 }
 
+const highestDose = () => Math.max(0, ...state.crewMembers.map((m) => m.dose)) / DOSE_LIMIT;
+
 function failureLabel(f) {
+  if (f.type === "dose") return `Anyone's radiation dose passes ${Math.round(f.value * 100)}% of the career limit`;
   if (f.type === "blackout") return "The batteries go flat (a blackout)";
   if (f.type === "deadline") return `Sol ${f.sol} starts before you've finished`;
 }
 
 function failureHud(f) {
+  if (f.type === "dose") return `Keep everyone's dose under ${Math.round(f.value * 100)}% (highest ${Math.round(highestDose() * 100)}%)`;
   if (f.type === "blackout") return "Don't let the batteries go flat";
   if (f.type === "deadline") return `Deadline: start of Sol ${f.sol}`;
 }

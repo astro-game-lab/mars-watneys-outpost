@@ -190,6 +190,13 @@ function lossDebrief(cause) {
         "The objective list in the HUD shows how far along you are."],
     };
   }
+  if (cause === "dosecap") {
+    const o = state.stats.overdosed;
+    return {
+      text: `${o.name}'s radiation dose passed ${Math.round(o.share * 100)}% of the career limit on ${whenText(o.time)}, and NASA called the mission off.`,
+      hints: [DOSE_HINT, "Each flare adds a step to everyone's dose. Exposure close to zero between flares leaves room for them."],
+    };
+  }
   if (cause === "dose") {
     const last = state.stats.left[state.stats.left.length - 1];
     const others = state.stats.left.slice(0, -1).map((l) => l.name);

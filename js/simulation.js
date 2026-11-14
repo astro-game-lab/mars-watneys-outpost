@@ -401,6 +401,13 @@ function checkEnd() {
   for (const f of state.mission.failures) {
     if (f.type === "blackout" && state.resources.power <= 0.01) return finish("lose", "blackout");
     if (f.type === "deadline" && state.sol >= f.sol) return finish("lose", "deadline");
+    if (f.type === "dose") {
+      const over = state.crewMembers.find((m) => m.dose > f.value * DOSE_LIMIT);
+      if (over) {
+        state.stats.overdosed = { name: over.name, time: state.time, share: f.value };
+        return finish("lose", "dosecap");
+      }
+    }
   }
 }
 

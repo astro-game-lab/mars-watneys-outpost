@@ -73,6 +73,10 @@ they relied on has moved.
   science economy no longer mattered.
 - *Ice Line* starts with 260 water instead of 60, for room on *Martian*, where
   Watney now builds everything alone. Regolith alone still falls short.
+- *Flare Watch* is lost if anyone's radiation dose passes 70% of the career
+  limit. Its exposure objective could be met by shielding at the last moment,
+  while the real cost, dose, built up unseen. The HUD shows the highest dose
+  against the cap, and the debrief names who passed it.
 - *Dust Season*'s briefing mentions dust on the panels, and *Crew Rotation*'s
   warns that anyone sent home at the dose limit lowers the crew count.
 

@@ -22,6 +22,7 @@
 //   failures     extra ways to lose, besides crew health reaching zero:
 //                  { type: "blackout" }          stored power reaches zero
 //                  { type: "deadline", sol }     this sol starts, objectives unmet
+//                  { type: "dose", value }       anyone's dose passes this share of DOSE_LIMIT
 
 const STORY = [
   "Mark Watney here: botanist, mechanical engineer, and as of this morning the person in charge of a small outpost on Mars. NASA has given me a couple of Habitats, a Science Lab, one Solar Array, and a planet that is not on my side.",
@@ -114,7 +115,7 @@ const MISSIONS = [
     briefing: [
       "Mars has no global magnetic field and only a thin atmosphere, so much of the radiation that Earth keeps out reaches the ground here. Curiosity measured it: a steady background dose, with spikes when the Sun flares up. And it adds up: NASA caps how much radiation an astronaut may take over a whole career, so every bit of exposure counts.",
       "The Sun is in a mood this week. Flares will come often, and one is forecast for midday on Sol 2. Each one pushes exposure way up for a while.",
-      "Get the outpost's everyday exposure down to 10% and hold out until Sol 5. Radiation Shields help. So does shovelling regolith over buildings, which needs no power at all.",
+      "Get the outpost's everyday exposure down to 10% and hold out until Sol 5, without anyone's dose passing 70% of their career limit. Every flare adds to it, and it never comes back down, so shield early. Radiation Shields help. So does shovelling regolith over buildings, which needs no power at all.",
     ],
     tips: [
       "Exposure above 50% hurts the crew. Watch it during a flare.",
@@ -129,7 +130,7 @@ const MISSIONS = [
       scripted: [{ sol: 2, at: 0.5, kind: "flare" }],
     },
     objectives: [{ type: "sol", value: 5 }, { type: "radiation", value: 10 }],
-    failures: [],
+    failures: [{ type: "dose", value: 0.7 }],   // dose adds up: shielding late is too late
   },
   {
     id: "crew-rotation",

@@ -43,7 +43,7 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
   1. *First Night*: storage. Survive two nights without a blackout, using Solar, Battery, Water and Greenhouse only. Shortage priorities are off here, so storage can't be dodged by switching the Lab off.
   2. *Ice Line*: water from the ground. Bank 2 000 water before Sol 4 on a handmade map whose ice sits past a ridge. Regolith alone falls short.
   3. *Dust Season*: nuclear power. Earn 3 000 credits before Sol 6 through near-constant 90 s storms. Solar alone falls short.
-  4. *Flare Watch*: shielding. Reach Sol 5 with exposure at 10% or less, through frequent flares and one scripted flare.
+  4. *Flare Watch*: shielding, and dose that adds up. Reach Sol 5 with exposure at 10% or less, through frequent flares and one scripted flare, and lose if anyone's dose passes 70% of the career limit. Shielding late is too late: on *Hard* and *Martian*, a shield alone isn't enough.
   5. *Crew Rotation*: life support for a growing crew. A lander arrives every sol. Reach a crew of six before Sol 9.
   6. *The Outpost*: everything at once, on a fresh random map each run.
 - **Assumed knowledge:** none. Every building explains why it exists, and Watney comments on each warning as it fires.

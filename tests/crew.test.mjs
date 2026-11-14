@@ -118,3 +118,18 @@ test("a name isn't reused after someone leaves", () => {
   const next = sim.addCrewMember();
   assert.notEqual(next.name, first);
 });
+
+test("a mission's dose cap ends it as soon as anyone's dose passes the cap", () => {
+  const sim = loadSim();
+  sim.createState({ ...sim.missionById("flare-watch"), events: null }, 1, "normal");
+  const { state } = sim;
+  for (const k of Object.keys(state.resources)) state.resources[k] = 1e6;
+  const cap = state.mission.failures.find((f) => f.type === "dose").value;
+  state.crewMembers[0].dose = cap * sim.DOSE_LIMIT - 0.1;   // a few steps below, at 35% exposure
+  sim.updateGame();
+  assert.equal(state.over, null, "ended below the cap");
+  for (let i = 0; i < 400 && !state.over; i++) sim.updateGame();
+  assert.equal(state.over, "lose");
+  assert.equal(state.endCause, "dosecap");
+  assert.equal(state.stats.overdosed.name, "Watney");
+});

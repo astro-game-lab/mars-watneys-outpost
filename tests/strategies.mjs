@@ -57,10 +57,14 @@ export const STRATEGIES = {
   },
 
   "flare-watch": {
-    // A Radiation Shield and regolith over four buildings bring exposure to 10% or less.
+    // A Radiation Shield at Critical priority, regolith over four buildings and a
+    // second shield bring exposure to 10% or less, soon enough to keep everyone's
+    // dose under the 70% cap: about 42% on Normal and 58-63% on Hard and Martian.
+    // A shield alone reaches 72-80% there, and fails.
     win: [{ build: "greenhouse" }, mine, water, { build: "solar" }, { build: "battery" }, { build: "shield" },
-      { build: "solar" }, { reinforce: "habitat" }, { reinforce: "habitat" }, { build: "battery" },
-      { build: "solar" }, { reinforce: "lab" }, { reinforce: "solar" }],
+      { priority: "shield", to: "critical" }, { build: "solar" }, { reinforce: "habitat" }, { reinforce: "habitat" },
+      { build: "battery" }, { build: "solar" }, { build: "shield" }, { priority: "shield", to: "critical" },
+      { reinforce: "lab" }, { reinforce: "solar" }],
     // No shielding: the flares hurt, and the exposure objective is never met.
     warned: {
       why: "no Radiation Shield and no regolith",
