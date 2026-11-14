@@ -25,7 +25,7 @@ To run it locally, see [Development](#development) below.
 | **Events** | By default every 40–70 seconds: a dust storm (solar −70%), a solar flare (radiation +40%), a micrometeorite (one building out for 30 s), a pump failure (water −50%), a dust devil (sweeps dust off some Solar Arrays), or a NASA supply drop. Missions change the mix, and some script events for a set time. |
 | **Winning** | Each mission has its own objectives: reach a sol, earn credits, grow the crew, store water, or bring radiation down. Every mission is lost if any crew member dies or Watney reaches the career dose limit, and some also end on a blackout or a deadline. |
 
-What isn't here yet: saving a mission in progress, settings, sound, keyboard-only play, touch input, or an in-game tutorial beyond the intro, the briefings and each building's explanation. The code is plain browser JavaScript with no build step. The simulation has automated tests, which run in CI.
+What isn't here yet: saving a mission in progress, settings beyond turning Watney's tips on and off, sound, keyboard-only play, or touch input. Beyond the intro, the briefings and each building's explanation, Watney's tips are the only tutorial: hints at teachable moments, each shown once a mission. The code is plain browser JavaScript with no build step. The simulation has automated tests, which run in CI.
 
 The simulation is deterministic. A seeded generator drives all randomness, and the simulation runs on a fixed timestep. So the same seed plus the same moves replays the same mission. The seed is shown on the end screen, and `?seed=N` in the URL replays a map in *The Outpost*. The simulation still calls the UI directly and uses abstract units. See [`docs/PHYSICS.md`](docs/PHYSICS.md#conventions).
 

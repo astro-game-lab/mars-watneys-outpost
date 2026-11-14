@@ -53,6 +53,11 @@ they relied on has moved.
   reinforce buildings, one job each at a time, repairs first. The HUD shows
   who's busy and how many jobs are waiting, and crew figures walk to their
   jobs. Busy crew still count toward the Science Lab bonus.
+- Watney's tips: hints at teachable moments, such as ice within reach, batteries
+  that won't last the night, a Greenhouse heading for frost or jobs piling up.
+  Each shows once a mission, at most one every 20 game seconds, and a tip
+  about a place pulses it on the map. They can be turned off in mission
+  select.
 - Dust devils, a sixth kind of event. One sweeps most of the dust off some
   of the Solar Arrays. They're in the default mix and in *Dust Season*.
 

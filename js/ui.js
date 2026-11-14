@@ -78,7 +78,7 @@ function say(text, kind = "") {
   const box = $("messages");
   const el = document.createElement("div");
   el.className = `msg ${kind}`;
-  el.innerHTML = `<b>👨‍🚀 WATNEY:</b> ${text}`;
+  el.innerHTML = `<b>${kind === "tip" ? "💡" : "👨‍🚀"} WATNEY:</b> ${text}`;
   box.prepend(el);
   while (box.children.length > 4) box.lastChild.remove();
 }
@@ -89,6 +89,37 @@ function drainOutbox() {
     else say(m.text, m.tone);
   }
   state.outbox.length = 0;
+}
+
+// ---------- Watney's tips ----------
+// Hints at teachable moments (TIPS in js/data.js). They only read the state,
+// so they can't change what happens. Each shows at most once a mission, at
+// most one every TIP_GAP game seconds, never in the first TIP_GRACE seconds,
+// and never while a screen is open.
+let tipsShown = new Set();
+let lastTipAt = -Infinity;
+let tipPulse = null;          // { tile, until } to pulse on the map
+
+function resetTips() {
+  tipsShown = new Set();
+  lastTipAt = -Infinity;
+  tipPulse = null;
+}
+
+function checkTips() {
+  if (!progress.tips || state.over || screenOpen()) return;
+  if (state.time - state.startTime < TIP_GRACE || state.time - lastTipAt < TIP_GAP) return;
+  for (const tip of TIPS) {
+    if (tipsShown.has(tip.id)) continue;
+    const hit = tip.when(state);
+    if (!hit) continue;
+    tipsShown.add(tip.id);
+    lastTipAt = state.time;
+    const tile = hit === true ? null : hit;
+    say(typeof tip.text === "function" ? tip.text(tile) : tip.text, "tip");
+    if (tile) tipPulse = { tile, until: performance.now() + TIP_PULSE_MS };
+    return;
+  }
 }
 
 // ---------- HUD ----------
@@ -163,6 +194,7 @@ function updateHud() {
     .map((e) => `<div class="effect">${e.label} · ${Math.ceil(e.remaining)}s</div>`).join("");
 
   if (state.selected) updatePanelLive();
+  checkTips();
 }
 
 // ---------- Crew roster ----------

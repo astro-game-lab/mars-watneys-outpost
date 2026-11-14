@@ -18,6 +18,7 @@ function newGame(missionId, seed) {
   astronauts.length = 0;
   $("messages").innerHTML = "";
   endShown = false;
+  resetTips();
   $("end").hidden = true;
   selectTile(null);
   refreshFlows();

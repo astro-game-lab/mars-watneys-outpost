@@ -364,6 +364,10 @@ function render(time) {
   for (const t of state.tiles) drawTileDynamic(t);
   drawNight(w, h);
   drawAstronauts(time);
+  if (tipPulse && performance.now() < tipPulse.until && tipPulse.tile.terrain) {
+    const a = 0.45 + 0.45 * Math.sin(time * 6);
+    drawHighlight(tipPulse.tile, `rgba(255, 210, 122, ${a.toFixed(2)})`, 4, 20);
+  }
   if (state.selected) drawHighlight(state.selected, "#ffd27a", 3, 14);
   if (state.hovered && state.hovered !== state.selected) drawHighlight(state.hovered, "#ffffff", 2, 12);
 }

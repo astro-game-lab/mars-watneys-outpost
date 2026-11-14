@@ -24,7 +24,7 @@ Plain browser JavaScript. Classic `<script>` tags in `index.html` share **one gl
 
 | File | Owns |
 | --- | --- |
-| `js/data.js` | Every balance number and shared content: terrain, buildings, `why` texts, event defaults, difficulty tiers, `SIM_STEP`, Watney's lines. **Tune here, nowhere else** (missions aside). |
+| `js/data.js` | Every balance number and shared content: terrain, buildings, `why` texts, event defaults, difficulty tiers, `SIM_STEP`, Watney's lines and tips (`TIPS`). **Tune here, nowhere else** (missions aside). |
 | `js/missions.js` | The campaign and the intro story. Each mission overrides the defaults in `data.js`. Its header comment documents every field. Briefing text makes claims to the player, so it's bound by `docs/PHYSICS.md` like the `why` texts. |
 | `js/rng.js` | The seeded generator (mulberry32). `rand()` is the simulation's only source of randomness. |
 | `js/hexmap.js` | Odd-r offset hex grid, terrain from a seed or a handmade map, neighbours, connectivity |
@@ -32,7 +32,7 @@ Plain browser JavaScript. Classic `<script>` tags in `index.html` share **one gl
 | `js/events.js` | Random and scripted events, and timed effects |
 | `js/simulation.js` | `computeFlows()` (shortage resolution by priority tier, through `allocate()`), `refreshFlows()`, building temperature (`outsideTempK()`, `heatingDemand()`, `updateTemperatures()`, `assignBeds()`), crew work (`pendingJobs()`, `updateWork()`), `updateGame()` (one fixed `SIM_STEP`: integrate, radiation, health, crew), objectives, and `checkEnd()`, which sets `state.over` and `state.endCause` |
 | `js/render.js` | Canvas 2-D: sprite loading, hex layout and pixel picking (`view`, `tileCenter`, `tileFromPixel`). The terrain, sprites and outlines are cached in an off-screen static layer, keyed by `staticSignature()`. Construction sites are drawn faint, with a 🔨 status marker ringed by their progress. The crew figures are cosmetic, but walk to their member's job. |
-| `js/ui.js` | HUD and objectives, build panel, message log. `drainOutbox()` shows the simulation's queued messages. |
+| `js/ui.js` | HUD and objectives, build panel, message log. `drainOutbox()` shows the simulation's queued messages. `checkTips()` shows Watney's tips: it only reads the state, so it can't affect determinism (`tests/tips.test.mjs` checks this). |
 | `js/screens.js` | Intro, mission select and briefing, end screen and debrief, saved progress in `localStorage`. The simulation doesn't run while one is open. |
 | `js/main.js` | `newGame()`, seeds, the 30 fps frame loop with its fixed-step accumulator, input. Each frame it drains the outbox and shows the end screen once `state.over` is set. |
 | `tests/` | Node tests of the simulation. `load-sim.mjs` runs the seven simulation files in an empty `node:vm` context. `bot.mjs` plays a mission from a build order. `strategies.mjs` holds each mission's winning and warned-against build orders. `helpers.mjs` has `buildNow()`, which skips construction for tests about a working building. |

@@ -9,7 +9,7 @@ const progress = loadProgress();
 // Storage can be missing or blocked (private windows, previews). Then progress
 // lasts for this page load only, and the intro shows again next time.
 function loadProgress() {
-  const base = { seenIntro: false, won: {}, difficulty: "normal", last: MISSIONS[0].id };
+  const base = { seenIntro: false, won: {}, difficulty: "normal", last: MISSIONS[0].id, tips: true };
   try {
     const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "null");
     if (saved && typeof saved === "object") Object.assign(base, saved);
@@ -101,6 +101,8 @@ function renderMissions() {
           aria-pressed="${k === progress.difficulty}">${DIFFICULTIES[k].name}</button>`).join("")}</div>
        <p class="sub">${DIFFICULTIES[progress.difficulty].blurb}</p>`
     : `<p class="sub">🔒 Difficulty settings unlock when you finish ${MISSIONS[MISSIONS.length - 1].name}.</p>`;
+  $("difficulty").innerHTML += `<div class="tips-row"><button class="diff-btn ${progress.tips ? "selected" : ""}" data-tips="toggle"
+      aria-pressed="${progress.tips}" title="Watney points things out the first time they matter">💡 Watney's tips: ${progress.tips ? "on" : "off"}</button></div>`;
 
   const m = missionById(shownMission);
   const diff = chosenDifficulty();
@@ -141,6 +143,10 @@ $("missions").addEventListener("click", (e) => {
     shownMission = btn.dataset.mission;
     renderMissions();
     $("begin").focus();
+  } else if (btn.dataset.tips) {
+    progress.tips = !progress.tips;
+    saveProgress();
+    renderMissions();
   } else if (btn.dataset.difficulty) {
     progress.difficulty = btn.dataset.difficulty;
     saveProgress();

@@ -47,6 +47,7 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
   5. *Crew Rotation*: life support for a growing crew. A lander arrives every sol. Reach a crew of six before Sol 9.
   6. *The Outpost*: everything at once, on a fresh random map each run.
 - **Assumed knowledge:** none. Every building explains why it exists, and Watney comments on each warning as it fires.
+- **Watney's tips:** short hints at teachable moments, each shown at most once a mission and at most one every 20 game seconds. Examples: ice within reach of the outpost, batteries that won't last the night, a Greenhouse heading for frost, jobs piling up. A tip about a place pulses that tile on the map. They can be turned off in mission select. They're for players who skip the briefings.
 - **Assists:** live objective progress in the HUD, time-to-empty on every resource, warn and crit colouring, and a reason given whenever a build, demolish or crew arrival is blocked.
 - **Failure:** a crew member dies, Watney reaches the career dose limit, or the mission's own condition (a blackout or a deadline) is met. The debrief names the cause, such as who died, the need that did the most harm and when it first ran out, who had to go home, or the objectives still missing, and gives a hint.
 - **Difficulty:** *Hard* and *Martian* unlock after the campaign. They scale crew consumption, starting water, food and oxygen, and how often events come. Every mission stays winnable at every tier.
@@ -61,4 +62,4 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 
 - **In the prototype:** a six-mission campaign, three difficulty tiers, one map size, ten buildings, six events, and progress saved in the browser.
 - **Explicitly out of scope:** orbital logistics. That's the roadmap's *Mars Colony Logistics*.
-- **Deferred:** saving a mission in progress, settings, sound, touch, full keyboard play, Watney prompts at teachable moments, and input replays.
+- **Deferred:** saving a mission in progress, settings beyond the tips toggle, sound, touch, full keyboard play, and input replays.

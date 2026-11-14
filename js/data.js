@@ -266,6 +266,98 @@ function dayPhase(t) {
   return "🌇 Evening";
 }
 
+// Watney's tips: short hints at teachable moments, each shown at most once a
+// mission. `when(s)` reads the state (never changes it) and returns false, true,
+// or a tile to pulse on the map; `text` is a string, or a function of that
+// tile. Checked by checkTips() in js/ui.js, in this order. Factual claims in
+// these texts are covered by docs/PHYSICS.md § Claims.
+const TIP_GRACE = 10;      // game seconds into a mission before the first tip
+const TIP_GAP = 20;        // game seconds between tips
+const TIP_PULSE_MS = 4000; // how long a tip's tile pulses on the map
+
+// Tiles within `range` steps of the outpost that are free to build on.
+function tilesNearOutpost(range) {
+  let frontier = buildings(), seen = new Set(frontier);
+  for (let i = 0; i < range; i++) {
+    const next = [];
+    for (const t of frontier) for (const n of neighbors(t)) if (!seen.has(n)) { seen.add(n); next.push(n); }
+    frontier = next;
+  }
+  return [...seen].filter((t) => !t.building && t.terrain !== "impassable");
+}
+const builtOf = (type) => buildings().filter((t) => t.building.type === type && !(t.building.construct > 0));
+const priorityHint = (s, advice) => (s.mission.priorities === false ? "" : ` ${advice}`);
+
+const TIPS = [
+  {
+    id: "nightPower",
+    when: (s) => {
+      const t = solTime();
+      if (t >= 0.2 && t < 0.65) return false;                             // only evening and night
+      const untilMorning = ((0.2 - t + 1) % 1) * SOL_SECONDS;
+      return (s.rates.power || 0) < -0.001 && timeLeft("power") < untilMorning;
+    },
+    text: () => "At this rate the batteries die before sunrise. More Battery Banks bank more of the day." +
+      priorityHint(state, "Or set the Lab to Low, so it's the first thing to lose power."),
+  },
+  {
+    id: "iceNearby",
+    when: () => {
+      if (!buildingUnlocked("water") || builtOf("water").some((t) => t.terrain === "ice")) return false;
+      return tilesNearOutpost(2).find((t) => t.terrain === "ice") || false;
+    },
+    text: "There's ice right there. A Water Extractor on ice pulls out twice as much as on regolith.",
+  },
+  {
+    id: "flareShield",
+    when: (s) => hasEffect("flare") && s.radiation > 25 && buildingUnlocked("shield") && !builtOf("shield").length,
+    text: "Flares are no joke. A Radiation Shield, or regolith piled over any building, takes the edge off.",
+  },
+  {
+    id: "dustyPanels",
+    when: () => builtOf("solar").find((t) => t.building.dust > 0.3 && !(t.building.cleaning > 0)) || false,
+    text: "My panels are filthy. Cleaning one takes it offline for a few seconds, then it's back to full output.",
+  },
+  {
+    id: "noBed",
+    when: (s) => s.mission.crewArrivals !== false && s.crew >= s.crewCapacity &&
+      s.nextArrivalSol - s.sol <= 1 && buildingUnlocked("habitat"),
+    text: "No bed, no crewmate. NASA won't land anyone until there's room. Another Habitat sleeps two more.",
+  },
+  {
+    id: "highDose",
+    when: (s) => s.crewMembers.some((m) => m.dose > 0.5 * DOSE_LIMIT),
+    text: "That radiation dose isn't going away. Shielding now is cheaper than a crewmate going home later.",
+  },
+  {
+    id: "repairWaiting",
+    when: () => buildings().find((t) => t.building.disabled > 0 && !beingWorked(t.building, "repair")) || false,
+    text: (t) => `Nobody's free to fix the ${BUILDINGS[t.building.type].name}. Repairs come first, so it's next in line.`,
+  },
+  {
+    id: "jobsPiling",
+    when: (s) => (s.jobsWaiting || 0) >= 3,
+    text: "More jobs than hands. Each of us does one thing at a time: repairs first, then building, cleaning and reinforcing. More crew means more hands.",
+  },
+  {
+    id: "noMine",
+    when: (s) => buildingUnlocked("mine") && !buildings().some((t) => t.building.type === "mine") && s.resources.materials < 30,
+    text: "Running low on materials. A Mine makes them, and on rock or high-resource ground it makes more.",
+  },
+  {
+    id: "greenhouseCold",
+    when: () => builtOf("greenhouse").find((t) => t.building.tempK < FROST_K + 8) || false,
+    text: () => "The greenhouse is getting cold. Potatoes don't do frost." +
+      priorityHint(state, "Give it power, or a higher priority."),
+  },
+  {
+    id: "habitatCooling",
+    when: (s) => builtOf("habitat").find((t) => t.building.tempK < SETPOINT_K - 4 &&
+      s.crewMembers.some((m) => m.bed === s.tiles.indexOf(t))) || false,
+    text: "The Habitat's losing heat. It's critical for a reason: below about 10 °C, the people sleeping in it start to suffer.",
+  },
+];
+
 // Watney's lines, keyed by trigger
 const WATNEY_LINES = {
   start: "Okay. I'm alone on Mars. Let's science the heck out of this.",
