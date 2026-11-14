@@ -49,7 +49,7 @@ function createState(mission, seed, difficulty = "normal") {
     nextEventIn: events.first * diff.eventGap,
     nextScripted: 0,           // index into events.scripted
     // For the debrief: health lost to each cause, and when each need first ran out.
-    stats: { damage: { water: 0, food: 0, oxygen: 0, radiation: 0 }, firstEmpty: {}, lost: null, left: [] },
+    stats: { damage: { water: 0, food: 0, oxygen: 0, radiation: 0, cold: 0 }, firstEmpty: {}, lost: null, left: [] },
     outbox: [],                // messages for the UI: { kind: "say", text, tone } | { kind: "line", key }
     lastSaid: {},              // game time each keyed line was last queued, for its cooldown
     tiles: createTiles(rng, mission.map),
@@ -117,6 +117,8 @@ function buildingUnlocked(type) {
 function makeBuilding(type) {
   const b = { type, disabled: 0, reinforced: false, priority: BUILDINGS[type].priority || null };
   if (BUILDINGS[type].solar) Object.assign(b, { dust: 0, cleaning: 0 });
+  if (BUILDINGS[type].heat) b.tempK = SETPOINT_K;
+  if (type === "greenhouse") b.crop = 1;
   return b;
 }
 

@@ -229,6 +229,8 @@ function drawTileDynamic(t) {
   let mark = null, color = "rgba(180, 20, 20, 0.85)";
   if (t.building.disabled > 0) mark = "🔧";
   else if (t.building.cleaning > 0) { mark = "🧹"; color = "rgba(46, 90, 122, 0.9)"; }
+  else if (t.building.type === "greenhouse" && t.building.tempK < FROST_K) { mark = "❄️"; color = "rgba(46, 90, 122, 0.9)"; }
+  else if (t.building.tempK < COLD_K) { mark = "🥶"; color = "rgba(46, 90, 122, 0.9)"; }
   else if (t.building.priority === "off") { mark = "OFF"; color = "rgba(60, 60, 60, 0.9)"; }
   else if (t.building.level !== undefined && t.building.level < 0.99) mark = "⚡";
   if (mark) {

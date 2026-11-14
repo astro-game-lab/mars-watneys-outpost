@@ -70,9 +70,11 @@ export const STRATEGIES = {
 
   "crew-rotation": {
     // A third Habitat for beds, and enough water, food and air for six.
-    win: [{ build: "greenhouse" }, water, { build: "solar" }, { build: "battery" }, mine, { build: "habitat" },
-      water, { build: "greenhouse" }, { build: "solar" }, { build: "solar" }, { build: "shield" },
-      { build: "battery" }, water, { build: "solar" }],
+    // Since building temperature, a power-short night freezes the Habitats, so
+    // this build puts up nuclear power early and keeps the Mines running.
+    win: [{ build: "greenhouse" }, water, { build: "solar" }, { build: "battery" }, mine,
+      { priority: "mine", to: "normal" }, { build: "nuclear" }, { build: "habitat" }, water,
+      { build: "greenhouse" }, { build: "shield" }, { build: "battery" }, water, { build: "solar" }],
     // No new Habitat: four beds, so the crew stops at four.
     warned: {
       why: "no new Habitat",

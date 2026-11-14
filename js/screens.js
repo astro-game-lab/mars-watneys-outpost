@@ -165,6 +165,7 @@ const NEED_HINTS = {
   food: "Only Greenhouses make food, and they need water and power. Build one early.",
   oxygen: "Habitats make oxygen from water and power. When either runs short, so does the air.",
   radiation: "Exposure above 50% hurts the crew. Radiation Shields and regolith reinforcement bring it down, and flares push it up.",
+  cold: "A Habitat that loses power cools fast at night, and the crew sleeping in it suffer. Keep Habitats at Critical priority, and bank enough power for the hours before dawn, when heating needs the most.",
 };
 const DOSE_HINT = "Every percent of exposure adds to everyone's dose, and it never heals. Shield early, not just during flares: Radiation Shields and regolith over buildings bring the everyday exposure down.";
 
@@ -195,7 +196,8 @@ function lossDebrief(cause) {
   // Health: name who died, and the cause that did the most harm.
   const [worst] = Object.entries(state.stats.damage).sort((a, b) => b[1] - a[1])[0];
   const first = state.stats.firstEmpty[worst];
-  const what = worst === "radiation" ? "radiation exposure" : `running out of ${worst}`;
+  const what = worst === "radiation" ? "radiation exposure"
+    : worst === "cold" ? "the cold in a Habitat that lost its heating" : `running out of ${worst}`;
   const lost = state.stats.lost;
   const who = lost ? `${lost.name} didn't make it` : "The crew didn't make it";
   const hints = [NEED_HINTS[worst], "A big stockpile means nothing if it's falling fast. Watch the rates."];
@@ -205,7 +207,7 @@ function lossDebrief(cause) {
   }
   return {
     text: `${who}. Most of the harm came from ${what}` +
-      (first !== undefined ? `, which first ran out on ${whenText(first)}.` : "."),
+      (first !== undefined ? `, which ${worst === "cold" ? "first set in" : "first ran out"} on ${whenText(first)}.` : "."),
     hints,
   };
 }

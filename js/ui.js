@@ -3,6 +3,8 @@
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => Math.floor(n).toLocaleString();
+// Temperatures are kelvin in the simulation; shown as °C with a true minus sign.
+const fmtC = (k) => { const c = Math.round(k - 273.15); return `${c < 0 ? "−" : ""}${Math.abs(c)} °C`; };
 const fmtRate = (r) => (r >= 0 ? "+" : "−") + Math.abs(r).toFixed(1) + "/s";
 const fmtList = (obj, perSec) => Object.entries(obj)
   .map(([k, v]) => `${ICON[k]} ${perSec ? v + "/s" : v}`).join("  ") || "—";
@@ -146,7 +148,7 @@ function updateHud() {
   $("clock").textContent = clockText(t);
   $("phase").textContent = dayPhase(t);
   $("solar-pct").textContent = `Solar ${Math.round(daylight(t) * (hasEffect("dust") ? 30 : 100))}%`;
-  $("heat-pct").textContent = `Heating ${Math.round(thermalLoad(t) * 100)}%`;
+  $("outside-temp").textContent = `Outside ${fmtC(outsideTempK(t))}`;
   const sun = $("sun");
   const day = Math.min(1, Math.max(0, (t - 0.2) / 0.65));
   const up = t >= 0.2 && t < 0.85;
@@ -177,9 +179,12 @@ function renderRoster() {
     const max = maxHealth(m);
     const doseShare = Math.min(1, m.dose / DOSE_LIMIT);
     const level = m.health < 30 ? "crit" : m.health < 60 ? "warn" : "";
-    const tip = `${m.name}: health ${Math.ceil(m.health)} / ${Math.round(max)} · dose ${Math.round(doseShare * 100)}% of the career limit`;
+    const bed = m.bed !== null && m.bed !== undefined ? state.tiles[m.bed] : null;
+    const cold = bed && bed.building && bed.building.tempK < COLD_K;
+    const tip = `${m.name}: health ${Math.ceil(m.health)} / ${Math.round(max)} · dose ${Math.round(doseShare * 100)}% of the career limit` +
+      (bed && bed.building ? ` · sleeps in a Habitat at ${fmtC(bed.building.tempK)}` : "");
     return `<div class="crew-row" title="${tip}">
-      <span class="cname">${m.arrival === 0 ? "⭐ " : ""}${m.name}</span>
+      <span class="cname">${cold ? "🥶 " : m.arrival === 0 ? "⭐ " : ""}${m.name}</span>
       <div class="bar"><div class="fill ${level}" style="width:${m.health}%"></div><div class="lost" style="width:${100 - max}%"></div></div>
       <span class="cval">${Math.ceil(m.health)}</span>
     </div>`;
@@ -210,7 +215,7 @@ function renderPanel() {
       <div class="sub">${terrain}</div>
       <div id="live"></div>
       <div class="kv"><span>Consumes</span><span>${fmtList(b.consumes, true)}</span></div>
-      ${b.heat ? `<div class="kv"><span>Heating</span><span>${ICON.power} up to ${b.heat}/s, most at night</span></div>` : ""}
+      ${b.heat ? `<div class="kv"><span>Heating</span><span>${ICON.power} up to ${b.heat}/s, most before dawn</span></div>` : ""}
       <div class="kv"><span>Produces</span><span>${makesText(b)}</span></div>
       ${priorityControl(t)}
       <div class="why">${b.why}</div>
@@ -271,7 +276,7 @@ function buildOption(key, t) {
         <button data-act="build" data-key="${key}" ${blocker ? "disabled" : ""}>Build</button>
       </div>
       <div class="ocost">Cost: ${fmtList(b.cost)} ${blocker ? `<span class="blk">· ${blocker}</span>` : ""}</div>
-      <div class="ocost">Uses: ${fmtList(b.consumes, true)}${b.heat ? ` + heating up to ${ICON.power} ${b.heat}/s at night` : ""} → Makes: ${makesText(b)}${b.solar ? " (× daylight)" : ""}</div>
+      <div class="ocost">Uses: ${fmtList(b.consumes, true)}${b.heat ? ` + heating up to ${ICON.power} ${b.heat}/s, most before dawn` : ""} → Makes: ${makesText(b)}${b.solar ? " (× daylight)" : ""}</div>
       ${bonus ? `<div class="bonus">★ ${TERRAIN[t.terrain].name} bonus: ×${bonus} output</div>` : ""}
       ${b.needsHabitat ? `<div class="ocost">Must touch a Habitat</div>` : ""}
       ${openWhy === key ? `<div class="why">${b.why}</div>` : ""}
@@ -298,10 +303,22 @@ function updatePanelLive() {
         ? `🧹 being cleaned · ${Math.ceil(t.building.cleaning)}s`
         : `${Math.round(t.building.dust * 100)}% · output −${Math.round(t.building.dust * 100)}%`}</span></div>`
       : "";
+    let temp = "";
+    if (t.building.tempK !== undefined) {
+      const T = t.building.tempK;
+      const trend = T >= SETPOINT_K - 0.05 ? "holding"
+        : (t.building.heatDelivered || 0) >= heatingDemand(t) - 1e-6 ? "rewarming" : "cooling";
+      const warn = t.building.type === "greenhouse" && T < FROST_K ? " · ❄️ frost!"
+        : T < COLD_K ? (t.building.type === "lab" ? " · too cold to work" : " · too cold") : "";
+      temp = `<div class="kv"><span>Temperature</span><span>🌡️ ${fmtC(T)} · ${trend}${warn}</span></div>`;
+      if (t.building.crop !== undefined) {
+        temp += `<div class="kv"><span>Crop</span><span>${Math.round(t.building.crop * 100)}%${t.building.crop < 1 ? (T >= FROST_K ? " · regrowing" : " · freezing") : ""}</span></div>`;
+      }
+    }
     const drawing = powerDemand(t) > 0 ? `${ICON.power} ${(powerDemand(t) * lv).toFixed(1)}/s` : "";
     live.innerHTML = `<div class="kv"><span>Status</span><span>${status}</span></div>` +
       (actual ? `<div class="kv"><span>Output now</span><span>${actual}</span></div>` : "") +
-      (drawing ? `<div class="kv"><span>Drawing now</span><span>${drawing}${b.heat ? " incl. heating" : ""}</span></div>` : "") + dust;
+      (drawing ? `<div class="kv"><span>Drawing now</span><span>${drawing}${b.heat ? " incl. heating" : ""}</span></div>` : "") + temp + dust;
     const rbtn = document.querySelector('#panel button[data-act="reinforce"]');
     if (rbtn) rbtn.disabled = !!reinforceBlocker(t);
     const cbtn = document.querySelector('#panel button[data-act="clean"]');

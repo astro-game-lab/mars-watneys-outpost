@@ -30,7 +30,7 @@ Plain browser JavaScript. Classic `<script>` tags in `index.html` share **one gl
 | `js/hexmap.js` | Odd-r offset hex grid, terrain from a seed or a handmade map, neighbours, connectivity |
 | `js/state.js` | The single `state` object, built by `createState(mission, seed, difficulty)`. Build, reinforce, demolish and shortage-priority rules, each paired with a `*Blocker()` function that returns the reason it's refused, or `null`. `emit()` and `emitLine()`, which queue messages on `state.outbox`. The crew list (`addCrewMember()`, `removeCrewMember()`, `maxHealth()`): `state.crew` is its length and changes only through those two. |
 | `js/events.js` | Random and scripted events, and timed effects |
-| `js/simulation.js` | `computeFlows()` (shortage resolution by priority tier, through `allocate()`), `refreshFlows()`, `updateGame()` (one fixed `SIM_STEP`: integrate, radiation, health, crew), objectives, and `checkEnd()`, which sets `state.over` and `state.endCause` |
+| `js/simulation.js` | `computeFlows()` (shortage resolution by priority tier, through `allocate()`), `refreshFlows()`, building temperature (`outsideTempK()`, `heatingDemand()`, `updateTemperatures()`, `assignBeds()`), `updateGame()` (one fixed `SIM_STEP`: integrate, radiation, health, crew), objectives, and `checkEnd()`, which sets `state.over` and `state.endCause` |
 | `js/render.js` | Canvas 2-D: sprite loading, hex layout and pixel picking (`view`, `tileCenter`, `tileFromPixel`). The terrain, sprites and outlines are cached in an off-screen static layer, keyed by `staticSignature()`. The crew figures are cosmetic only. |
 | `js/ui.js` | HUD and objectives, build panel, message log. `drainOutbox()` shows the simulation's queued messages. |
 | `js/screens.js` | Intro, mission select and briefing, end screen and debrief, saved progress in `localStorage`. The simulation doesn't run while one is open. |
@@ -63,7 +63,7 @@ python3 -m http.server 8000    # then open http://localhost:8000/
 npm test                       # Node 22 or later; nothing to install
 ```
 
-The suite takes about 40 seconds, most of it the balance tests, which play every mission at every difficulty. For a quick run, pick files: `node --test tests/shortages.test.mjs`. CI runs the full suite on every pull request, and `deploy.yml` runs it before publishing, so a failing test blocks a deploy. There's no lint.
+The suite takes about a minute, most of it the balance tests, which play every mission at every difficulty. For a quick run, pick files: `node --test tests/shortages.test.mjs`. CI runs the full suite on every pull request, and `deploy.yml` runs it before publishing, so a failing test blocks a deploy. There's no lint.
 
 Tests don't cover the UI, so also verify changes by playing through in a browser. The Playwright MCP server works well for this. Check the browser console for errors, because a broken global or a script-order mistake fails silently until it's called. `python3 -m http.server` lets the browser cache scripts, so after editing JS, hard-reload or use a no-cache server, or you'll test stale code.
 

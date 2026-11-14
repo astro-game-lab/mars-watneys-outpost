@@ -69,12 +69,16 @@ they relied on has moved.
   it shows within a mission. Clean an array by hand (10 s offline) or let a
   dust devil do it. Solar-only builds now lose ground over a mission. See
   `docs/PHYSICS.md` § What is modelled and § Gameplay departures.
-- Heating. Habitats, Greenhouses and Science Labs draw extra power to stay
-  warm: all of it at night, half in the morning and evening, a fifth at
-  midday. The clock box shows the current heating level. Nights now cost
-  more power, so in *First Night* one extra Solar Array and one Battery Bank
-  are no longer enough: it takes a second bank or a third array. See
-  `docs/PHYSICS.md` § What is modelled.
+- Heating and building temperature. Habitats, Greenhouses and Science Labs
+  have a temperature, held at 20 °C by a thermostat that heats against the
+  outside air: a smooth daily curve between −89 °C before dawn and −31 °C in
+  the afternoon, the Viking 1 range. A building short of power cools, and
+  rewarming it costs power. A frozen Greenhouse loses its crop and regrows it
+  over a sol, a cold Lab stops, and crew sleeping in a cold Habitat get hurt.
+  The clock box shows the outside temperature, and building panels show their
+  temperature. Nights cost more power, so in *First Night* one extra Solar
+  Array and one Battery Bank are no longer enough. See `docs/PHYSICS.md`
+  § What is modelled.
 - Power and water shortages are shared out by priority instead of evenly:
   critical buildings first, then normal, then low. Habitats and Water
   Extractors default to critical, Greenhouses and Radiation Shields to normal,

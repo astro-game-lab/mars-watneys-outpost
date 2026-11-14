@@ -23,14 +23,76 @@ function outputMultiplier(t) {
   }
   if (b.key === "water" && hasEffect("failure")) m *= 0.5;
   if (b.key === "lab") m *= 1 + CREW_SCIENCE_BONUS * (state.crew - 1);
+  if (b.key === "lab" && t.building.tempK < COLD_K) m = 0;    // too cold to work
+  if (t.building.crop !== undefined) m *= t.building.crop;    // frost-damaged crop
   return m;
 }
 
-// Power a building draws at full operation right now: its base load plus
-// heating, which depends on the time of day.
-function powerDemand(t) {
+// ---------- Temperature ----------
+
+// The outside temperature at a time of day (0..1 of a sol): a smooth curve,
+// lowest just before dawn and highest in the early afternoon.
+function outsideTempK(t) {
+  const { min, max, minAt, maxAt } = OUTSIDE_K;
+  const warming = maxAt - minAt;                       // fraction of the sol spent warming
+  const since = (t - minAt + 1) % 1;                   // time since the low
+  const rise = since < warming ? since / warming : 1 - (since - warming) / (1 - warming);
+  return min + (max - min) * (1 - Math.cos(Math.PI * rise)) / 2;
+}
+
+// A heated building's heat loss per kelvin of difference from outside.
+function heatLoss(b) {
+  return b.heat / (HEATER_HEADROOM * (SETPOINT_K - OUTSIDE_K.min));
+}
+
+// What a building's thermostat asks its heater for this step: whatever holds
+// the setpoint against the current loss, plus enough to climb back to it if
+// the building has cooled, up to the heater's maximum.
+function heatingDemand(t, outside = outsideTempK(solTime())) {
   const b = BUILDINGS[t.building.type];
-  return (b.consumes.power || 0) + (b.heat || 0) * thermalLoad(solTime());
+  if (!b.heat) return 0;
+  const loss = heatLoss(b);
+  const T = t.building.tempK;
+  const lost = loss * (T - outside);
+  const catchUp = loss * THERMAL_TAU * (SETPOINT_K - T) / SIM_STEP;
+  return Math.max(0, Math.min(b.heat, lost + catchUp));
+}
+
+// Power a building draws at full operation right now: its base load plus heating.
+function powerDemand(t, outside) {
+  return (BUILDINGS[t.building.type].consumes.power || 0) + heatingDemand(t, outside);
+}
+
+// Each heated building warms with the heat it got this step and cools toward
+// the outside temperature:  dT/dt = (heat delivered ÷ loss − (T − T_outside)) ÷ THERMAL_TAU.
+// Greenhouse crops take frost damage below FROST_K, and regrow while warm.
+function updateTemperatures(dt) {
+  const outside = outsideTempK(solTime());
+  for (const t of buildings()) {
+    const bld = t.building, b = BUILDINGS[bld.type];
+    if (!b.heat) continue;
+    const delivered = bld.heatDelivered || 0;
+    bld.tempK += (dt * (delivered / heatLoss(b) - (bld.tempK - outside))) / THERMAL_TAU;
+    bld.tempK = Math.min(SETPOINT_K, bld.tempK);
+    if (bld.crop !== undefined) {
+      if (bld.tempK < FROST_K) bld.crop = Math.max(0, bld.crop - CROP_FROST_RATE * dt);
+      else bld.crop = Math.min(1, bld.crop + dt / (CROP_REGROW_SOLS * SOL_SECONDS));
+    }
+  }
+}
+
+// Which Habitat each crew member sleeps in: the warmest working Habitats fill
+// first, two to a Habitat; ties go to tile order. Anyone without a bed shares
+// the warmest. Returns a Map from member to tile.
+function assignBeds() {
+  const habitats = buildings().filter((t) => t.building.type === "habitat" && t.building.disabled <= 0)
+    .sort((a, b) => b.building.tempK - a.building.tempK);   // stable: ties keep tile order
+  const beds = [];
+  for (const t of habitats) for (let i = 0; i < BUILDINGS.habitat.crew; i++) beds.push(t);
+  const fallback = habitats[0] || buildings().find((t) => t.building.type === "habitat");
+  const assigned = new Map();
+  state.crewMembers.forEach((m, i) => { if (beds[i] || fallback) assigned.set(m, beds[i] || fallback); });
+  return assigned;
 }
 
 // Dust settles on Solar Arrays, faster in a storm. An array being cleaned
@@ -86,6 +148,11 @@ function computeFlows() {
   const add = (obj, k, v) => { obj[k] = (obj[k] || 0) + v; };
   const running = (t) => t.building.disabled <= 0 && t.building.priority !== "off";
 
+  // Each building's heating and power demand, worked out once for this step.
+  const outside = outsideTempK(solTime());
+  const heatingOf = new Map(list.map((t) => [t, heatingDemand(t, outside)]));
+  const demandOf = (t) => (BUILDINGS[t.building.type].consumes.power || 0) + heatingOf.get(t);
+
   // Power: producers have no inputs, and nothing throttles them.
   let pProd = 0;
   const pDemand = {};
@@ -93,15 +160,14 @@ function computeFlows() {
     const b = BUILDINGS[t.building.type];
     if (t.building.disabled > 0) continue;
     pProd += (b.produces.power || 0) * outputMultiplier(t);
-    const demand = powerDemand(t);
+    const demand = demandOf(t);
     if (running(t) && demand > 0) add(pDemand, t.building.priority, demand);
   }
   const pTotal = sumValues(pDemand);
   const powerShare = state.resources.power <= 0.01 && pTotal > pProd ? allocate(pProd, pDemand) : fullShare();
-  const powerLevel = (t) => {
-    if (!running(t)) return 0;
-    return powerDemand(t) > 0 ? powerShare[t.building.priority] : 1;
-  };
+  const powerLevelOf = new Map(list.map((t) => [t,
+    !running(t) ? 0 : demandOf(t) > 0 ? powerShare[t.building.priority] : 1]));
+  const powerLevel = (t) => powerLevelOf.get(t);
 
   // Water: extractors depend on power, and buildings want water only as fast
   // as their power lets them run. The crew drinks first.
@@ -130,7 +196,12 @@ function computeFlows() {
     t.building.level = lv;
     for (const [k, v] of Object.entries(b.produces)) add(prod, k, v * outputMultiplier(t) * (k === "power" ? (t.building.disabled > 0 ? 0 : 1) : lv));
     for (const [k, v] of Object.entries(b.consumes)) if (k !== "power") add(cons, k, v * lv);
-    if (lv > 0) add(cons, "power", powerDemand(t) * lv);
+    if (lv > 0) add(cons, "power", (b.consumes.power || 0) * lv);
+    // The heater runs on power alone, so it gets the building's power share
+    // even if a water shortage has slowed the rest of the building.
+    const heat = heatingOf.get(t) * powerLevel(t);
+    t.building.heatDelivered = heat;
+    if (heat > 0) add(cons, "power", heat);
     if (t.building.reinforced) shielding += REINFORCE.radiation; // passive, works even when damaged or off
     if (t.building.disabled > 0) continue;
     crewCapacity += b.crew || 0;
@@ -187,6 +258,8 @@ function updateGame() {
 
   const flows = refreshFlows();
 
+  updateTemperatures(dt);
+
   const res = state.resources;
   for (const r of RESOURCES) {
     res[r.key] = Math.max(0, res[r.key] + flows.rates[r.key] * dt);
@@ -215,11 +288,23 @@ function updateGame() {
   // Everyone shares the air and the stores, so harm hits every member alike.
   // Dose builds up for everyone and never heals; it lowers each member's
   // maximum health, and recovery stops there.
+  // A cold Habitat hurts only the crew sleeping in it.
+  const beds = assignBeds();
+  let worstCold = 0;
   for (const m of state.crewMembers) {
     m.dose += (state.radiation / 100) * dt;
-    if (dmg > 0) m.health -= dmg * dt;
+    const bed = beds.get(m);
+    m.bed = bed ? state.tiles.indexOf(bed) : null;
+    const cold = bed && bed.building.tempK < COLD_K ? COLD_HARM * (COLD_K - bed.building.tempK) : 0;
+    worstCold = Math.max(worstCold, cold);
+    const harmed = dmg + cold;
+    if (harmed > 0) m.health -= harmed * dt;
     else m.health += 0.5 * dt;
     m.health = Math.min(m.health, maxHealth(m));
+  }
+  if (worstCold > 0) {
+    stats.damage.cold += worstCold * dt;
+    if (stats.firstEmpty.cold === undefined) stats.firstEmpty.cold = state.time;
   }
   updateCareerLimits();
 
@@ -328,5 +413,9 @@ function checkWarnings() {
   if (resourceStatus("oxygen") !== "good") emitLine("lowOxygen");
   if (state.radiation > 50) emitLine("highRadiation");
   if (lowestHealth() < 40) emitLine("lowHealth");
+  const heated = buildings().filter((t) => t.building.tempK !== undefined);
+  if (heated.some((t) => t.building.type === "greenhouse" && t.building.tempK < FROST_K + 3)) emitLine("frost", 60);
+  if (heated.some((t) => t.building.type === "habitat" && t.building.tempK < COLD_K &&
+      state.crewMembers.some((m) => m.bed === state.tiles.indexOf(t)))) emitLine("cold", 60);
   if (state.crewMembers.some((m) => m.dose >= DOSE_WARNING * DOSE_LIMIT)) emitLine("highDose", 120);
 }

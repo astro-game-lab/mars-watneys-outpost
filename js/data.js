@@ -8,6 +8,24 @@ const POWER_CAPACITY = 200;     // base battery size (Battery Banks add more)
 const BASE_RADIATION = 35;      // % exposure with no protection
 const FLARE_RADIATION = 40;     // % exposure added during a solar flare
 
+// Temperatures, in kelvin; the UI shows °C. Heated buildings (those with
+// `heat`) hold SETPOINT_K while their heater keeps up. Each loses heat in
+// proportion to the difference from the outside temperature, which follows a
+// smooth daily curve between the Viking 1 extremes: its low just before dawn,
+// its high in the early afternoon. A heater can deliver HEATER_HEADROOM times
+// the loss on the coldest night, which sets each building's heat loss per
+// kelvin. THERMAL_TAU sets how fast a building cools with no heat at all: an
+// unpowered building at night reaches FROST_K in about two minutes.
+const SETPOINT_K = 293;            // 20 °C
+const COLD_K = 283;                // 10 °C: crew in a colder Habitat get hurt, and Labs stop
+const FROST_K = 273;               // 0 °C: Greenhouse crops take frost damage
+const OUTSIDE_K = { min: 184, max: 242, minAt: 0.18, maxAt: 0.58 };   // sol fractions
+const HEATER_HEADROOM = 1.25;
+const THERMAL_TAU = 600;           // game seconds
+const COLD_HARM = 0.1;             // health per second per kelvin below COLD_K
+const CROP_FROST_RATE = 0.02;      // crop lost per second below FROST_K: 50 s of frost kills it
+const CROP_REGROW_SOLS = 1;        // a dead crop regrows in this long, while warm
+
 // Dust on Solar Arrays. `dust` is the share of an array's output lost, from 0
 // to DUST_MAX. It settles faster during a dust storm. Cleaning by hand takes an
 // array offline for CLEAN_SECONDS; a dust devil cleans each array with chance
@@ -110,8 +128,9 @@ const SUPPLY_TIERS = ["critical", "normal", "low"];   // served in this order
 
 // Buildings. produces/consumes are per second at 100% efficiency. `priority`
 // is the default shortage priority; `alwaysOn` buildings can't be switched off.
-// `heat` is the extra power a pressurised building draws to stay warm, at
-// full heating; how much of it is drawn depends on the time of day (thermalLoad).
+// `heat` is the most power a heated building's heater can draw. How much it
+// actually draws comes from the building's temperature and the weather
+// outside (heatingDemand() in js/simulation.js).
 const BUILDINGS = {
   habitat: {
     name: "Habitat", icon: "🏠", sprite: "habitat",
@@ -139,7 +158,7 @@ const BUILDINGS = {
     produces: { food: 2, oxygen: 0.3 },
     heat: 1,
     priority: "normal",
-    why: "Growing food locally reduces how much must be shipped from Earth, but plants need water, energy, warmth and light. As a bonus, photosynthesis adds a little oxygen.",
+    why: "Growing food locally reduces how much must be shipped from Earth, but plants need water, energy, warmth and light. Let a greenhouse freeze and the frost kills the leaves: the plants grow back, but it takes time. As a bonus, photosynthesis adds a little oxygen.",
   },
   moxie: {
     name: "Oxygen Plant", icon: "⚗️", sprite: "moxie",
@@ -220,14 +239,6 @@ function daylight(t) {
   if (t < 0.65) return 1;                   // midday
   return 0.3;                               // evening
 }
-// Share of each building's `heat` drawn by time of day (0..1 of a sol). The
-// phases match daylight(): heating works hardest at night.
-function thermalLoad(t) {
-  if (t < 0.2 || t >= 0.85) return 1;       // night
-  if (t < 0.35) return 0.5;                 // morning
-  if (t < 0.65) return 0.2;                 // midday
-  return 0.5;                               // evening
-}
 function dayPhase(t) {
   if (t < 0.2 || t >= 0.85) return "🌑 Night";
   if (t < 0.35) return "🌅 Morning";
@@ -245,6 +256,8 @@ const WATNEY_LINES = {
   lowOxygen: "Oxygen is dropping. I kind of need that.",
   highRadiation: "My dosimeter is clicking a lot. More shielding would be nice.",
   lowHealth: "I don't feel so good...",
+  frost: "The greenhouse is freezing. Potatoes don't do frost. It needs heat, now.",
+  cold: "It's cold enough in the Habitat to see my breath. It needs heat.",
   highDose: "Somebody's career radiation dose is getting up there. More shielding, please. It doesn't wash off.",
   night: "Sun's going down. Hope the batteries are charged.",
 };
