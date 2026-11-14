@@ -6,6 +6,7 @@
 <linearGradient id="r-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7D36B"></stop><stop offset="1" stop-color="#D9A62A"></stop></linearGradient>
 <radialGradient id="r-shadow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000000" stop-opacity=".55"></stop><stop offset=".6" stop-color="#000000" stop-opacity=".3"></stop><stop offset="1" stop-color="#000000" stop-opacity="0"></stop></radialGradient>
 </defs>
+<g transform="translate(0,-8)">
 <ellipse cx="60" cy="96" rx="58" ry="18" fill="url(#r-shadow)"></ellipse>
 <!-- base plate -->
 <polygon points="60,58 98,77 60,96 22,77" fill="#F4F6F9"></polygon>
@@ -43,4 +44,5 @@
 <!-- status lights -->
 <circle cx="56" cy="64" r="2" fill="#9FF3E8"></circle>
 <circle cx="60" cy="62" r="1.6" fill="#F28C28"></circle>
+</g>
 </svg>
