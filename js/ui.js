@@ -202,6 +202,8 @@ function renderPanel() {
         ${openWhy === "reinforce" ? `<div class="why">${REINFORCE.why}</div>` : ""}
       </div>
       <div class="actions">
+        ${b.solar ? `<button data-act="clean" ${cleanBlocker(t) ? "disabled" : ""}
+          title="${cleanBlocker(t) || `Offline for ${CLEAN_SECONDS}s, then the dust is gone`}">🧹 Clean panels</button>` : ""}
         <button data-act="demolish" ${demolishBlocker(t) ? "disabled" : ""}
           title="${demolishBlocker(t) || "Refunds 50% of the cost"}">Demolish (50% refund)</button>
       </div>`;
@@ -260,18 +262,30 @@ function updatePanelLive() {
     if (!live) return;
     const lv = t.building.level ?? 1;
     const status = t.building.disabled > 0 ? `🔧 Damaged — repairs ${Math.ceil(t.building.disabled)}s`
+      : t.building.cleaning > 0 ? `🧹 Being cleaned — back in ${Math.ceil(t.building.cleaning)}s`
       : t.building.priority === "off" ? "💤 Switched off"
       : lv < 0.99 ? `⚡ Short of inputs — running at ${Math.round(lv * 100)}%` : "✅ Running";
     const b = BUILDINGS[t.building.type];
     const mult = outputMultiplier(t);
     const actual = Object.entries(b.produces)
       .map(([k, v]) => `${ICON[k]} ${(v * mult * (t.building.disabled > 0 ? 0 : k === "power" ? 1 : lv)).toFixed(1)}/s`).join("  ");
+    const dust = b.solar
+      ? `<div class="kv"><span>Dust on panels</span><span>${t.building.cleaning > 0
+        ? `🧹 being cleaned · ${Math.ceil(t.building.cleaning)}s`
+        : `${Math.round(t.building.dust * 100)}% · output −${Math.round(t.building.dust * 100)}%`}</span></div>`
+      : "";
     const drawing = powerDemand(t) > 0 ? `${ICON.power} ${(powerDemand(t) * lv).toFixed(1)}/s` : "";
     live.innerHTML = `<div class="kv"><span>Status</span><span>${status}</span></div>` +
       (actual ? `<div class="kv"><span>Output now</span><span>${actual}</span></div>` : "") +
-      (drawing ? `<div class="kv"><span>Drawing now</span><span>${drawing}${b.heat ? " incl. heating" : ""}</span></div>` : "");
+      (drawing ? `<div class="kv"><span>Drawing now</span><span>${drawing}${b.heat ? " incl. heating" : ""}</span></div>` : "") + dust;
     const rbtn = document.querySelector('#panel button[data-act="reinforce"]');
     if (rbtn) rbtn.disabled = !!reinforceBlocker(t);
+    const cbtn = document.querySelector('#panel button[data-act="clean"]');
+    if (cbtn) {
+      const blocker = cleanBlocker(t);
+      cbtn.disabled = !!blocker;
+      cbtn.title = blocker || `Offline for ${CLEAN_SECONDS}s, then the dust is gone`;
+    }
   } else {
     // Update affordability of build options without losing the open "Why?"
     for (const btn of document.querySelectorAll('#panel button[data-act="build"]')) {
@@ -292,6 +306,10 @@ $("panel").addEventListener("click", (e) => {
     renderPanel();
   } else if (act === "reinforce" && reinforce(t)) {
     say(`Shovelled regolith over the ${BUILDINGS[t.building.type].name}. Mars dirt: now with radiation protection.`, "good");
+    renderPanel();
+  } else if (act === "clean" && clean(t)) {
+    say("Out with the brush. This array is offline until I've finished.", "good");
+    refreshFlows();
     renderPanel();
   } else if (act === "priority" && setPriority(t, btn.dataset.key)) {
     refreshFlows();   // show the effect straight away, even while paused

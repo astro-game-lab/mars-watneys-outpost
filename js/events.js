@@ -21,6 +21,18 @@ const EVENTS = {
     addEffect("failure", "🔧 Pump failure: water −50%", state.events.durations.failure);
     emit("Water pump is acting up. Output's down until I fix it.", "bad");
   },
+  devil() {
+    let cleaned = 0;
+    for (const t of buildings()) {
+      if (!BUILDINGS[t.building.type].solar) continue;
+      if (rand() < DEVIL.chance) {
+        t.building.dust *= DEVIL.keep;
+        cleaned++;
+      }
+    }
+    if (cleaned) emit(`A dust devil just swept across ${cleaned === 1 ? "a Solar Array" : `${cleaned} Solar Arrays`}. Free cleaning!`, "good");
+    else emit("A dust devil wandered past and missed the panels entirely.");
+  },
   supply() {
     const drop = state.events.supply;
     for (const [k, v] of Object.entries(drop)) state.resources[k] += v;

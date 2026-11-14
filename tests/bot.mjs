@@ -8,6 +8,7 @@
 //   { build: "lab", at: [5, 3] }             exactly this tile
 //   { reinforce: "habitat" }                 the first unreinforced building of a type
 //   { priority: "lab", to: "off" }           every building of a type, as built so far
+//   { clean: "solar" }                       clean every array that can be cleaned now
 //   { wait: 1200 }                           do nothing until this tick
 //
 // A move may also carry `after: tick` to hold it back until that tick.
@@ -62,6 +63,10 @@ function tryMove(sim, move) {
     if (!sim.canAfford(move.build)) return false;
     const t = chooseTile(sim, move);
     return !!t && sim.build(move.build, t);
+  }
+  if (move.clean) {
+    for (const t of state.tiles) if (t.building && t.building.type === move.clean) sim.clean(t);
+    return true;
   }
   if (move.priority) {
     const list = state.tiles.filter((t) => t.building && t.building.type === move.priority);

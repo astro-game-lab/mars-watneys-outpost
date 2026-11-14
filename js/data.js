@@ -8,6 +8,16 @@ const POWER_CAPACITY = 200;     // base battery size (Battery Banks add more)
 const BASE_RADIATION = 35;      // % exposure with no protection
 const FLARE_RADIATION = 40;     // % exposure added during a solar flare
 
+// Dust on Solar Arrays. `dust` is the share of an array's output lost, from 0
+// to DUST_MAX. It settles faster during a dust storm. Cleaning by hand takes an
+// array offline for CLEAN_SECONDS; a dust devil cleans each array with chance
+// DEVIL.chance, leaving DEVIL.keep of its dust behind.
+const DUST_PER_SOL = 0.04;      // in clear weather; real arrays lose ~0.2% a sol
+const DUST_STORM_FACTOR = 5;
+const DUST_MAX = 0.6;
+const CLEAN_SECONDS = 10;
+const DEVIL = { chance: 0.6, keep: 0.2 };
+
 // Fixed simulation step, in game seconds. The frame loop accumulates game time
 // and runs whole steps, so a mission plays out the same at any frame rate.
 const SIM_STEP = 0.05;
@@ -28,7 +38,7 @@ const DEFAULT_START = {
 const EVENT_DEFAULTS = {
   first: 45,
   interval: [40, 70],
-  weights: { dust: 3, flare: 2, meteor: 2, failure: 2, supply: 2 },
+  weights: { dust: 3, flare: 2, meteor: 2, failure: 2, supply: 2, devil: 1 },
   durations: { dust: 30, flare: 20, meteor: 30, failure: 25 },
   supply: { materials: 50, credits: 100 },
   scripted: [],                 // [{ sol, at: fraction of the sol, kind }]
@@ -136,7 +146,7 @@ const BUILDINGS = {
     consumes: {},
     produces: { power: 6 },
     solar: true,
-    why: "Solar panels give clean, renewable power, but only when the Sun is up. Mars gets less than half of Earth's sunlight, nights are long and dust storms can block the Sun for days. An outpost must plan for that.",
+    why: "Solar panels give clean, renewable power, but only when the Sun is up. Mars gets less than half of Earth's sunlight, nights are long and dust storms can block the Sun for days. Dust also settles on the panels and slowly smothers them: it ended NASA's InSight lander in 2022. Now and then a gust or a dust devil sweeps them clean, as happened to the Spirit rover more than once.",
   },
   nuclear: {
     name: "Nuclear Generator", icon: "☢️", sprite: "nuclear",

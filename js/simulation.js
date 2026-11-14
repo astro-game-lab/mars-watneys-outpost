@@ -17,7 +17,10 @@ function crewNeed(k) {
 function outputMultiplier(t) {
   const b = BUILDINGS[t.building.type];
   let m = (b.bonus && b.bonus[t.terrain]) || 1;
-  if (b.solar) m *= daylight(solTime()) * (hasEffect("dust") ? 0.3 : 1);
+  if (b.solar) {
+    m *= daylight(solTime()) * (hasEffect("dust") ? 0.3 : 1) * (1 - t.building.dust);
+    if (t.building.cleaning > 0) m = 0;   // offline while it's cleaned
+  }
   if (b.key === "water" && hasEffect("failure")) m *= 0.5;
   if (b.key === "lab") m *= 1 + CREW_SCIENCE_BONUS * (state.crew - 1);
   return m;
@@ -28,6 +31,26 @@ function outputMultiplier(t) {
 function powerDemand(t) {
   const b = BUILDINGS[t.building.type];
   return (b.consumes.power || 0) + (b.heat || 0) * thermalLoad(solTime());
+}
+
+// Dust settles on Solar Arrays, faster in a storm. An array being cleaned
+// collects none, and comes back with none.
+function updateDust(dt) {
+  const settle = (DUST_PER_SOL / SOL_SECONDS) * (hasEffect("dust") ? DUST_STORM_FACTOR : 1) * dt;
+  for (const t of buildings()) {
+    const b = t.building;
+    if (!BUILDINGS[b.type].solar) continue;
+    if (b.cleaning > 0) {
+      b.cleaning = Math.max(0, b.cleaning - dt);
+      if (b.cleaning < 1e-9) {
+        b.cleaning = 0;
+        b.dust = 0;
+        emit("Solar Array's clean and back online. Shiny.", "good");
+      }
+      continue;
+    }
+    b.dust = Math.min(DUST_MAX, b.dust + settle);
+  }
 }
 
 // Share `supply` out tier by tier (SUPPLY_TIERS: critical, normal, low).
@@ -160,6 +183,7 @@ function updateGame() {
   if (prevPhase !== dayPhase(solTime()) && dayPhase(solTime()) === "🌑 Night") emitLine("night");
 
   updateEvents(dt);
+  updateDust(dt);
 
   const flows = refreshFlows();
 

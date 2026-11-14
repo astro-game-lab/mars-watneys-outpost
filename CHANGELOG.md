@@ -44,6 +44,8 @@ they relied on has moved.
 - The Oxygen Plant, a tenth building. It splits the carbon dioxide in the air
   into oxygen, using power and no water, like NASA's MOXIE on Perseverance.
   It's available wherever a mission allows every building.
+- Dust devils, a sixth kind of event. One sweeps most of the dust off some
+  of the Solar Arrays. They're in the default mix and in *Dust Season*.
 
 ### Changed
 - The simulation no longer touches the page. It queues messages on
@@ -52,6 +54,11 @@ they relied on has moved.
   to `js/render.js`. No change for players. See `docs/PHYSICS.md` § Conventions.
 
 ### Physics
+- Dust settles on Solar Arrays and cuts their output: 4% a sol, five times
+  faster in a dust storm, up to 60%. That's about 20 times the real rate, so
+  it shows within a mission. Clean an array by hand (10 s offline) or let a
+  dust devil do it. Solar-only builds now lose ground over a mission. See
+  `docs/PHYSICS.md` § What is modelled and § Gameplay departures.
 - Heating. Habitats, Greenhouses and Science Labs draw extra power to stay
   warm: all of it at night, half in the morning and evening, a fifth at
   midday. The clock box shows the current heating level. Nights now cost
@@ -71,8 +78,9 @@ they relied on has moved.
 - *Dust Season* now asks for 3 000 credits instead of 1 000, and its storms last
   90 s instead of 45 s, so they run into each other. Before, a solar-only
   build won on *Normal* and *Hard*, and the mission didn't teach its lesson.
-  Now the best solar-only build tested reaches about 79% of the target by the
-  deadline, and a build with a Nuclear Generator wins on Sol 3. See
+  Now, with heating as well, the best solar-only build tested reaches about a
+  quarter of the target by the deadline, and a build that puts up a Nuclear
+  Generator first wins on Sol 3. See
   `docs/PHYSICS.md` § Gameplay departures.
 - Water shortages now feed the crew first. Buildings share only the water left
   after the crew's needs, and shortage detection counts every crew member's

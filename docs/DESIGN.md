@@ -31,7 +31,7 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 
 | The game is honest about | The game deliberately simplifies |
 | --- | --- |
-| Solar depends on daylight and dust, and storage and nuclear power are the answers | Every quantity: rates are balance values, not hardware figures |
+| Solar depends on daylight and dust, dust builds up on the panels until something cleans it, and storage and nuclear power are the answers | Every quantity: rates are balance values, not hardware figures |
 | Water and materials come from the ground | A 120 s sol, crew every 2 sols, random resupply |
 | Shielding and regolith reduce exposure | Exposure is a 0–100 score, and its damage heals |
 | Habitats make oxygen from water and power, an Oxygen Plant makes it from the CO₂ in the air, and nights cost heating | Heating is a four-step curve with no insulation. No recycling, no seasons. |
@@ -59,6 +59,6 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 
 ## Scope
 
-- **In the prototype:** a six-mission campaign, three difficulty tiers, one map size, ten buildings, five events, and progress saved in the browser.
+- **In the prototype:** a six-mission campaign, three difficulty tiers, one map size, ten buildings, six events, and progress saved in the browser.
 - **Explicitly out of scope:** orbital logistics. That's the roadmap's *Mars Colony Logistics*.
 - **Deferred:** saving a mission in progress, settings, sound, touch, full keyboard play, Watney prompts at teachable moments, and input replays.

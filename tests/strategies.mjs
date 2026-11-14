@@ -39,11 +39,12 @@ export const STRATEGIES = {
   })(),
 
   "dust-season": {
-    // A Nuclear Generator keeps the Labs running through the storms.
-    win: [mine, { build: "greenhouse" }, water, { build: "nuclear" }, { build: "lab" }, { build: "lab" },
-      { build: "battery" }, { build: "lab" }, { build: "habitat" }, { build: "lab" }],
+    // A Nuclear Generator first, then a second, keeps the Labs running through
+    // the storms. Wins around Sol 3.1, nearly three sols before the deadline.
+    win: [mine, { build: "nuclear" }, { build: "lab" }, { build: "lab" }, { build: "greenhouse" }, water,
+      mine, { build: "nuclear" }, { build: "lab" }, { build: "lab" }, { build: "habitat" }, { build: "lab" }],
     // The briefing says solar alone won't do: a big solar build with batteries
-    // and as many Labs reaches only about three quarters of the target.
+    // and as many Labs reaches only about a quarter of the target.
     warned: {
       why: "solar power and batteries only, no Nuclear Generator",
       moves: [mine, { build: "greenhouse" }, water, { build: "solar" }, { build: "solar" }, { build: "battery" },

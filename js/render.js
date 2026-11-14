@@ -120,6 +120,28 @@ function spriteBitmap(type) {
   return entry;
 }
 
+// A dusty Solar Array: its sprite with a rust-coloured film, one cached
+// bitmap per 10% step of dust, so the static layer redraws rarely.
+const DUST_STEPS = 10;
+const dustCache = {};   // step -> { key, canvas }
+const dustStep = (b) => Math.min(DUST_STEPS, Math.floor((b.dust || 0) * DUST_STEPS));
+
+function dustyBitmap(sp, step) {
+  let entry = dustCache[step];
+  if (!entry || entry.key !== sp.key) {
+    const cv = document.createElement("canvas");
+    cv.width = sp.canvas.width;
+    cv.height = sp.canvas.height;
+    const c = cv.getContext("2d");
+    c.drawImage(sp.canvas, 0, 0);
+    c.globalCompositeOperation = "source-atop";   // tint only the sprite's own pixels
+    c.fillStyle = `rgba(176, 104, 58, ${Math.min(0.75, step * 0.11)})`;
+    c.fillRect(0, 0, cv.width, cv.height);
+    entry = dustCache[step] = { key: sp.key, canvas: cv };
+  }
+  return entry.canvas;
+}
+
 // Static part of a tile: terrain, outline, expansion hint, berm, sprite.
 function drawTileStatic(c, t) {
   const { x, y } = tileCenter(t);
@@ -155,7 +177,8 @@ function drawTileStatic(c, t) {
     const sp = spriteBitmap(t.building.type);
     if (sp) {
       c.globalAlpha = t.building.disabled > 0 || t.building.priority === "off" ? 0.45 : 1;
-      c.drawImage(sp.canvas, x - sp.w / 2, y - sp.h / 2, sp.w, sp.h);
+      const step = dustStep(t.building);
+      c.drawImage(step > 0 ? dustyBitmap(sp, step) : sp.canvas, x - sp.w / 2, y - sp.h / 2, sp.w, sp.h);
       c.globalAlpha = 1;
     }
   }
@@ -172,7 +195,7 @@ function staticSignature() {
   for (const t of state.tiles) {
     const b = t.building;
     sig += `${TERRAIN_CODE[t.terrain]}:`;
-    sig += b ? `${BUILDING_CODE[b.type]}${b.reinforced ? "r" : ""}${b.disabled > 0 ? "d" : ""}${b.priority === "off" ? "o" : ""},` : ".,";
+    sig += b ? `${BUILDING_CODE[b.type]}${b.reinforced ? "r" : ""}${b.disabled > 0 ? "d" : ""}${b.priority === "off" ? "o" : ""}${b.dust !== undefined ? `u${dustStep(b)}` : ""},` : ".,";
   }
   return sig;
 }
@@ -205,6 +228,7 @@ function drawTileDynamic(t) {
   if (!t.building) return;
   let mark = null, color = "rgba(180, 20, 20, 0.85)";
   if (t.building.disabled > 0) mark = "🔧";
+  else if (t.building.cleaning > 0) { mark = "🧹"; color = "rgba(46, 90, 122, 0.9)"; }
   else if (t.building.priority === "off") { mark = "OFF"; color = "rgba(60, 60, 60, 0.9)"; }
   else if (t.building.level !== undefined && t.building.level < 0.99) mark = "⚡";
   if (mark) {

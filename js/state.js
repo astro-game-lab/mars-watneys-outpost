@@ -82,7 +82,25 @@ function buildingUnlocked(type) {
 }
 
 function makeBuilding(type) {
-  return { type, disabled: 0, reinforced: false, priority: BUILDINGS[type].priority || null };
+  const b = { type, disabled: 0, reinforced: false, priority: BUILDINGS[type].priority || null };
+  if (BUILDINGS[type].solar) Object.assign(b, { dust: 0, cleaning: 0 });
+  return b;
+}
+
+// Reason a Solar Array can't be cleaned, or null if it can.
+function cleanBlocker(t) {
+  if (!t || !t.building) return "No building";
+  if (!BUILDINGS[t.building.type].solar) return "Only Solar Arrays collect dust";
+  if (t.building.cleaning > 0) return "Already being cleaned";
+  if (t.building.dust < 0.01) return "Nothing to clean";
+  return null;
+}
+
+// Take the array offline for CLEAN_SECONDS; its dust is gone when it's back.
+function clean(t) {
+  if (cleanBlocker(t)) return false;
+  t.building.cleaning = CLEAN_SECONDS;
+  return true;
 }
 
 // Reason a building can't be given a shortage priority, or null if it can.

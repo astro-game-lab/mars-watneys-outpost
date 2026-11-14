@@ -12,7 +12,7 @@ To run it locally, see [Development](#development) below.
 
 ## Status
 
-**A playable prototype.** A six-mission campaign on an 11 × 8 hex map, with ten buildings, crew arrivals, a day/night cycle and five kinds of event. Each mission teaches one piece of Mars science. Difficulty tiers unlock once you finish it.
+**A playable prototype.** A six-mission campaign on an 11 × 8 hex map, with ten buildings, crew arrivals, a day/night cycle and six kinds of event. Each mission teaches one piece of Mars science. Difficulty tiers unlock once you finish it.
 
 | | |
 | --- | --- |
@@ -21,8 +21,8 @@ To run it locally, see [Development](#development) below.
 | **The outpost** | Most missions start with two Habitats, a Science Lab and a Solar Array, on a handmade map or one generated from the mission's seed. Build outward from it onto regolith, rock, ice and high-resource tiles; impassable tiles block you. Every building has to connect to the outpost, Science Labs have to touch a Habitat, and you can't demolish a building if that would split the outpost in two or leave the crew without beds. You can bury any building under regolith for passive shielding. |
 | **Resources** | Water, food, oxygen, power, materials and credits. Each building produces and consumes them at fixed per-second rates. When power or water runs short, buildings are served by priority: *critical* first, then *normal*, then *low*. Life support is critical and science is low by default, and you can change any building's priority or switch it off (except Habitats). Power is capped by battery capacity. |
 | **The crew** | They drink, eat and breathe. NASA lands one more astronaut every two sols, but only if there's a free bed and supplies are healthy. Each extra crew member adds 25% to Science Lab output. |
-| **The environment** | A 120-second sol with night, morning, midday and evening. Solar output follows it, and so does heating: Habitats, Greenhouses and Labs draw extra power to stay warm, most of all at night. Background radiation sits at 35% and shielding brings it down. Crew health falls when water, food or oxygen runs out or radiation tops 50%, and recovers otherwise. |
-| **Events** | By default every 40–70 seconds: a dust storm (solar −70%), a solar flare (radiation +40%), a micrometeorite (one building out for 30 s), a pump failure (water −50%), or a NASA supply drop. Missions change the mix, and some script events for a set time. |
+| **The environment** | A 120-second sol with night, morning, midday and evening. Solar output follows it, less whatever dust has settled on each array: dust builds up every sol, faster in storms, until you clean the array or a dust devil does. Heating follows the day too: Habitats, Greenhouses and Labs draw extra power to stay warm, most of all at night. Background radiation sits at 35% and shielding brings it down. Crew health falls when water, food or oxygen runs out or radiation tops 50%, and recovers otherwise. |
+| **Events** | By default every 40–70 seconds: a dust storm (solar −70%), a solar flare (radiation +40%), a micrometeorite (one building out for 30 s), a pump failure (water −50%), a dust devil (sweeps dust off some Solar Arrays), or a NASA supply drop. Missions change the mix, and some script events for a set time. |
 | **Winning** | Each mission has its own objectives: reach a sol, earn credits, grow the crew, store water, or bring radiation down. Every mission is lost if crew health hits zero, and some also end on a blackout or a deadline. |
 
 What isn't here yet: saving a mission in progress, settings, sound, keyboard-only play, touch input, or an in-game tutorial beyond the intro, the briefings and each building's explanation. The code is plain browser JavaScript with no build step. The simulation has automated tests, which run in CI.
