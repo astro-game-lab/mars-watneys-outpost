@@ -221,7 +221,7 @@ function renderPanel() {
   if (t.building && t.building.construct > 0) {
     const b = BUILDINGS[t.building.type];
     panel.innerHTML = `
-      <div class="ptitle">🏗️ ${b.name}<button class="close" data-act="close">✕</button></div>
+      <div class="ptitle">🔨 ${b.name}<button class="close" data-act="close">✕</button></div>
       <div class="sub">${terrain} · under construction</div>
       <div id="live"></div>
       <div class="kv"><span>When finished</span><span>${makesText(b)}</span></div>
@@ -316,7 +316,7 @@ function updatePanelLive() {
     const lv = t.building.level ?? 1;
     const bld = t.building;
     if (bld.construct > 0) {
-      live.innerHTML = `<div class="kv"><span>Status</span><span>🏗️ ${Math.floor(100 * jobProgress(bld, "construct"))}% · ${workText(bld, "construct", "being built")}</span></div>` +
+      live.innerHTML = `<div class="kv"><span>Status</span><span>🔨 ${Math.floor(100 * jobProgress(bld, "construct"))}% · ${workText(bld, "construct", "being built")}</span></div>` +
         `<div class="kv"><span>Work left</span><span>${Math.ceil(bld.construct)}s of crew time</span></div>`;
       const cbtn = document.querySelector('#panel button[data-act="cancel"]');
       if (cbtn) cbtn.disabled = !!cancelBlocker(t);

@@ -48,7 +48,7 @@ they relied on has moved.
   maximum health lost to radiation dose hatched at its end. The debrief names
   who died or who went home.
 - Construction time and crew labour. Buildings take crew time to put up, drawn
-  faint with a 🏗️ status marker ringed by their progress, and a site can be
+  faint with a 🔨 status marker ringed by their progress, and a site can be
   cancelled for a full refund. The crew also repair micrometeorite damage, clean Solar Arrays and
   reinforce buildings, one job each at a time, repairs first. The HUD shows
   who's busy and how many jobs are waiting, and crew figures walk to their

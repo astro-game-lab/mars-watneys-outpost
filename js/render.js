@@ -235,7 +235,7 @@ function drawTileDynamic(t) {
   // moment it's queued.
   const b = t.building, blue = "rgba(46, 90, 122, 0.9)";
   let mark = null, color = "rgba(180, 20, 20, 0.85)", progress = null;
-  if (b.construct > 0) { mark = "🏗️"; color = "rgba(120, 72, 30, 0.9)"; progress = jobProgress(b, "construct"); }
+  if (b.construct > 0) { mark = "🔨"; color = "rgba(120, 72, 30, 0.9)"; progress = jobProgress(b, "construct"); }
   else if (b.disabled > 0) { mark = "🔧"; progress = jobProgress(b, "repair"); }
   else if (b.type === "greenhouse" && b.tempK < FROST_K) { mark = "❄️"; color = blue; }
   else if (b.tempK < COLD_K) { mark = "🥶"; color = blue; }
