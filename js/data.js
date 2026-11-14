@@ -303,7 +303,7 @@ const TIPS = [
       return (s.rates.power || 0) < -0.001 && timeLeft("power") < untilMorning;
     },
     text: () => "At this rate the batteries die before sunrise. More Battery Banks bank more of the day." +
-      priorityHint(state, "Or set the Lab to Low, so it's the first thing to lose power."),
+      priorityHint(state, "Or switch the Lab off until sunrise: at Low it's only cut once the batteries are already flat."),
   },
   {
     id: "iceNearby",

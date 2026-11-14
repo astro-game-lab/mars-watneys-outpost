@@ -60,6 +60,7 @@ they relied on has moved.
   select.
 - Dust devils, a sixth kind of event. One sweeps most of the dust off some
   of the Solar Arrays. They're in the default mix and in *Dust Season*.
+- A favicon: Mars with a Habitat dome on it, so the game's tab is easy to find.
 
 ### Changed
 - Tests that set the clock now run at the time they set. The first step used

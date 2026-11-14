@@ -69,7 +69,7 @@ Tests don't cover drawing, input or the frame loop, so also verify changes by pl
 
 Balance is checked by `tests/balance.test.mjs`. Every mission must be winnable at every difficulty, and the strategy its briefing warns against must lose. The build orders in `tests/strategies.mjs` are that contract: a change to a rate, rule or mission keeps them passing, or updates them in the same change and says why. A known gap is marked with `knownGap`, which makes its check a `todo` rather than a failure.
 
-Pushes to `main` deploy to GitHub Pages through `.github/workflows/deploy.yml`, which publishes only `index.html`, `style.css`, `js/`, `sprites/` and `assets/`. **A new top-level file the game loads must be added to that workflow's staging step**, or the deployed game won't find it.
+Pushes to `main` deploy to GitHub Pages through `.github/workflows/deploy.yml`, which publishes only `index.html`, `favicon.ico`, `style.css`, `js/`, `sprites/` and `assets/`. **A new top-level file the game loads must be added to that workflow's staging step**, or the deployed game won't find it.
 
 ## Conventions
 

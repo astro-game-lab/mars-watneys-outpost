@@ -91,3 +91,19 @@ test("checking every tip, every step, changes nothing in the simulation", () => 
   const strip = (s) => snapshot({ ...s, mission: s.mission.id });
   assert.equal(strip(checked), strip(plain));
 });
+
+test("the nightPower tip's advice about the Lab slows the drain", () => {
+  const sim = calm();
+  sim.state.time = 0.9 * sim.SOL_SECONDS;
+  sim.state.resources.power = 30;
+  sim.refreshFlows();
+  assert.ok(fires(sim, "nightPower"));
+  const text = tip(sim, "nightPower").text(null);
+  assert.match(text, /switch the Lab off/);
+  const lab = first(sim, "lab");
+  assert.notEqual(lab.building.priority, "off", "the advice would be moot");
+  const before = sim.state.rates.power;
+  assert.ok(sim.setPriority(lab, "off"));
+  sim.refreshFlows();
+  assert.ok(sim.state.rates.power > before + 1, `${before} → ${sim.state.rates.power}`);
+});
