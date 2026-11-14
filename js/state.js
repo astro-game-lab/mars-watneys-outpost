@@ -49,6 +49,7 @@ function createState(mission, seed, difficulty = "normal") {
     nextEventIn: events.first * diff.eventGap,
     nextScripted: 0,           // index into events.scripted
     // For the debrief: health lost to each cause, and when each need first ran out.
+    jobSeq: 0,                 // order jobs were queued in, for who does what first
     stats: { damage: { water: 0, food: 0, oxygen: 0, radiation: 0, cold: 0 }, firstEmpty: {}, lost: null, left: [] },
     outbox: [],                // messages for the UI: { kind: "say", text, tone } | { kind: "line", key }
     lastSaid: {},              // game time each keyed line was last queued, for its cooldown
@@ -115,26 +116,44 @@ function buildingUnlocked(type) {
 }
 
 function makeBuilding(type) {
-  const b = { type, disabled: 0, reinforced: false, priority: BUILDINGS[type].priority || null };
+  const b = {
+    type, disabled: 0, reinforced: false, priority: BUILDINGS[type].priority || null,
+    construct: 0, reinforcing: 0, queued: {},   // remaining work per job, and when each was queued
+  };
   if (BUILDINGS[type].solar) Object.assign(b, { dust: 0, cleaning: 0 });
   if (BUILDINGS[type].heat) b.tempK = SETPOINT_K;
   if (type === "greenhouse") b.crop = 1;
   return b;
 }
 
+// ---------- Jobs ----------
+// A job is remaining work in one of a building's JOB_FIELD fields. Crew pick
+// jobs up in updateWork() (js/simulation.js).
+function startJob(t, kind, work) {
+  t.building[JOB_FIELD[kind]] = work;
+  t.building.queued[kind] = state.jobSeq++;
+}
+
+// Not working: damaged or still being built. Switched off is separate.
+function offline(b) {
+  return b.disabled > 0 || b.construct > 0;
+}
+
 // Reason a Solar Array can't be cleaned, or null if it can.
 function cleanBlocker(t) {
   if (!t || !t.building) return "No building";
   if (!BUILDINGS[t.building.type].solar) return "Only Solar Arrays collect dust";
-  if (t.building.cleaning > 0) return "Already being cleaned";
+  if (t.building.construct > 0) return "Still under construction";
+  if (t.building.cleaning > 0) return "Already queued for cleaning";
   if (t.building.dust < 0.01) return "Nothing to clean";
   return null;
 }
 
-// Take the array offline for CLEAN_SECONDS; its dust is gone when it's back.
+// Queue a cleaning job. The array goes offline while someone works on it,
+// and its dust is gone when they finish.
 function clean(t) {
   if (cleanBlocker(t)) return false;
-  t.building.cleaning = CLEAN_SECONDS;
+  startJob(t, "clean", CLEAN_SECONDS);
   return true;
 }
 
@@ -163,6 +182,8 @@ function canAffordCost(cost) {
 function reinforceBlocker(t) {
   if (!t || !t.building) return "No building";
   if (t.building.reinforced) return "Already reinforced";
+  if (t.building.reinforcing > 0) return "Already being reinforced";
+  if (t.building.construct > 0) return "Still under construction";
   if (!canAffordCost(REINFORCE.cost)) return "Not enough materials";
   return null;
 }
@@ -170,7 +191,7 @@ function reinforceBlocker(t) {
 function reinforce(t) {
   if (reinforceBlocker(t)) return false;
   for (const [k, v] of Object.entries(REINFORCE.cost)) state.resources[k] -= v;
-  t.building.reinforced = true;
+  startJob(t, "reinforce", REINFORCE.work);   // takes effect when the job is done
   return true;
 }
 
@@ -206,11 +227,28 @@ function build(type, t) {
   if (buildBlocker(type, t)) return false;
   for (const [k, v] of Object.entries(BUILDINGS[type].cost)) state.resources[k] -= v;
   t.building = makeBuilding(type);
+  startJob(t, "construct", BUILDINGS[type].work);   // a construction site until the crew finish it
+  return true;
+}
+
+// Reason a construction site can't be cancelled, or null if it can.
+function cancelBlocker(t) {
+  if (!t || !t.building || !(t.building.construct > 0)) return "Not under construction";
+  if (!canDemolish(t)) return "Would disconnect the outpost";
+  return null;
+}
+
+// Cancel construction: the site goes, and the cost comes back in full.
+function cancel(t) {
+  if (cancelBlocker(t)) return false;
+  for (const [k, v] of Object.entries(BUILDINGS[t.building.type].cost)) state.resources[k] += v;
+  t.building = null;
   return true;
 }
 
 // Reason a building can't be demolished, or null if it can.
 function demolishBlocker(t) {
+  if (t && t.building && t.building.construct > 0) return "Still under construction: cancel it for a full refund";
   if (!canDemolish(t)) return "Would disconnect the outpost";
   const b = BUILDINGS[t.building.type];
   if (b.crew && t.building.disabled <= 0 && state.crewCapacity - b.crew < state.crew) return "The crew needs these beds";

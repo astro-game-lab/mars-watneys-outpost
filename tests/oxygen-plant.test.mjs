@@ -3,6 +3,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { buildNow } from "./helpers.mjs";
 import { loadSim } from "./load-sim.mjs";
 
 function outpostWith(types, { power = 100, water = 100, mission = "the-outpost" } = {}) {
@@ -13,7 +14,7 @@ function outpostWith(types, { power = 100, water = 100, mission = "the-outpost" 
   for (const type of types) {
     const t = state.tiles.find((t) => !sim.buildBlocker(type, t));
     assert.ok(t, `no room for a ${type}`);
-    sim.build(type, t);
+    buildNow(sim, type, t);
   }
   state.time = 0.5 * sim.SOL_SECONDS;
   state.resources.power = power;

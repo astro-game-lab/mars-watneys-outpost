@@ -19,7 +19,7 @@ function outputMultiplier(t) {
   let m = (b.bonus && b.bonus[t.terrain]) || 1;
   if (b.solar) {
     m *= daylight(solTime()) * (hasEffect("dust") ? 0.3 : 1) * (1 - t.building.dust);
-    if (t.building.cleaning > 0) m = 0;   // offline while it's cleaned
+    if (beingWorked(t.building, "clean")) m = 0;   // offline while someone cleans it
   }
   if (b.key === "water" && hasEffect("failure")) m *= 0.5;
   if (b.key === "lab") m *= 1 + CREW_SCIENCE_BONUS * (state.crew - 1);
@@ -70,7 +70,7 @@ function updateTemperatures(dt) {
   const outside = outsideTempK(solTime());
   for (const t of buildings()) {
     const bld = t.building, b = BUILDINGS[bld.type];
-    if (!b.heat) continue;
+    if (!b.heat || bld.construct > 0) continue;   // a site isn't sealed or heated yet
     const delivered = bld.heatDelivered || 0;
     bld.tempK += (dt * (delivered / heatLoss(b) - (bld.tempK - outside))) / THERMAL_TAU;
     bld.tempK = Math.min(SETPOINT_K, bld.tempK);
@@ -85,7 +85,7 @@ function updateTemperatures(dt) {
 // first, two to a Habitat; ties go to tile order. Anyone without a bed shares
 // the warmest. Returns a Map from member to tile.
 function assignBeds() {
-  const habitats = buildings().filter((t) => t.building.type === "habitat" && t.building.disabled <= 0)
+  const habitats = buildings().filter((t) => t.building.type === "habitat" && !offline(t.building))
     .sort((a, b) => b.building.tempK - a.building.tempK);   // stable: ties keep tile order
   const beds = [];
   for (const t of habitats) for (let i = 0; i < BUILDINGS.habitat.crew; i++) beds.push(t);
@@ -95,22 +95,61 @@ function assignBeds() {
   return assigned;
 }
 
+// ---------- Crew work ----------
+
+// Every job waiting to be done, in the order the crew take them: by kind
+// (JOB_ORDER), then oldest first, then tile order.
+function pendingJobs() {
+  const jobs = [];
+  state.tiles.forEach((t, tile) => {
+    if (!t.building) return;
+    JOB_ORDER.forEach((kind, rank) => {
+      if (t.building[JOB_FIELD[kind]] > 0) jobs.push({ t, tile, kind, rank, seq: t.building.queued[kind] ?? -1 });
+    });
+  });
+  return jobs.sort((a, b) => a.rank - b.rank || a.seq - b.seq || a.tile - b.tile);
+}
+
+function beingWorked(b, kind) {
+  return !!(b.working && b.working[kind]);
+}
+
+// Crew member i takes job i, one worker to a job, at 1 unit of work a
+// second. Each job's progress lives on its building, so who does it can
+// change from step to step without losing anything.
+function updateWork(dt) {
+  for (const t of state.tiles) if (t.building) t.building.working = null;
+  const jobs = pendingJobs();
+  state.crewMembers.forEach((m, i) => {
+    const job = jobs[i];
+    m.job = job ? { tile: job.tile, kind: job.kind } : null;
+    if (!job) return;
+    const b = job.t.building, field = JOB_FIELD[job.kind];
+    (b.working ??= {})[job.kind] = m.name;
+    b[field] = Math.max(0, b[field] - dt);
+    if (b[field] < 1e-9) finishJob(job.t, job.kind, m);
+  });
+  state.jobsWaiting = Math.max(0, jobs.length - state.crewMembers.length);
+}
+
+function finishJob(t, kind, member) {
+  const b = t.building, name = BUILDINGS[b.type].name;
+  b[JOB_FIELD[kind]] = 0;
+  delete b.queued[kind];
+  if (b.working) delete b.working[kind];
+  if (kind === "construct") emit(`The ${name} is finished${member.arrival ? `, thanks to ${member.name}` : ""}. Up and running.`, "good");
+  else if (kind === "repair") emit(`${member.name} has the ${name} working again.`, "good");
+  else if (kind === "clean") { b.dust = 0; emit("Solar Array's clean and back online. Shiny.", "good"); }
+  else if (kind === "reinforce") { b.reinforced = true; emit(`Regolith's piled over the ${name}. Mars dirt: now with radiation protection.`, "good"); }
+}
+
 // Dust settles on Solar Arrays, faster in a storm. An array being cleaned
 // collects none, and comes back with none.
 function updateDust(dt) {
   const settle = (DUST_PER_SOL / SOL_SECONDS) * (hasEffect("dust") ? DUST_STORM_FACTOR : 1) * dt;
   for (const t of buildings()) {
     const b = t.building;
-    if (!BUILDINGS[b.type].solar) continue;
-    if (b.cleaning > 0) {
-      b.cleaning = Math.max(0, b.cleaning - dt);
-      if (b.cleaning < 1e-9) {
-        b.cleaning = 0;
-        b.dust = 0;
-        emit("Solar Array's clean and back online. Shiny.", "good");
-      }
-      continue;
-    }
+    if (!BUILDINGS[b.type].solar || b.construct > 0 || beingWorked(b, "clean")) continue;
     b.dust = Math.min(DUST_MAX, b.dust + settle);
   }
 }
@@ -146,7 +185,7 @@ function computeFlows() {
   const list = buildings();
   const prod = {}, cons = {};
   const add = (obj, k, v) => { obj[k] = (obj[k] || 0) + v; };
-  const running = (t) => t.building.disabled <= 0 && t.building.priority !== "off";
+  const running = (t) => !offline(t.building) && t.building.priority !== "off";
 
   // Each building's heating and power demand, worked out once for this step.
   const outside = outsideTempK(solTime());
@@ -158,7 +197,7 @@ function computeFlows() {
   const pDemand = {};
   for (const t of list) {
     const b = BUILDINGS[t.building.type];
-    if (t.building.disabled > 0) continue;
+    if (offline(t.building)) continue;
     pProd += (b.produces.power || 0) * outputMultiplier(t);
     const demand = demandOf(t);
     if (running(t) && demand > 0) add(pDemand, t.building.priority, demand);
@@ -194,7 +233,7 @@ function computeFlows() {
     const b = BUILDINGS[t.building.type];
     const lv = level(t);
     t.building.level = lv;
-    for (const [k, v] of Object.entries(b.produces)) add(prod, k, v * outputMultiplier(t) * (k === "power" ? (t.building.disabled > 0 ? 0 : 1) : lv));
+    for (const [k, v] of Object.entries(b.produces)) add(prod, k, v * outputMultiplier(t) * (k === "power" ? (offline(t.building) ? 0 : 1) : lv));
     for (const [k, v] of Object.entries(b.consumes)) if (k !== "power") add(cons, k, v * lv);
     if (lv > 0) add(cons, "power", (b.consumes.power || 0) * lv);
     // The heater runs on power alone, so it gets the building's power share
@@ -203,7 +242,7 @@ function computeFlows() {
     t.building.heatDelivered = heat;
     if (heat > 0) add(cons, "power", heat);
     if (t.building.reinforced) shielding += REINFORCE.radiation; // passive, works even when damaged or off
-    if (t.building.disabled > 0) continue;
+    if (offline(t.building)) continue;
     crewCapacity += b.crew || 0;
     powerCapacity += b.storage || 0;
     shielding += (b.radiation || 0) * lv;
@@ -254,7 +293,8 @@ function updateGame() {
   if (prevPhase !== dayPhase(solTime()) && dayPhase(solTime()) === "🌑 Night") emitLine("night");
 
   updateEvents(dt);
-  updateDust(dt);
+  updateDust(dt);   // before work, so an array cleaned this step ends it clean
+  updateWork(dt);
 
   const flows = refreshFlows();
 

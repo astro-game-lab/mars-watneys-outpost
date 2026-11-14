@@ -47,6 +47,12 @@ they relied on has moved.
 - A crew roster in the HUD: one health bar per crew member, with the share of
   maximum health lost to radiation dose hatched at its end. The debrief names
   who died or who went home.
+- Construction time and crew labour. Buildings take crew time to put up, drawn
+  as scaffolding with a progress ring, and a site can be cancelled for a full
+  refund. The crew also repair micrometeorite damage, clean Solar Arrays and
+  reinforce buildings, one job each at a time, repairs first. The HUD shows
+  who's busy and how many jobs are waiting, and crew figures walk to their
+  jobs. Busy crew still count toward the Science Lab bonus.
 - Dust devils, a sixth kind of event. One sweeps most of the dust off some
   of the Solar Arrays. They're in the default mix and in *Dust Season*.
 
@@ -57,6 +63,10 @@ they relied on has moved.
   to `js/render.js`. No change for players. See `docs/PHYSICS.md` § Conventions.
 
 ### Physics
+- Buildings are no longer instant: each takes 6 to 18 seconds of one crew
+  member's work, and damage stays until someone repairs it. *First Night*'s
+  winning build now puts both Solar Arrays up before the Battery Banks. See
+  `docs/PHYSICS.md` § What is modelled and § Gameplay departures.
 - Health is per crew member, and radiation dose adds up. Everyone takes the
   same harm from shortages and acute radiation, but each member builds up a
   dose that never heals. It lowers their maximum health, and at the career

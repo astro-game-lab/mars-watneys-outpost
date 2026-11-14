@@ -4,6 +4,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { buildNow } from "./helpers.mjs";
 import { loadSim } from "./load-sim.mjs";
 
 const EPS = 1e-9;
@@ -14,7 +15,7 @@ function outpostAt(fraction, { types = [], power = 1e6 } = {}) {
   sim.createState({ ...sim.missionById("the-outpost"), events: null }, 1, "normal");
   const { state } = sim;
   state.resources.materials = state.resources.credits = 1e6;
-  for (const type of types) sim.build(type, state.tiles.find((t) => !sim.buildBlocker(type, t)));
+  for (const type of types) buildNow(sim, type, state.tiles.find((t) => !sim.buildBlocker(type, t)));
   state.time = fraction * sim.SOL_SECONDS;
   state.resources.power = power;
   state.resources.water = state.resources.food = state.resources.oxygen = 1e6;

@@ -41,7 +41,7 @@ const MISSIONS = [
     ],
     tips: [
       "Watch ⚡ Power's rate and time left in the HUD before evening. At night the Habitats and the Lab also draw power for heating.",
-      "A second Solar Array fills the batteries faster. A Battery Bank holds more for the night.",
+      "A second Solar Array fills the batteries faster. A Battery Bank holds more for the night. Watney builds one thing at a time, so put the arrays up first: the sooner they're generating, the more you bank before sunset.",
       "On Normal difficulty, water and food will hold for this mission. Power won't.",
     ],
     seed: 1101,
@@ -143,7 +143,7 @@ const MISSIONS = [
     tips: [
       "Each Habitat sleeps two, so you need a third before the fifth crew member lands.",
       "A landing is postponed if water, food or oxygen is running low. Keep all three green.",
-      "Each extra crew member makes every Science Lab 25% more productive.",
+      "Each extra crew member makes every Science Lab 25% more productive, and is another pair of hands for building and repairs.",
     ],
     seed: 5501,
     buildings: null,

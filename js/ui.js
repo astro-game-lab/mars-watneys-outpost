@@ -120,7 +120,9 @@ function updateHud() {
       status !== "good" ? (state.resources[r.key] <= 0.01 ? "EMPTY" : `${Math.ceil(tl)}s left`) : "";
   }
 
-  $("crew").textContent = `${state.crew} / ${state.crewCapacity}`;
+  const busy = state.crewMembers.filter((m) => m.job).length;
+  $("crew").textContent = `${state.crew} / ${state.crewCapacity}` + (busy ? ` · ${busy} busy` : "") +
+    (state.jobsWaiting ? ` · ${state.jobsWaiting} job${state.jobsWaiting > 1 ? "s" : ""} waiting` : "");
   if (state.mission.crewArrivals === false) {
     $("arrival").textContent = "No crew landings this mission";
   } else {
@@ -182,7 +184,9 @@ function renderRoster() {
     const bed = m.bed !== null && m.bed !== undefined ? state.tiles[m.bed] : null;
     const cold = bed && bed.building && bed.building.tempK < COLD_K;
     const tip = `${m.name}: health ${Math.ceil(m.health)} / ${Math.round(max)} · dose ${Math.round(doseShare * 100)}% of the career limit` +
-      (bed && bed.building ? ` · sleeps in a Habitat at ${fmtC(bed.building.tempK)}` : "");
+      (bed && bed.building ? ` · sleeps in a Habitat at ${fmtC(bed.building.tempK)}` : "") +
+      (m.job && state.tiles[m.job.tile].building
+        ? ` · ${JOB_NAME[m.job.kind]} the ${BUILDINGS[state.tiles[m.job.tile].building.type].name}` : " · free");
     return `<div class="crew-row" title="${tip}">
       <span class="cname">${cold ? "🥶 " : m.arrival === 0 ? "⭐ " : ""}${m.name}</span>
       <div class="bar"><div class="fill ${level}" style="width:${m.health}%"></div><div class="lost" style="width:${100 - max}%"></div></div>
@@ -190,6 +194,12 @@ function renderRoster() {
     </div>`;
   }).join("") + (shown.length < state.crewMembers.length
     ? `<div class="crew-more">+${state.crewMembers.length - shown.length} more, all healthier</div>` : "");
+}
+
+// "being built by Tanaka" or "waiting for a free crew member", for a job on a building.
+function workText(b, kind, verb) {
+  const who = b.working && b.working[kind];
+  return who ? `${verb} by ${who}` : "waiting for a free crew member";
 }
 
 // ---------- Side panel: build menu / building info ----------
@@ -208,7 +218,20 @@ function renderPanel() {
   panel.hidden = false;
   const terrain = TERRAIN[t.terrain].name;
 
-  if (t.building) {
+  if (t.building && t.building.construct > 0) {
+    const b = BUILDINGS[t.building.type];
+    panel.innerHTML = `
+      <div class="ptitle">🏗️ ${b.name}<button class="close" data-act="close">✕</button></div>
+      <div class="sub">${terrain} · under construction</div>
+      <div id="live"></div>
+      <div class="kv"><span>When finished</span><span>${makesText(b)}</span></div>
+      <div class="why">${b.why}</div>
+      <div class="actions">
+        <button data-act="cancel" ${cancelBlocker(t) ? "disabled" : ""}
+          title="${cancelBlocker(t) || "Refunds the full cost"}">Cancel (full refund)</button>
+      </div>`;
+    updatePanelLive();
+  } else if (t.building) {
     const b = BUILDINGS[t.building.type];
     panel.innerHTML = `
       <div class="ptitle">${b.icon} ${b.name}<button class="close" data-act="close">✕</button></div>
@@ -225,14 +248,15 @@ function renderPanel() {
           <button data-act="why" data-key="reinforce" class="whybtn">Why?</button>
           ${t.building.reinforced
             ? `<span class="bonus">✓ Reinforced (−${REINFORCE.radiation}% rad)</span>`
+            : t.building.reinforcing > 0 ? `<span class="bonus">🧱 Under way</span>`
             : `<button data-act="reinforce" ${reinforceBlocker(t) ? "disabled" : ""}>Reinforce</button>`}
         </div>
-        ${t.building.reinforced ? "" : `<div class="ocost">Cost: ${fmtList(REINFORCE.cost)} · Radiation −${REINFORCE.radiation}%, no power needed</div>`}
+        ${t.building.reinforced ? "" : `<div class="ocost">Cost: ${fmtList(REINFORCE.cost)} · ${REINFORCE.work}s of crew work · Radiation −${REINFORCE.radiation}%, no power needed</div>`}
         ${openWhy === "reinforce" ? `<div class="why">${REINFORCE.why}</div>` : ""}
       </div>
       <div class="actions">
         ${b.solar ? `<button data-act="clean" ${cleanBlocker(t) ? "disabled" : ""}
-          title="${cleanBlocker(t) || `Offline for ${CLEAN_SECONDS}s, then the dust is gone`}">🧹 Clean panels</button>` : ""}
+          title="${cleanBlocker(t) || `${CLEAN_SECONDS}s of crew work, offline while it's done`}">🧹 Clean panels</button>` : ""}
         <button data-act="demolish" ${demolishBlocker(t) ? "disabled" : ""}
           title="${demolishBlocker(t) || "Refunds 50% of the cost"}">Demolish (50% refund)</button>
       </div>`;
@@ -275,7 +299,7 @@ function buildOption(key, t) {
         <button data-act="why" data-key="${key}" class="whybtn">Why?</button>
         <button data-act="build" data-key="${key}" ${blocker ? "disabled" : ""}>Build</button>
       </div>
-      <div class="ocost">Cost: ${fmtList(b.cost)} ${blocker ? `<span class="blk">· ${blocker}</span>` : ""}</div>
+      <div class="ocost">Cost: ${fmtList(b.cost)} · ${b.work}s to build ${blocker ? `<span class="blk">· ${blocker}</span>` : ""}</div>
       <div class="ocost">Uses: ${fmtList(b.consumes, true)}${b.heat ? ` + heating up to ${ICON.power} ${b.heat}/s, most before dawn` : ""} → Makes: ${makesText(b)}${b.solar ? " (× daylight)" : ""}</div>
       ${bonus ? `<div class="bonus">★ ${TERRAIN[t.terrain].name} bonus: ×${bonus} output</div>` : ""}
       ${b.needsHabitat ? `<div class="ocost">Must touch a Habitat</div>` : ""}
@@ -290,8 +314,17 @@ function updatePanelLive() {
     const live = $("live");
     if (!live) return;
     const lv = t.building.level ?? 1;
-    const status = t.building.disabled > 0 ? `🔧 Damaged — repairs ${Math.ceil(t.building.disabled)}s`
-      : t.building.cleaning > 0 ? `🧹 Being cleaned — back in ${Math.ceil(t.building.cleaning)}s`
+    const bld = t.building;
+    if (bld.construct > 0) {
+      const total = BUILDINGS[bld.type].work;
+      live.innerHTML = `<div class="kv"><span>Status</span><span>🏗️ ${Math.floor(100 * (1 - bld.construct / total))}% · ${workText(bld, "construct", "being built")}</span></div>` +
+        `<div class="kv"><span>Work left</span><span>${Math.ceil(bld.construct)}s of crew time</span></div>`;
+      const cbtn = document.querySelector('#panel button[data-act="cancel"]');
+      if (cbtn) cbtn.disabled = !!cancelBlocker(t);
+      return;
+    }
+    const status = bld.disabled > 0 ? `🔧 Damaged · ${Math.ceil(bld.disabled)}s of repairs · ${workText(bld, "repair", "being repaired")}`
+      : bld.cleaning > 0 && beingWorked(bld, "clean") ? `🧹 Being cleaned by ${bld.working.clean} · ${Math.ceil(bld.cleaning)}s left`
       : t.building.priority === "off" ? "💤 Switched off"
       : lv < 0.99 ? `⚡ Short of inputs — running at ${Math.round(lv * 100)}%` : "✅ Running";
     const b = BUILDINGS[t.building.type];
@@ -299,9 +332,8 @@ function updatePanelLive() {
     const actual = Object.entries(b.produces)
       .map(([k, v]) => `${ICON[k]} ${(v * mult * (t.building.disabled > 0 ? 0 : k === "power" ? 1 : lv)).toFixed(1)}/s`).join("  ");
     const dust = b.solar
-      ? `<div class="kv"><span>Dust on panels</span><span>${t.building.cleaning > 0
-        ? `🧹 being cleaned · ${Math.ceil(t.building.cleaning)}s`
-        : `${Math.round(t.building.dust * 100)}% · output −${Math.round(t.building.dust * 100)}%`}</span></div>`
+      ? `<div class="kv"><span>Dust on panels</span><span>${Math.round(t.building.dust * 100)}% · output −${Math.round(t.building.dust * 100)}%` +
+        `${t.building.cleaning > 0 && !beingWorked(t.building, "clean") ? " · cleaning queued" : ""}</span></div>`
       : "";
     let temp = "";
     if (t.building.tempK !== undefined) {
@@ -343,15 +375,18 @@ $("panel").addEventListener("click", (e) => {
   if (act === "close") selectTile(null);
   else if (act === "why") { openWhy = openWhy === btn.dataset.key ? null : btn.dataset.key; renderPanel(); }
   else if (act === "build" && build(btn.dataset.key, t)) {
-    say(`${BUILDINGS[btn.dataset.key].name} is up and running.`, "good");
+    say(`Construction started on the ${BUILDINGS[btn.dataset.key].name}. ${BUILDINGS[btn.dataset.key].work}s of work.`, "good");
     renderPanel();
   } else if (act === "reinforce" && reinforce(t)) {
-    say(`Shovelled regolith over the ${BUILDINGS[t.building.type].name}. Mars dirt: now with radiation protection.`, "good");
+    say(`Regolith shielding queued for the ${BUILDINGS[t.building.type].name}.`, "good");
     renderPanel();
   } else if (act === "clean" && clean(t)) {
-    say("Out with the brush. This array is offline until I've finished.", "good");
-    refreshFlows();
+    say("Panel cleaning queued. The array goes offline while someone's on it.", "good");
     renderPanel();
+  } else if (act === "cancel" && cancel(t)) {
+    say("Construction cancelled. Everything went back into storage.", "good");
+    refreshFlows();
+    selectTile(null);
   } else if (act === "priority" && setPriority(t, btn.dataset.key)) {
     refreshFlows();   // show the effect straight away, even while paused
     renderPanel();

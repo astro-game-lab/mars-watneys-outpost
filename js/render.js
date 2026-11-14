@@ -6,12 +6,15 @@ const ctx = canvas.getContext("2d");
 const bg = new Image();
 bg.src = "assets/mars3.png";
 
-// Building sprites, keyed by building type.
+// Building sprites, keyed by building type, plus the scaffolding drawn over
+// any building under construction.
 const SPRITES = Object.fromEntries(BUILD_ORDER.map((k) => {
   const img = new Image();
   img.src = `sprites/${BUILDINGS[k].sprite}.svg`;
   return [k, img];
 }));
+SPRITES.scaffold = new Image();
+SPRITES.scaffold.src = "sprites/scaffold.svg";
 
 // ---------- Layout ----------
 // Pointy-top hexes in odd-r offset layout; js/hexmap.js has the grid itself.
@@ -175,12 +178,16 @@ function drawTileStatic(c, t) {
       c.lineWidth = 1;
     }
     const sp = spriteBitmap(t.building.type);
+    const site = t.building.construct > 0;
     if (sp) {
-      c.globalAlpha = t.building.disabled > 0 || t.building.priority === "off" ? 0.45 : 1;
+      // A construction site shows the finished building, faint, under scaffolding.
+      c.globalAlpha = site ? 0.35 : t.building.disabled > 0 || t.building.priority === "off" ? 0.45 : 1;
       const step = dustStep(t.building);
       c.drawImage(step > 0 ? dustyBitmap(sp, step) : sp.canvas, x - sp.w / 2, y - sp.h / 2, sp.w, sp.h);
       c.globalAlpha = 1;
     }
+    const scaffold = site && spriteBitmap("scaffold");
+    if (scaffold) c.drawImage(scaffold.canvas, x - scaffold.w / 2, y - scaffold.h / 2, scaffold.w, scaffold.h);
   }
 }
 
@@ -191,11 +198,11 @@ const BUILDING_CODE = Object.fromEntries(BUILD_ORDER.map((k, i) => [k, i]));
 // including the terrain, which differs between missions and seeds.
 function staticSignature() {
   let sig = `${canvas.width}x${canvas.height}|${view.size}|${bg.complete && bg.naturalWidth ? 1 : 0}|`;
-  for (const k of BUILD_ORDER) sig += SPRITES[k].naturalWidth ? 1 : 0;
+  for (const k of [...BUILD_ORDER, "scaffold"]) sig += SPRITES[k].naturalWidth ? 1 : 0;
   for (const t of state.tiles) {
     const b = t.building;
     sig += `${TERRAIN_CODE[t.terrain]}:`;
-    sig += b ? `${BUILDING_CODE[b.type]}${b.reinforced ? "r" : ""}${b.disabled > 0 ? "d" : ""}${b.priority === "off" ? "o" : ""}${b.dust !== undefined ? `u${dustStep(b)}` : ""},` : ".,";
+    sig += b ? `${BUILDING_CODE[b.type]}${b.reinforced ? "r" : ""}${b.disabled > 0 ? "d" : ""}${b.priority === "off" ? "o" : ""}${b.construct > 0 ? "c" : ""}${b.dust !== undefined ? `u${dustStep(b)}` : ""},` : ".,";
   }
   return sig;
 }
@@ -226,9 +233,23 @@ function drawTileDynamic(t) {
     ctx.globalAlpha = 1;
   }
   if (!t.building) return;
+  if (t.building.construct > 0) {
+    const total = BUILDINGS[t.building.type].work;
+    const done = 1 - t.building.construct / total;
+    ctx.lineWidth = Math.max(2, size * 0.08);
+    hexPath(x, y, size * 0.92);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.18)";
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x, y, size * 0.8, -Math.PI / 2, -Math.PI / 2 + done * Math.PI * 2);
+    ctx.strokeStyle = "rgba(242, 140, 40, 0.95)";
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    return;
+  }
   let mark = null, color = "rgba(180, 20, 20, 0.85)";
   if (t.building.disabled > 0) mark = "🔧";
-  else if (t.building.cleaning > 0) { mark = "🧹"; color = "rgba(46, 90, 122, 0.9)"; }
+  else if (beingWorked(t.building, "clean")) { mark = "🧹"; color = "rgba(46, 90, 122, 0.9)"; }
   else if (t.building.type === "greenhouse" && t.building.tempK < FROST_K) { mark = "❄️"; color = "rgba(46, 90, 122, 0.9)"; }
   else if (t.building.tempK < COLD_K) { mark = "🥶"; color = "rgba(46, 90, 122, 0.9)"; }
   else if (t.building.priority === "off") { mark = "OFF"; color = "rgba(60, 60, 60, 0.9)"; }
@@ -279,8 +300,11 @@ function updateAstronauts(dt) {
     astronauts.push({ arrival: m.arrival, x: c.x, y: c.y + view.size * 0.45, target: null, wait: 0 });
   }
 
+  const jobOf = new Map(state.crewMembers.map((m) => [m.arrival, m.job]));
   for (const a of astronauts) {
-    if (!a.target || !a.target.building) a.target = pick();
+    const job = jobOf.get(a.arrival);
+    if (job) { a.target = state.tiles[job.tile]; a.wait = 0.5; }   // off to work
+    else if (!a.target || !a.target.building) a.target = pick();
     const c = tileCenter(a.target);
     const tx = c.x, ty = c.y + view.size * 0.45;
     const dx = tx - a.x, dy = ty - a.y;
@@ -289,7 +313,7 @@ function updateAstronauts(dt) {
     if (dist > speed) {
       a.x += (dx / dist) * speed;
       a.y += (dy / dist) * speed;
-    } else if ((a.wait -= dt) <= 0) {
+    } else if (!job && (a.wait -= dt) <= 0) {
       a.wait = 1.5 + rngNext(crewRng) * 2;
       a.target = pick();
     }

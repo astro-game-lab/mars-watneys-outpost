@@ -12,10 +12,12 @@ const EVENTS = {
     emit("Solar flare! Staying inside the shielded areas.", "bad");
   },
   meteor() {
-    const list = buildings();
+    const list = buildings().filter((t) => !(t.building.construct > 0));
     const t = list[Math.floor(rand() * list.length)];
-    t.building.disabled = state.events.durations.meteor;
-    emit(`Micrometeorite hit the ${BUILDINGS[t.building.type].name}! Repairs will take a while.`, "bad");
+    // Damage waits for a crew member to repair it (updateWork in js/simulation.js).
+    if (t.building.disabled > 0) t.building.disabled += state.events.durations.meteor;
+    else startJob(t, "repair", state.events.durations.meteor);
+    emit(`Micrometeorite hit the ${BUILDINGS[t.building.type].name}! It's out until someone repairs it.`, "bad");
   },
   failure() {
     addEffect("failure", "🔧 Pump failure: water −50%", state.events.durations.failure);
@@ -58,9 +60,6 @@ function scriptedTime(e) {
 function updateEvents(dt) {
   for (const e of state.effects) e.remaining -= dt;
   state.effects = state.effects.filter((e) => e.remaining > 0);
-  for (const t of buildings()) {
-    if (t.building.disabled > 0) t.building.disabled = Math.max(0, t.building.disabled - dt);
-  }
 
   const cfg = state.events;
   while (state.nextScripted < cfg.scripted.length && state.time >= scriptedTime(cfg.scripted[state.nextScripted])) {

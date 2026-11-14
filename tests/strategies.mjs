@@ -13,9 +13,10 @@ export const OUTPOST_SEEDS = [1, 2, 3, 4, 5, 6, 7, 8];
 export const STRATEGIES = {
   "first-night": {
     // A second array and two Battery Banks get the outpost through two nights,
-    // heating included. With one bank it takes a third array instead; one
-    // bank and two arrays go flat on the first night.
-    win: [{ build: "solar" }, { build: "battery" }, { build: "battery" }, { build: "solar" }, { build: "water" }],
+    // heating included. Watney builds alone, one thing at a time, so the
+    // arrays go up first: the sooner they're generating, the more gets banked
+    // before sunset. With one bank it takes a third array instead.
+    win: [{ build: "solar" }, { build: "solar" }, { build: "battery" }, { build: "battery" }, { build: "water" }],
     // The briefing: the Sun sets and the batteries go flat.
     warned: { why: "no extra generation or storage", moves: [] },
   },

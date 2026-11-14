@@ -3,6 +3,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { buildNow } from "./helpers.mjs";
 import { loadSim } from "./load-sim.mjs";
 
 const EPS = 1e-9;
@@ -13,7 +14,7 @@ function outpost({ types = [], events = null } = {}) {
   sim.createState({ ...sim.missionById("the-outpost"), events }, 1, "normal");
   const { state } = sim;
   state.resources.materials = state.resources.credits = 1e6;
-  for (const type of types) sim.build(type, state.tiles.find((t) => !sim.buildBlocker(type, t)));
+  for (const type of types) buildNow(sim, type, state.tiles.find((t) => !sim.buildBlocker(type, t)));
   return sim;
 }
 const arrays = (sim) => sim.state.tiles.filter((t) => t.building && t.building.type === "solar");
@@ -57,15 +58,18 @@ test("a dusty array loses exactly its share of output", () => {
   assert.ok(Math.abs(sim.outputMultiplier(a) - clean * 0.75) < EPS);
 });
 
-test("cleaning takes the array offline for CLEAN_SECONDS, then its dust is gone", () => {
+test("cleaning is a crew job: the array is offline while it's worked on, then its dust is gone", () => {
   const sim = outpost();
   const a = arrays(sim)[0];
   a.building.dust = 0.4;
   sim.state.time = 0.5 * sim.SOL_SECONDS;
   assert.ok(sim.clean(a));
+  assert.ok(sim.outputMultiplier(a) > 0, "offline before anyone picked the job up");
+  assert.match(sim.cleanBlocker(a), /Already queued/);
+  steps(sim, 1);                                // Watney is free and takes the job
+  assert.equal(sim.state.crewMembers[0].job.kind, "clean");
   assert.equal(sim.outputMultiplier(a), 0);
-  assert.match(sim.cleanBlocker(a), /Already/);
-  steps(sim, Math.round(sim.CLEAN_SECONDS / sim.SIM_STEP) - 1);
+  steps(sim, Math.round(sim.CLEAN_SECONDS / sim.SIM_STEP) - 2);
   assert.ok(a.building.cleaning > 0, "finished early");
   steps(sim, 1);
   assert.equal(a.building.cleaning, 0);

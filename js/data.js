@@ -33,7 +33,7 @@ const CROP_REGROW_SOLS = 1;        // a dead crop regrows in this long, while wa
 const DUST_PER_SOL = 0.04;      // in clear weather; real arrays lose ~0.2% a sol
 const DUST_STORM_FACTOR = 5;
 const DUST_MAX = 0.6;
-const CLEAN_SECONDS = 10;
+const CLEAN_SECONDS = 10;       // the work it takes to clean an array
 const DEVIL = { chance: 0.6, keep: 0.2 };
 
 // Fixed simulation step, in game seconds. The frame loop accumulates game time
@@ -57,7 +57,7 @@ const EVENT_DEFAULTS = {
   first: 45,
   interval: [40, 70],
   weights: { dust: 3, flare: 2, meteor: 2, failure: 2, supply: 2, devil: 1 },
-  durations: { dust: 30, flare: 20, meteor: 30, failure: 25 },
+  durations: { dust: 30, flare: 20, meteor: 15, failure: 25 },   // meteor: work to repair
   supply: { materials: 50, credits: 100 },
   scripted: [],                 // [{ sol, at: fraction of the sol, kind }]
 };
@@ -126,6 +126,15 @@ const PRIORITIES = {
 const PRIORITY_ORDER = ["critical", "normal", "low", "off"];
 const SUPPLY_TIERS = ["critical", "normal", "low"];   // served in this order
 
+// Crew work. Building, repairing, cleaning panels and reinforcing are jobs,
+// each done by one crew member at a time at 1 unit of work per second. Each
+// building's `work` is how long it takes to build; repairs take the
+// micrometeorite's damage (EVENT_DEFAULTS.durations.meteor). Jobs are done in
+// JOB_ORDER, oldest first within a kind.
+const JOB_ORDER = ["repair", "construct", "clean", "reinforce"];
+const JOB_FIELD = { repair: "disabled", construct: "construct", clean: "cleaning", reinforce: "reinforcing" };
+const JOB_NAME = { repair: "repairing", construct: "building", clean: "cleaning", reinforce: "reinforcing" };
+
 // Buildings. produces/consumes are per second at 100% efficiency. `priority`
 // is the default shortage priority; `alwaysOn` buildings can't be switched off.
 // `heat` is the most power a heated building's heater can draw. How much it
@@ -135,6 +144,7 @@ const BUILDINGS = {
   habitat: {
     name: "Habitat", icon: "🏠", sprite: "habitat",
     cost: { materials: 40, credits: 60 },
+    work: 12,
     consumes: { power: 1, water: 0.5 },
     produces: { oxygen: 1.5 },
     heat: 1,
@@ -145,6 +155,7 @@ const BUILDINGS = {
   water: {
     name: "Water Extractor", icon: "💧", sprite: "water",
     cost: { materials: 20, credits: 40 },
+    work: 6,
     consumes: { power: 1.5 },
     produces: { water: 2 },
     bonus: { ice: 2 },
@@ -154,6 +165,7 @@ const BUILDINGS = {
   greenhouse: {
     name: "Greenhouse", icon: "🌱", sprite: "greenhouse",
     cost: { materials: 30, credits: 100 },
+    work: 9,
     consumes: { power: 2, water: 1 },
     produces: { food: 2, oxygen: 0.3 },
     heat: 1,
@@ -163,6 +175,7 @@ const BUILDINGS = {
   moxie: {
     name: "Oxygen Plant", icon: "⚗️", sprite: "moxie",
     cost: { materials: 40, credits: 150 },
+    work: 9,
     consumes: { power: 3 },
     produces: { oxygen: 1 },
     priority: "critical",       // life support, like the Habitats
@@ -171,6 +184,7 @@ const BUILDINGS = {
   solar: {
     name: "Solar Array", icon: "☀️", sprite: "solar",
     cost: { materials: 20, credits: 80 },
+    work: 6,
     consumes: {},
     produces: { power: 6 },
     solar: true,
@@ -179,6 +193,7 @@ const BUILDINGS = {
   nuclear: {
     name: "Nuclear Generator", icon: "☢️", sprite: "nuclear",
     cost: { materials: 80, credits: 300 },
+    work: 18,
     consumes: {},
     produces: { power: 12 },
     why: "Nuclear power (like NASA's Kilopower project) works day and night, in any weather. It is expensive and needs careful engineering and shielding, but it never stops at sunset.",
@@ -186,6 +201,7 @@ const BUILDINGS = {
   battery: {
     name: "Battery Bank", icon: "🔋", sprite: "battery",
     cost: { materials: 30, credits: 60 },
+    work: 6,
     consumes: {},
     produces: {},
     storage: 150,
@@ -194,6 +210,7 @@ const BUILDINGS = {
   mine: {
     name: "Mine", icon: "⛏️", sprite: "mine",
     cost: { materials: 10, credits: 50 },
+    work: 6,
     consumes: { power: 2 },
     produces: { materials: 1.5 },
     bonus: { rocky: 1.5, resource: 2 },
@@ -203,6 +220,7 @@ const BUILDINGS = {
   lab: {
     name: "Science Lab", icon: "🔬", sprite: "lab",
     cost: { materials: 40, credits: 120 },
+    work: 12,
     consumes: { power: 2 },
     produces: { credits: 3 },
     heat: 0.5,
@@ -213,6 +231,7 @@ const BUILDINGS = {
   shield: {
     name: "Radiation Shield", icon: "🛡️", sprite: "shield",
     cost: { materials: 50, credits: 80 },
+    work: 9,
     consumes: { power: 0.5 },
     produces: {},
     radiation: 15,
@@ -224,6 +243,7 @@ const BUILDINGS = {
 // Passive (no power needed), one per building.
 const REINFORCE = {
   cost: { materials: 30 },
+  work: 6,
   radiation: 5,
   why: "Martian soil (regolith) is free shielding. Piling a couple of metres of it over a structure blocks a large share of cosmic rays and solar particles. NASA studies for Mars habitats often propose exactly this, or 3D-printing walls from regolith.",
 };

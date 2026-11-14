@@ -11,7 +11,7 @@ You're the stranded engineer turned colony founder: improvising, rationing, and 
 ## What the player actually does
 
 1. **Read the outpost.** The HUD shows each resource with its net rate and time to empty, plus crew, exposure, health and the clock.
-2. **Expand.** Click a dashed tile next to the outpost to build. Terrain matters: Water Extractors do double on ice, and Mines do 1.5× on rock and 2× on high-resource tiles.
+2. **Expand.** Click a dashed tile next to the outpost to build. Terrain matters: Water Extractors do double on ice, and Mines do 1.5× on rock and 2× on high-resource tiles. Buildings take crew time to put up, and the same crew repairs damage, cleans panels and piles on regolith, one job each at a time. So a growing crew means more hands as well as more mouths.
 3. **Balance the loop.** Power runs everything, water feeds the Habitats and Greenhouses, Habitats make oxygen and house crew, Oxygen Plants pull oxygen out of the air with power alone, and Labs earn the credits that pay for more. When power or water runs short, each building's priority decides who goes without: life support first, science last by default. Switching a building off saves its share for the night.
 4. **Survive the sol.** Night kills solar. Events hit at random. Shortages throttle whatever depends on them.
 5. **Grow.** New crew land every two sols if there's a bed and supplies are healthy. More crew means more science and more mouths.

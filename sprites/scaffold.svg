@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 120 120">
+<!-- Watney's Outpost overlay: scaffolding over a building under construction.
+     Drawn over the building's own sprite at low opacity, so one overlay serves every building. -->
+<g transform="translate(0,-6)">
+<!-- back uprights -->
+<path d="M60,30 V78 M96,48 V96 M24,48 V96" stroke="#7E8896" stroke-width="3" stroke-linecap="round"></path>
+<!-- back ledgers -->
+<path d="M24,64 L60,46 L96,64 M24,82 L60,64 L96,82" stroke="#9FA9B6" stroke-width="2.5" stroke-linecap="round" fill="none"></path>
+<!-- front uprights -->
+<path d="M60,66 V112" stroke="#5C6673" stroke-width="3.5" stroke-linecap="round"></path>
+<!-- front ledgers and cross-bracing -->
+<path d="M24,64 L60,82 L96,64 M24,82 L60,100 L96,82" stroke="#C9D0D9" stroke-width="2.5" stroke-linecap="round" fill="none"></path>
+<path d="M24,82 L60,64 M60,100 L96,64" stroke="#9FA9B6" stroke-width="1.6" stroke-linecap="round" opacity=".8"></path>
+<!-- planks: hi-vis orange walkways on two levels -->
+<polygon points="24,62 60,44 66,47 30,65" fill="#F28C28"></polygon>
+<polygon points="60,80 96,62 96,66 60,84" fill="#F28C28"></polygon>
+<polygon points="24,80 60,98 60,102 24,84" fill="#D9761C"></polygon>
+<!-- hazard stripes on the top plank -->
+<path d="M33,58 L36,59.5 M42,53.5 L45,55 M51,49 L54,50.5" stroke="#2A3039" stroke-width="2"></path>
+<!-- a crane arm with its hook -->
+<path d="M60,30 L88,18" stroke="#F2C94C" stroke-width="3" stroke-linecap="round"></path>
+<path d="M84,20 V34" stroke="#2A3039" stroke-width="1.2"></path>
+<path d="M82,34 Q84,38 86,34" stroke="#2A3039" stroke-width="1.6" fill="none"></path>
+<circle cx="60" cy="30" r="2.4" fill="#F28C28"></circle>
+</g>
+</svg>

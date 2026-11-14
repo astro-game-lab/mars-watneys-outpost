@@ -3,6 +3,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { buildNow } from "./helpers.mjs";
 import { loadSim } from "./load-sim.mjs";
 import { hexDistance } from "./bot.mjs";
 
@@ -35,7 +36,8 @@ for (const seed of [1, 2, 3, 4, 5]) {
         if (free.length) sim.build(type, pick(free));
       } else {
         const t = pick(built);
-        if (sim.demolish(t)) demolished++;
+        // A construction site is cancelled rather than demolished; both must keep the outpost whole.
+        if (t.building.construct > 0 ? sim.cancel(t) : sim.demolish(t)) demolished++;
         else refused++;
       }
       assert.ok(state.tiles.some((t) => t.building), "the last building was demolished");
@@ -56,7 +58,7 @@ test("a building whose removal would split the outpost can't be demolished", () 
     const tip = line.length ? line[line.length - 1] : state.tiles.find((t) => t.building && t.building.type === "solar");
     const next = sim.neighbors(tip).find((n) => !n.building && n.col > tip.col && !sim.buildBlocker("battery", n));
     assert.ok(next, "no room to grow east");
-    sim.build("battery", next);
+    buildNow(sim, "battery", next);
     line.push(next);
   }
   assert.equal(sim.demolishBlocker(line[1]), "Would disconnect the outpost");
