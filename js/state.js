@@ -16,7 +16,8 @@ function createState(mission, seed, difficulty = "normal") {
         durations: { ...EVENT_DEFAULTS.durations, ...(mission.events && mission.events.durations) },
       };
   const rng = createRng(seed);
-  const startTime = start.time * SOL_SECONDS;
+  const startTick = Math.round(start.time * STEPS_PER_SOL);
+  const startTime = startTick * SIM_STEP;
   // This mission's buildings: the defaults, with any of its overrides merged in.
   const specs = Object.fromEntries(BUILD_ORDER.map((k) => [k, { ...BUILDINGS[k], ...(mission.overrides && mission.overrides[k]) }]));
 
@@ -29,6 +30,7 @@ function createState(mission, seed, difficulty = "normal") {
     specs,                     // this mission's buildings: read them through spec()
     climate: { ...OUTSIDE_K, ...mission.climate },   // the outside temperature curve
     tick: 0,                   // simulation steps since the mission started
+    startTick,                 // steps from the start of Sol 1 to the mission's start
     startTime,
     time: startTime,           // game seconds since the start of Sol 1
     sol: 1,
@@ -106,7 +108,7 @@ function emit(text, tone = "") {
 // A keyed line from WATNEY_LINES, queued at most once per cooldown (game seconds).
 function emitLine(key, cooldown = 45) {
   const last = state.lastSaid[key];
-  if (last !== undefined && state.time - last < cooldown) return;
+  if (last !== undefined && state.time - last < cooldown - TIME_EPS) return;
   state.lastSaid[key] = state.time;
   state.outbox.push({ kind: "line", key });
 }
@@ -197,8 +199,12 @@ function setPriority(t, priority) {
   return true;
 }
 
+// Whether the stores hold a cost. Stocks are sums of many small steps, so one
+// that should exactly meet a cost can fall short by a rounding error: allow
+// for that. Spending clamps at zero, so the sliver never shows.
+const AFFORD_TOLERANCE = 1e-9;
 function canAffordCost(cost) {
-  return Object.entries(cost).every(([k, v]) => state.resources[k] >= v);
+  return Object.entries(cost).every(([k, v]) => state.resources[k] >= v * (1 - AFFORD_TOLERANCE));
 }
 
 // Reason a building can't be reinforced, or null if it can.
@@ -213,7 +219,7 @@ function reinforceBlocker(t) {
 
 function reinforce(t) {
   if (reinforceBlocker(t)) return false;
-  for (const [k, v] of Object.entries(REINFORCE.cost)) state.resources[k] -= v;
+  for (const [k, v] of Object.entries(REINFORCE.cost)) state.resources[k] = Math.max(0, state.resources[k] - v);
   startJob(t, "reinforce", REINFORCE.work);   // takes effect when the job is done
   return true;
 }
@@ -248,7 +254,7 @@ function buildBlocker(type, t) {
 
 function build(type, t) {
   if (buildBlocker(type, t)) return false;
-  for (const [k, v] of Object.entries(BUILDINGS[type].cost)) state.resources[k] -= v;
+  for (const [k, v] of Object.entries(BUILDINGS[type].cost)) state.resources[k] = Math.max(0, state.resources[k] - v);
   t.building = makeBuilding(type);
   startJob(t, "construct", BUILDINGS[type].work);   // a construction site until the crew finish it
   return true;

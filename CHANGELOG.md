@@ -92,6 +92,14 @@ they relied on has moved.
   warns that anyone sent home at the dose limit lowers the crew count.
 
 ### Physics
+- Timers end on the step they're due. The clock now counts whole steps, and
+  countdowns end when less than half a step is left. Before, rounding could
+  leave a sliver, so the first random event of every mission came one step
+  (0.05 s) late. See `docs/PHYSICS.md` § Numerical notes.
+- A purchase no longer waits a step because the stores fall a rounding error
+  short of its cost: a Mine's 0.075 a step could reach 29.9999999999996 rather
+  than 30. Costs are affordable within a relative 1e-9, and spending clamps
+  stocks at zero.
 - Buildings are no longer instant: each takes 6 to 18 seconds of one crew
   member's work, and damage stays until someone repairs it. *First Night*'s
   winning build now puts both Solar Arrays up before the Battery Banks. See

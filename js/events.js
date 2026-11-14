@@ -52,24 +52,24 @@ function hasEffect(kind) {
   return state.effects.some((e) => e.kind === kind);
 }
 
-// Game time at which a scripted event fires.
-function scriptedTime(e) {
-  return (e.sol - 1 + e.at) * SOL_SECONDS;
+// The clock step at which a scripted event fires.
+function scriptedStep(e) {
+  return Math.round((e.sol - 1 + e.at) * STEPS_PER_SOL);
 }
 
 function updateEvents(dt) {
   for (const e of state.effects) e.remaining -= dt;
-  state.effects = state.effects.filter((e) => e.remaining > 0);
+  state.effects = state.effects.filter((e) => e.remaining > TIME_EPS);
 
   const cfg = state.events;
-  while (state.nextScripted < cfg.scripted.length && state.time >= scriptedTime(cfg.scripted[state.nextScripted])) {
+  while (state.nextScripted < cfg.scripted.length && clockSteps() >= scriptedStep(cfg.scripted[state.nextScripted])) {
     EVENTS[cfg.scripted[state.nextScripted++].kind]();
   }
 
   const weights = Object.entries(cfg.weights).filter(([, w]) => w > 0);
   if (!weights.length) return;
   state.nextEventIn -= dt;
-  if (state.nextEventIn <= 0) {
+  if (state.nextEventIn <= TIME_EPS) {
     const [min, max] = cfg.interval;
     state.nextEventIn = (min + rand() * (max - min)) * difficulty().eventGap;
     EVENTS[pickWeighted(state.rng, weights)]();

@@ -156,6 +156,7 @@ The tests in `tests/` run with `npm test` (Node's built-in runner, nothing to in
 - **Integrator:** explicit Euler on a fixed step.
 - **Timestep:** `SIM_STEP` = 0.05 game seconds. The frame loop is capped at 30 fps, so it runs about 0.7 steps per frame at 1× and about 2.7 at 4×. A slow frame is capped at 0.1 s of wall time, so at most 8 steps run in one frame.
 - **Known drift:** shortages are detected only once a stock reaches about zero (`≤ 0.01`), so one step of over-draw is clamped away. With the fixed step this is the same at every speed.
+- **Rounding:** the clock counts whole steps (`STEPS_PER_SOL` = 2 400), so the time of day and the sol come from an integer, not from summed floats. Countdowns (events, effects, jobs) end when less than half a step is left (`TIME_EPS`), and costs are affordable within a relative 1e-9 (`canAffordCost()`), because a stock or timer built from many float steps can land a hair short of a value it should meet exactly.
 - **Known drift:** power is shared out before water. If a building is also starved of water, the power it was allotted goes unused for that step. Stored power then rises above zero, and the next step has no power shortage. The effect lasts one step at a time.
 
 ## Sources

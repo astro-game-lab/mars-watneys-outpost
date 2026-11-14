@@ -36,9 +36,14 @@ const DUST_MAX = 0.6;
 const CLEAN_SECONDS = 10;       // the work it takes to clean an array
 const DEVIL = { chance: 0.6, keep: 0.2 };
 
-// Fixed simulation step, in game seconds. The frame loop accumulates game time
-// and runs whole steps, so a mission plays out the same at any frame rate.
-const SIM_STEP = 0.05;
+// Fixed simulation step, in game seconds: a whole number of steps to the sol.
+// The frame loop accumulates game time and runs whole steps, so a mission
+// plays out the same at any frame rate. The clock counts steps, so the time of
+// day and the sol never depend on rounding. Timers that count down by whole
+// steps end when less than TIME_EPS (half a step) is left, for the same reason.
+const STEPS_PER_SOL = 2400;
+const SIM_STEP = SOL_SECONDS / STEPS_PER_SOL;
+const TIME_EPS = SIM_STEP / 2;
 
 // What a mission starts with unless it says otherwise (see js/missions.js).
 // `time` is the fraction of Sol 1 the mission starts at. The outpost is placed

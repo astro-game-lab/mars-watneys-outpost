@@ -4,8 +4,14 @@
 // DOM or calls the UI: messages go to state.outbox, and the end of a mission
 // is recorded in state.over and state.endCause for the UI to pick up.
 
+// The time of day, 0..1 of a sol, and the sol: from the step count on the
+// clock, so both are exact. Tests may set state.time directly; it is snapped to
+// the nearest step.
+function clockSteps() {
+  return Math.round(state.time / SIM_STEP);
+}
 function solTime() {
-  return (state.time % SOL_SECONDS) / SOL_SECONDS;
+  return (clockSteps() % STEPS_PER_SOL) / STEPS_PER_SOL;
 }
 
 // What the whole crew consumes of a need per second, at this difficulty.
@@ -127,7 +133,7 @@ function updateWork(dt) {
     const b = job.t.building, field = JOB_FIELD[job.kind];
     (b.working ??= {})[job.kind] = m.name;
     b[field] = Math.max(0, b[field] - dt);
-    if (b[field] < 1e-9) finishJob(job.t, job.kind, m);
+    if (b[field] < TIME_EPS) finishJob(job.t, job.kind, m);
   });
   state.jobsWaiting = Math.max(0, jobs.length - state.crewMembers.length);
 }
@@ -284,8 +290,8 @@ function updateGame() {
 
   const prevPhase = dayPhase(solTime());
   state.tick++;
-  state.time = state.startTime + state.tick * SIM_STEP;
-  const newSol = Math.floor(state.time / SOL_SECONDS) + 1;
+  state.time = (state.startTick + state.tick) * SIM_STEP;
+  const newSol = Math.floor(clockSteps() / STEPS_PER_SOL) + 1;
   if (newSol !== state.sol) {
     state.sol = newSol;
     emit(`Sol ${newSol}. Still alive. Log entry complete.`, "good");

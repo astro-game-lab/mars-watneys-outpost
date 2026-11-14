@@ -7,7 +7,7 @@ import { play } from "./bot.mjs";
 import { STRATEGIES, OUTPOST_SEEDS } from "./strategies.mjs";
 import { loadSim } from "./load-sim.mjs";
 
-const { MISSIONS, DIFFICULTY_ORDER } = loadSim();
+const { MISSIONS, DIFFICULTY_ORDER, SOL_SECONDS, SIM_STEP } = loadSim();
 
 // The seeds a mission is checked on: its own, or a spread of them.
 const seedsFor = (m) => (m.seed === null ? OUTPOST_SEEDS : [m.seed]);
@@ -17,7 +17,7 @@ const seedsFor = (m) => (m.seed === null ? OUTPOST_SEEDS : [m.seed]);
 function horizon(m) {
   const sols = [...m.objectives.filter((o) => o.type === "sol").map((o) => o.value),
     ...m.failures.filter((f) => f.type === "deadline").map((f) => f.sol), 4];
-  return (Math.max(...sols) + 2) * 120 / 0.05;
+  return Math.round((Math.max(...sols) + 2) * SOL_SECONDS / SIM_STEP);
 }
 
 test("every mission has a strategy", () => {
