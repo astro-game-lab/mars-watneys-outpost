@@ -68,6 +68,13 @@ they relied on has moved.
   to `js/render.js`. No change for players. See `docs/PHYSICS.md` § Conventions.
 
 ### Changed (missions)
+- Two new missions, for an eight-mission campaign. *Thin Air* (after *Ice Line*):
+  the Habitats' oxygen generators were wrecked in the landing, so Oxygen Plants
+  have to make the air while the crew grows to three. *Long Night* (after *Dust
+  Season*): a winter night at a northern site like Viking 2's, down to −113 °C
+  with weak sun, where solar alone can't keep the outpost warm. Missions can now
+  override a building's specification, the outside climate and the sunlight.
+  Players who had reached later missions keep them unlocked.
 - *The Outpost* asks for 4 000 credits instead of 1 000. With every mechanic in
   play, a sound outpost was earning five to seven times the old target, so the
   science economy no longer mattered.

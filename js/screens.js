@@ -25,8 +25,10 @@ function saveProgress() {
 const missionIndex = (id) => MISSIONS.findIndex((m) => m.id === id);
 const isWon = (id) => progress.won[id] !== undefined;
 
+// Unlocked once the mission before it is won, or once any mission from here
+// on has been won, so a mission added mid-campaign doesn't re-lock the rest.
 function missionUnlocked(i) {
-  return i === 0 || isWon(MISSIONS[i - 1].id);
+  return i === 0 || isWon(MISSIONS[i - 1].id) || MISSIONS.slice(i).some((m) => isWon(m.id));
 }
 
 // Difficulty tiers unlock once the last mission of the campaign is won.

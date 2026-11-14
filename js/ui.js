@@ -255,7 +255,7 @@ function renderPanel() {
   const terrain = TERRAIN[t.terrain].name;
 
   if (t.building && t.building.construct > 0) {
-    const b = BUILDINGS[t.building.type];
+    const b = spec(t.building.type);
     panel.innerHTML = `
       <div class="ptitle">🔨 ${b.name}<button class="close" data-act="close">✕</button></div>
       <div class="sub">${terrain} · under construction</div>
@@ -268,7 +268,7 @@ function renderPanel() {
       </div>`;
     updatePanelLive();
   } else if (t.building) {
-    const b = BUILDINGS[t.building.type];
+    const b = spec(t.building.type);
     panel.innerHTML = `
       <div class="ptitle">${b.icon} ${b.name}<button class="close" data-act="close">✕</button></div>
       <div class="sub">${terrain}</div>
@@ -325,7 +325,7 @@ function priorityControl(t) {
 }
 
 function buildOption(key, t) {
-  const b = BUILDINGS[key];
+  const b = spec(key);
   const blocker = buildBlocker(key, t);
   const bonus = b.bonus && b.bonus[t.terrain];
   return `
@@ -362,7 +362,7 @@ function updatePanelLive() {
       : bld.cleaning > 0 && beingWorked(bld, "clean") ? `🧹 Being cleaned by ${bld.working.clean} · ${Math.floor(100 * jobProgress(bld, "clean"))}% done`
       : t.building.priority === "off" ? "💤 Switched off"
       : lv < 0.99 ? `⚡ Short of inputs — running at ${Math.round(lv * 100)}%` : "✅ Running";
-    const b = BUILDINGS[t.building.type];
+    const b = spec(t.building.type);
     const mult = outputMultiplier(t);
     const actual = Object.entries(b.produces)
       .map(([k, v]) => `${ICON[k]} ${(v * mult * (t.building.disabled > 0 ? 0 : k === "power" ? 1 : lv)).toFixed(1)}/s`).join("  ");

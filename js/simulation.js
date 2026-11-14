@@ -15,10 +15,10 @@ function crewNeed(k) {
 
 // Production multiplier for a building, before input shortages.
 function outputMultiplier(t) {
-  const b = BUILDINGS[t.building.type];
+  const b = spec(t.building.type);
   let m = (b.bonus && b.bonus[t.terrain]) || 1;
   if (b.solar) {
-    m *= daylight(solTime()) * (hasEffect("dust") ? 0.3 : 1) * (1 - t.building.dust);
+    m *= daylight(solTime()) * (hasEffect("dust") ? 0.3 : 1) * (1 - t.building.dust) * (state.mission.sunlight ?? 1);
     if (beingWorked(t.building, "clean")) m = 0;   // offline while someone cleans it
   }
   if (b.key === "water" && hasEffect("failure")) m *= 0.5;
@@ -33,7 +33,7 @@ function outputMultiplier(t) {
 // The outside temperature at a time of day (0..1 of a sol): a smooth curve,
 // lowest just before dawn and highest in the early afternoon.
 function outsideTempK(t) {
-  const { min, max, minAt, maxAt } = OUTSIDE_K;
+  const { min, max, minAt, maxAt } = (state && state.climate) || OUTSIDE_K;
   const warming = maxAt - minAt;                       // fraction of the sol spent warming
   const since = (t - minAt + 1) % 1;                   // time since the low
   const rise = since < warming ? since / warming : 1 - (since - warming) / (1 - warming);
@@ -49,7 +49,7 @@ function heatLoss(b) {
 // the setpoint against the current loss, plus enough to climb back to it if
 // the building has cooled, up to the heater's maximum.
 function heatingDemand(t, outside = outsideTempK(solTime())) {
-  const b = BUILDINGS[t.building.type];
+  const b = spec(t.building.type);
   if (!b.heat) return 0;
   const loss = heatLoss(b);
   const T = t.building.tempK;
@@ -60,7 +60,7 @@ function heatingDemand(t, outside = outsideTempK(solTime())) {
 
 // Power a building draws at full operation right now: its base load plus heating.
 function powerDemand(t, outside) {
-  return (BUILDINGS[t.building.type].consumes.power || 0) + heatingDemand(t, outside);
+  return (spec(t.building.type).consumes.power || 0) + heatingDemand(t, outside);
 }
 
 // Each heated building warms with the heat it got this step and cools toward
@@ -69,7 +69,7 @@ function powerDemand(t, outside) {
 function updateTemperatures(dt) {
   const outside = outsideTempK(solTime());
   for (const t of buildings()) {
-    const bld = t.building, b = BUILDINGS[bld.type];
+    const bld = t.building, b = spec(bld.type);
     if (!b.heat || bld.construct > 0) continue;   // a site isn't sealed or heated yet
     const delivered = bld.heatDelivered || 0;
     bld.tempK += (dt * (delivered / heatLoss(b) - (bld.tempK - outside))) / THERMAL_TAU;
@@ -133,7 +133,7 @@ function updateWork(dt) {
 }
 
 function finishJob(t, kind, member) {
-  const b = t.building, name = BUILDINGS[b.type].name;
+  const b = t.building, name = spec(b.type).name;
   b[JOB_FIELD[kind]] = 0;
   delete b.queued[kind];
   delete b.jobTotal[kind];
@@ -150,7 +150,7 @@ function updateDust(dt) {
   const settle = (DUST_PER_SOL / SOL_SECONDS) * (hasEffect("dust") ? DUST_STORM_FACTOR : 1) * dt;
   for (const t of buildings()) {
     const b = t.building;
-    if (!BUILDINGS[b.type].solar || b.construct > 0 || beingWorked(b, "clean")) continue;
+    if (!spec(b.type).solar || b.construct > 0 || beingWorked(b, "clean")) continue;
     b.dust = Math.min(DUST_MAX, b.dust + settle);
   }
 }
@@ -191,13 +191,13 @@ function computeFlows() {
   // Each building's heating and power demand, worked out once for this step.
   const outside = outsideTempK(solTime());
   const heatingOf = new Map(list.map((t) => [t, heatingDemand(t, outside)]));
-  const demandOf = (t) => (BUILDINGS[t.building.type].consumes.power || 0) + heatingOf.get(t);
+  const demandOf = (t) => (spec(t.building.type).consumes.power || 0) + heatingOf.get(t);
 
   // Power: producers have no inputs, and nothing throttles them.
   let pProd = 0;
   const pDemand = {};
   for (const t of list) {
-    const b = BUILDINGS[t.building.type];
+    const b = spec(t.building.type);
     if (offline(t.building)) continue;
     pProd += (b.produces.power || 0) * outputMultiplier(t);
     const demand = demandOf(t);
@@ -215,7 +215,7 @@ function computeFlows() {
   let wProd = 0;
   const wDemand = {};
   for (const t of list) {
-    const b = BUILDINGS[t.building.type];
+    const b = spec(t.building.type);
     const lv = powerLevel(t);
     wProd += (b.produces.water || 0) * outputMultiplier(t) * lv;
     if (b.consumes.water && lv > 0) add(wDemand, t.building.priority, b.consumes.water * lv);
@@ -225,13 +225,13 @@ function computeFlows() {
     ? allocate(Math.max(0, wProd - crewWater), wDemand) : fullShare();
   const level = (t) => {
     const lv = powerLevel(t);
-    return BUILDINGS[t.building.type].consumes.water && lv > 0 ? lv * waterShare[t.building.priority] : lv;
+    return spec(t.building.type).consumes.water && lv > 0 ? lv * waterShare[t.building.priority] : lv;
   };
 
   // Final flows.
   let crewCapacity = 0, shielding = 0, powerCapacity = POWER_CAPACITY;
   for (const t of list) {
-    const b = BUILDINGS[t.building.type];
+    const b = spec(t.building.type);
     const lv = level(t);
     t.building.level = lv;
     for (const [k, v] of Object.entries(b.produces)) add(prod, k, v * outputMultiplier(t) * (k === "power" ? (offline(t.building) ? 0 : 1) : lv));

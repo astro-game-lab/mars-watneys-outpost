@@ -17,6 +17,8 @@ function createState(mission, seed, difficulty = "normal") {
       };
   const rng = createRng(seed);
   const startTime = start.time * SOL_SECONDS;
+  // This mission's buildings: the defaults, with any of its overrides merged in.
+  const specs = Object.fromEntries(BUILD_ORDER.map((k) => [k, { ...BUILDINGS[k], ...(mission.overrides && mission.overrides[k]) }]));
 
   state = {
     mission,
@@ -24,6 +26,8 @@ function createState(mission, seed, difficulty = "normal") {
     difficulty,
     rng,
     events,                    // this mission's event settings
+    specs,                     // this mission's buildings: read them through spec()
+    climate: { ...OUTSIDE_K, ...mission.climate },   // the outside temperature curve
     tick: 0,                   // simulation steps since the mission started
     startTime,
     time: startTime,           // game seconds since the start of Sol 1
@@ -105,6 +109,11 @@ function emitLine(key, cooldown = 45) {
   if (last !== undefined && state.time - last < cooldown) return;
   state.lastSaid[key] = state.time;
   state.outbox.push({ kind: "line", key });
+}
+
+// A building type as this mission defines it (BUILDINGS plus its overrides).
+function spec(type) {
+  return state.specs[type];
 }
 
 function difficulty() {

@@ -42,10 +42,12 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 - **The campaign is the tutorial.** Each mission isolates one lesson, with a briefing that gives the science, the objectives, how you can lose, the buildings available, and three first moves.
   1. *First Night*: storage. Survive two nights without a blackout, using Solar, Battery, Water and Greenhouse only. Shortage priorities are off here, so storage can't be dodged by switching the Lab off.
   2. *Ice Line*: water from the ground. Bank 2 000 water before Sol 4 on a handmade map whose ice sits past a ridge. Regolith alone falls short.
-  3. *Dust Season*: nuclear power. Earn 3 000 credits before Sol 6 through near-constant 90 s storms. Solar alone falls short.
-  4. *Flare Watch*: shielding, and dose that adds up. Reach Sol 5 with exposure at 10% or less, through frequent flares and one scripted flare, and lose if anyone's dose passes 70% of the career limit. Shielding late is too late: on *Hard* and *Martian*, a shield alone isn't enough.
-  5. *Crew Rotation*: life support for a growing crew. A lander arrives every sol. Reach a crew of six before Sol 9.
-  6. *The Outpost*: everything at once, on a fresh random map each run.
+  3. *Thin Air*: oxygen from the atmosphere. The Habitats' oxygen generators were wrecked in the landing, so Oxygen Plants have to supply the air. Grow the crew to three before Sol 6. Greenhouses alone fall short.
+  4. *Dust Season*: nuclear power. Earn 3 000 credits before Sol 6 through near-constant 90 s storms. Solar alone falls short.
+  5. *Long Night*: heating. A winter night at a northern site like Viking 2's, down to −113 °C, with weak sun. Reach Sol 5 with 400 food stored, before Sol 6. Solar alone can't keep the outpost warm.
+  6. *Flare Watch*: shielding, and dose that adds up. Reach Sol 5 with exposure at 10% or less, through frequent flares and one scripted flare, and lose if anyone's dose passes 70% of the career limit. Shielding late is too late: on *Hard* and *Martian*, a shield alone isn't enough.
+  7. *Crew Rotation*: life support for a growing crew. A lander arrives every sol. Reach a crew of six before Sol 9.
+  8. *The Outpost*: everything at once, on a fresh random map each run.
 - **Assumed knowledge:** none. Every building explains why it exists, and Watney comments on each warning as it fires.
 - **Watney's tips:** short hints at teachable moments, each shown at most once a mission and at most one every 20 game seconds. Examples: ice within reach of the outpost, batteries that won't last the night, a Greenhouse heading for frost, jobs piling up. A tip about a place pulses that tile on the map. They can be turned off in mission select. They're for players who skip the briefings.
 - **Assists:** live objective progress in the HUD, time-to-empty on every resource, warn and crit colouring, and a reason given whenever a build, demolish or crew arrival is blocked.
@@ -60,6 +62,6 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 
 ## Scope
 
-- **In the prototype:** a six-mission campaign, three difficulty tiers, one map size, ten buildings, six events, and progress saved in the browser.
+- **In the prototype:** an eight-mission campaign, three difficulty tiers, one map size, ten buildings, six events, and progress saved in the browser.
 - **Explicitly out of scope:** orbital logistics. That's the roadmap's *Mars Colony Logistics*.
 - **Deferred:** saving a mission in progress, settings beyond the tips toggle, sound, touch, full keyboard play, and input replays.

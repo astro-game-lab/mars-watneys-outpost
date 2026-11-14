@@ -8,6 +8,10 @@
 //   map          optional handmade terrain, one string per row (TERRAIN_CHARS)
 //   start        overrides for DEFAULT_START (resources merge key by key)
 //   buildings    the buildings the player may build, or null for all
+//   overrides    per-building changes to BUILDINGS for this mission, merged
+//                over the defaults, such as { habitat: { produces: {} } }
+//   climate      overrides for OUTSIDE_K (the outside temperature curve)
+//   sunlight     multiplier on Solar Array output (default 1)
 //   priorities   false to turn off shortage priorities: every building keeps
 //                its default (PRIORITIES in js/data.js), and the panel hides them
 //   events       overrides for EVENT_DEFAULTS, or null for no events at all
@@ -87,6 +91,34 @@ const MISSIONS = [
     failures: [{ type: "deadline", sol: 4 }],
   },
   {
+    id: "thin-air",
+    name: "Thin Air",
+    lesson: "Mars' air is a resource too. An Oxygen Plant pulls oxygen out of carbon dioxide with power alone, no water needed.",
+    briefing: [
+      "Bad landing. The outpost came down in one piece, but the Habitats' oxygen generators didn't. The Habitats still keep us warm and pressurised. They just can't make air any more, and the spares are on a lander that hasn't launched yet.",
+      "Luckily the air outside is about 95% carbon dioxide, and NASA packed an Oxygen Plant, a grown-up version of the MOXIE experiment that made oxygen on the Perseverance rover. It splits carbon dioxide and keeps the oxygen. All it wants is power, and plenty of it.",
+      "Two more crew are due before Sol 6, and NASA won't land them unless the oxygen is in good shape. Get the crew up to three.",
+    ],
+    tips: [
+      "Each Oxygen Plant makes 1 oxygen a second, and each crew member breathes 0.5. Plan for the crew you'll have, not the crew you've got.",
+      "An Oxygen Plant draws 3 power around the clock. At night that means batteries, or a Nuclear Generator.",
+      "Greenhouses add a little oxygen too, but not enough on their own.",
+    ],
+    seed: 2601,
+    start: { resources: { oxygen: 250 } },
+    buildings: null,
+    overrides: {
+      habitat: {
+        produces: {},
+        consumes: { power: 1 },
+        why: "Habitats are pressurised shelters, heated against the Martian night, and their walls block some of the radiation the thin atmosphere lets through. Normally their life support turns water and power into oxygen, but on this landing the oxygen generators were wrecked: these Habitats shelter the crew and make no air.",
+      },
+    },
+    events: { first: 60, interval: [50, 80], weights: { dust: 2, meteor: 1, supply: 2, devil: 1 } },
+    objectives: [{ type: "crew", value: 3 }],
+    failures: [{ type: "deadline", sol: 6 }],
+  },
+  {
     id: "dust-season",
     name: "Dust Season",
     lesson: "Solar power is at the mercy of the weather. Nuclear power runs through storms and nights alike.",
@@ -106,6 +138,30 @@ const MISSIONS = [
     buildings: null,
     events: { first: 25, interval: [30, 45], weights: { dust: 6, meteor: 1, supply: 1, devil: 2 }, durations: { dust: 90 } },
     objectives: [{ type: "credits", value: 3000 }],
+    failures: [{ type: "deadline", sol: 6 }],
+  },
+  {
+    id: "long-night",
+    name: "Long Night",
+    lesson: "Heating is a big share of an outpost's power. When a night gets cold enough, you decide what stays warm.",
+    briefing: [
+      "NASA has moved us north for the winter, to a plain like the one Viking 2 landed on. Up here the Sun stays low, the days are short, and the nights get properly cold. Viking 2 measured about −113 °C before dawn in late winter.",
+      "Everything that's pressurised needs heating, and on nights like these the heaters want more than they ever have. If power runs short, something gets cold. A cold Greenhouse loses its crop. A cold Habitat hurts whoever's sleeping in it.",
+      "Hold out until Sol 5 with 400 food in the stores, before Sol 6 starts. Decide what matters: shortage priorities say who gets the heat when there isn't enough to go round.",
+    ],
+    tips: [
+      "Leave the Habitats at Critical: they're what keeps people warm. Raising a Greenhouse to Critical makes it share their heat. Let the Lab and the Mine, on Low, be the first to go cold.",
+      "Solar is weak this far north in winter. A Nuclear Generator doesn't care.",
+      "Watch each building's temperature in its panel: holding, cooling or rewarming.",
+    ],
+    seed: 4601,
+    start: { crew: 2, resources: { food: 150, materials: 140 } },
+    buildings: null,
+    climate: { min: 160, max: 205 },
+    sunlight: 0.6,
+    crewArrivals: false,
+    events: { first: 70, interval: [60, 90], weights: { meteor: 1, supply: 1, devil: 1 } },
+    objectives: [{ type: "sol", value: 5 }, { type: "stock", resource: "food", value: 400 }],
     failures: [{ type: "deadline", sol: 6 }],
   },
   {
@@ -157,7 +213,7 @@ const MISSIONS = [
     name: "The Outpost",
     lesson: "A closed loop of power, water, air and food, on a planet that isn't trying to help.",
     briefing: [
-      "This is the full mission: everything from the last five, all at once, on fresh ground every time.",
+      "This is the full mission: everything from the last seven, all at once, on fresh ground every time.",
       "Keep everyone alive until Sol 8 and earn 4,000 credits of science. NASA lands a new crew member every two sols if there's a bed and supplies are healthy. Dust storms, flares, micrometeorites and dodgy pumps will all turn up, along with the odd supply drop from home.",
       "No pressure. Well, some pressure: about 0.6% of Earth's.",
     ],

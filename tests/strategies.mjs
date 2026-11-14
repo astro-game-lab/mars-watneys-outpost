@@ -39,6 +39,21 @@ export const STRATEGIES = {
     };
   })(),
 
+  "thin-air": {
+    // The Habitats make no oxygen here, so Oxygen Plants do, with nuclear power
+    // to run them through the night, and a second Greenhouse so supplies stay
+    // healthy enough for NASA to land the crew on time.
+    win: [{ build: "greenhouse" }, { build: "moxie" }, { build: "solar" }, { build: "battery" }, water, mine,
+      { priority: "mine", to: "normal" }, { build: "nuclear" }, { build: "moxie" }, { build: "greenhouse" },
+      { build: "moxie" }, { build: "battery" }, water],
+    // Greenhouses add a little oxygen, but nowhere near enough for a crew.
+    warned: {
+      why: "no Oxygen Plant, only Greenhouses for air",
+      moves: [{ build: "greenhouse" }, { build: "solar" }, { build: "battery" }, water, { build: "greenhouse" }, mine,
+        { build: "solar" }, { build: "greenhouse" }, { build: "battery" }, { build: "greenhouse" }, { build: "solar" }],
+    },
+  },
+
   "dust-season": {
     // A Nuclear Generator first, then a second, keeps the Labs running through
     // the storms. Wins around Sol 3.1, nearly three sols before the deadline.
@@ -53,6 +68,20 @@ export const STRATEGIES = {
         { build: "solar" }, { build: "lab" }, { build: "battery" }, { build: "lab" }, { build: "solar" },
         { build: "lab" }, mine, { build: "solar" }, { build: "solar" }, { build: "battery" }, { build: "lab" },
         { build: "solar" }, { build: "solar" }, { build: "lab" }, water, { build: "greenhouse" }],
+    },
+  },
+
+  "long-night": {
+    // Reliable power for the heaters: a Nuclear Generator. The default
+    // priorities already put the Habitats first and the Lab and the Mine last.
+    win: [{ build: "greenhouse" }, mine, { build: "battery" }, { build: "solar" }, { build: "nuclear" },
+      { build: "greenhouse" }, water, { build: "battery" }, { build: "greenhouse" }],
+    // Weak winter sun can't heat the outpost through the night, however much storage.
+    warned: {
+      why: "solar and batteries only, no Nuclear Generator",
+      moves: [{ build: "greenhouse" }, mine, { build: "solar" }, { build: "battery" }, { build: "solar" },
+        { build: "greenhouse" }, water, { build: "battery" }, { build: "solar" }, { build: "greenhouse" },
+        { build: "battery" }, { build: "solar" }],
     },
   },
 
