@@ -19,7 +19,7 @@ To run it locally, see [Development](#development) below.
 | **The campaign** | *First Night* (storage), *Ice Line* (water from the ground), *Dust Season* (nuclear power), *Flare Watch* (radiation shielding), *Crew Rotation* (life support for a growing crew), and *The Outpost*, which combines all five on a fresh random map each run. Each mission opens with a briefing in Watney's voice and ends with a debrief. A loss names its cause and suggests what to try. The intro screen tells the story and explains the loop. Progress is saved in the browser. |
 | **Difficulty** | *Normal*, *Hard* and *Martian*, unlocked once *The Outpost* is won. They raise crew consumption, cut starting water, food and oxygen, and bring events more often. |
 | **The outpost** | Most missions start with two Habitats, a Science Lab and a Solar Array, on a handmade map or one generated from the mission's seed. Build outward from it onto regolith, rock, ice and high-resource tiles; impassable tiles block you. Every building has to connect to the outpost, Science Labs have to touch a Habitat, and you can't demolish a building if that would split the outpost in two or leave the crew without beds. You can bury any building under regolith for passive shielding. |
-| **Resources** | Water, food, oxygen, power, materials and credits. Each building produces and consumes them at fixed per-second rates. Power and water shortages cut the output of whatever depends on them, in a fixed order. Power is capped by battery capacity. |
+| **Resources** | Water, food, oxygen, power, materials and credits. Each building produces and consumes them at fixed per-second rates. When power or water runs short, buildings are served by priority: *critical* first, then *normal*, then *low*. Life support is critical and science is low by default, and you can change any building's priority or switch it off (except Habitats). Power is capped by battery capacity. |
 | **The crew** | They drink, eat and breathe. NASA lands one more astronaut every two sols, but only if there's a free bed and supplies are healthy. Each extra crew member adds 25% to Science Lab output. |
 | **The environment** | A 120-second sol with night, morning, midday and evening, and solar output following it. Background radiation sits at 35% and shielding brings it down. Crew health falls when water, food or oxygen runs out or radiation tops 50%, and recovers otherwise. |
 | **Events** | By default every 40–70 seconds: a dust storm (solar −70%), a solar flare (radiation +40%), a micrometeorite (one building out for 30 s), a pump failure (water −50%), or a NASA supply drop. Missions change the mix, and some script events for a set time. |
@@ -40,7 +40,7 @@ The numbers are a game economy, not a life-support model. [`docs/PHYSICS.md`](do
 | Input | Action |
 | --- | --- |
 | Click a dashed tile | Open the build menu for it |
-| Click a building | Info, reinforce, demolish |
+| Click a building | Info, shortage priority, reinforce, demolish |
 | Right-click / `Esc` | Close the panel, or go back to the outpost from an overlay |
 | `Space` | Pause |
 | `1` / `2` / `3` | Speed 1× / 2× / 4× |

@@ -8,6 +8,8 @@
 //   map          optional handmade terrain, one string per row (TERRAIN_CHARS)
 //   start        overrides for DEFAULT_START (resources merge key by key)
 //   buildings    the buildings the player may build, or null for all
+//   priorities   false to turn off shortage priorities: every building keeps
+//                its default (PRIORITIES in js/data.js), and the panel hides them
 //   events       overrides for EVENT_DEFAULTS, or null for no events at all
 //   crewArrivals false to turn crew landings off
 //   crewArrivalSols  sols between landings (default CREW_ARRIVAL_SOLS)
@@ -45,6 +47,7 @@ const MISSIONS = [
     seed: 1101,
     start: { resources: { food: 100, oxygen: 400, materials: 120, credits: 300 } },
     buildings: ["solar", "battery", "water", "greenhouse"],
+    priorities: false,          // the lesson is storage; switching the Lab off would dodge it
     events: null,
     crewArrivals: false,
     objectives: [{ type: "sol", value: 3 }],
@@ -94,7 +97,7 @@ const MISSIONS = [
     tips: [
       "Save up for a Nuclear Generator: 80 materials and 300 credits.",
       "A Mine on rocky or high-resource ground pays back fastest.",
-      "Science Labs earn the credits. Keep them powered.",
+      "Science Labs earn the credits, but they start at Low priority. In a storm, raise them above the Mines so they're the last to lose power.",
     ],
     seed: 3301,
     start: { resources: { materials: 120 } },

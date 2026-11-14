@@ -48,6 +48,19 @@ function failureHud(f) {
   if (f.type === "deadline") return `Deadline: start of Sol ${f.sol}`;
 }
 
+// "⚠ Power shortage: critical 100% · normal 60% · low 0%", listing only the
+// tiers that want some, or "" when nothing is short.
+function shortageNote(key) {
+  const supply = state.supply;
+  if (!supply) return "";
+  const share = supply.shares[key], demand = supply.demand[key];
+  const tiers = SUPPLY_TIERS.filter((tier) => (demand[tier] || 0) > 0);
+  if (!tiers.some((tier) => share[tier] < 0.99)) return "";
+  const name = RESOURCES.find((r) => r.key === key).name;
+  return `⚠ ${name} shortage: ` +
+    tiers.map((tier) => `${PRIORITIES[tier].name.toLowerCase()} ${Math.round(share[tier] * 100)}%`).join(" · ");
+}
+
 // Production plus non-resource effects (crew space, shielding, storage).
 function makesText(b) {
   const parts = Object.entries(b.produces).map(([k, v]) => `${ICON[k]} ${v}/s`);
@@ -127,8 +140,7 @@ function updateHud() {
       return `<div class="obj ${met ? "met" : ""}">${met ? "✓" : "○"} ${objectiveLabel(o)} <span class="prog">(${objectiveProgress(o)})</span></div>`;
     }).join("") +
     m.failures.map((f) => `<div class="obj fail">⚠ ${failureHud(f)}</div>`).join("");
-  $("power-note").textContent = state.efficiency < 0.99
-    ? `⚠ Power shortage: buildings at ${Math.round(state.efficiency * 100)}%` : "";
+  $("power-note").innerHTML = ["power", "water"].map(shortageNote).filter(Boolean).join("<br>");
 
   // Clock
   const t = solTime();
@@ -174,6 +186,7 @@ function renderPanel() {
       <div id="live"></div>
       <div class="kv"><span>Consumes</span><span>${fmtList(b.consumes, true)}</span></div>
       <div class="kv"><span>Produces</span><span>${makesText(b)}</span></div>
+      ${priorityControl(t)}
       <div class="why">${b.why}</div>
       <div class="opt">
         <div class="orow">
@@ -205,6 +218,19 @@ function renderPanel() {
   }
 }
 
+// The shortage-priority buttons for a building, if it has a priority and the
+// mission allows changing it.
+function priorityControl(t) {
+  if (!t.building.priority || state.mission.priorities === false) return "";
+  const buttons = PRIORITY_ORDER.map((p) => {
+    const blocker = priorityBlocker(t, p);
+    const on = t.building.priority === p;
+    return `<button data-act="priority" data-key="${p}" class="prio-btn ${on ? "selected" : ""}"
+      aria-pressed="${on}" ${blocker ? "disabled" : ""} title="${blocker || PRIORITIES[p].tip}">${PRIORITIES[p].name}</button>`;
+  }).join("");
+  return `<div class="prio"><div class="kv"><span>Priority in a shortage</span></div><div class="prio-row">${buttons}</div></div>`;
+}
+
 function buildOption(key, t) {
   const b = BUILDINGS[key];
   const blocker = buildBlocker(key, t);
@@ -232,6 +258,7 @@ function updatePanelLive() {
     if (!live) return;
     const lv = t.building.level ?? 1;
     const status = t.building.disabled > 0 ? `🔧 Damaged — repairs ${Math.ceil(t.building.disabled)}s`
+      : t.building.priority === "off" ? "💤 Switched off"
       : lv < 0.99 ? `⚡ Short of inputs — running at ${Math.round(lv * 100)}%` : "✅ Running";
     const b = BUILDINGS[t.building.type];
     const mult = outputMultiplier(t);
@@ -262,5 +289,9 @@ $("panel").addEventListener("click", (e) => {
   } else if (act === "reinforce" && reinforce(t)) {
     say(`Shovelled regolith over the ${BUILDINGS[t.building.type].name}. Mars dirt: now with radiation protection.`, "good");
     renderPanel();
+  } else if (act === "priority" && setPriority(t, btn.dataset.key)) {
+    refreshFlows();   // show the effect straight away, even while paused
+    renderPanel();
+    updateHud();
   } else if (act === "demolish" && demolish(t)) renderPanel();
 });

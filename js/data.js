@@ -76,7 +76,21 @@ const CREW_NAMES = ["Okafor", "Lindqvist", "Tanaka", "Moreau", "Silva", "Novak",
 // Consumption per crew member per second
 const CREW_NEEDS = { water: 0.3, food: 0.25, oxygen: 0.5 };
 
-// Buildings. produces/consumes are per second at 100% efficiency.
+// Shortage priorities. When stored power (or water) runs out and demand is
+// more than supply, supply goes to critical buildings first, then normal,
+// then low; buildings in the same tier share alike. An "off" building draws
+// nothing and makes nothing. Buildings that draw no power or water have none.
+const PRIORITIES = {
+  critical: { name: "Critical", tip: "Served first in a shortage" },
+  normal:   { name: "Normal",   tip: "Served after critical buildings in a shortage" },
+  low:      { name: "Low",      tip: "First to be cut in a shortage" },
+  off:      { name: "Off",      tip: "Switched off: draws nothing and makes nothing" },
+};
+const PRIORITY_ORDER = ["critical", "normal", "low", "off"];
+const SUPPLY_TIERS = ["critical", "normal", "low"];   // served in this order
+
+// Buildings. produces/consumes are per second at 100% efficiency. `priority`
+// is the default shortage priority; `alwaysOn` buildings can't be switched off.
 const BUILDINGS = {
   habitat: {
     name: "Habitat", icon: "🏠", sprite: "habitat",
@@ -84,6 +98,7 @@ const BUILDINGS = {
     consumes: { power: 1, water: 0.5 },
     produces: { oxygen: 1.5 },
     crew: 2, radiation: 5,
+    priority: "critical", alwaysOn: true,
     why: "Habitats are pressurised shelters with built-in life support that turns water and power into breathable oxygen (via electrolysis). Their walls also block some of the radiation that the thin Martian atmosphere lets through.",
   },
   water: {
@@ -92,6 +107,7 @@ const BUILDINGS = {
     consumes: { power: 1.5 },
     produces: { water: 2 },
     bonus: { ice: 2 },
+    priority: "critical",       // the crew drinks what it pulls out of the ground
     why: "Mars has lots of water locked up as ice in the ground. Heating icy soil releases water that can be collected. Bringing water from Earth would be far too heavy, so extracting it locally (in-situ resource utilisation) is essential.",
   },
   greenhouse: {
@@ -99,6 +115,7 @@ const BUILDINGS = {
     cost: { materials: 30, credits: 100 },
     consumes: { power: 2, water: 1 },
     produces: { food: 2, oxygen: 0.3 },
+    priority: "normal",
     why: "Growing food locally reduces how much must be shipped from Earth, but plants need water, energy, warmth and light. As a bonus, photosynthesis adds a little oxygen.",
   },
   solar: {
@@ -130,6 +147,7 @@ const BUILDINGS = {
     consumes: { power: 2 },
     produces: { materials: 1.5 },
     bonus: { rocky: 1.5, resource: 2 },
+    priority: "low",
     why: "Building materials can be made from Martian rock and regolith instead of being launched from Earth, where every kilogram costs thousands of dollars to send.",
   },
   lab: {
@@ -138,6 +156,7 @@ const BUILDINGS = {
     consumes: { power: 2 },
     produces: { credits: 3 },
     needsHabitat: true,
+    priority: "low",
     why: "Science is why we go to Mars: studying rocks, ice and the atmosphere to learn whether Mars ever had life. Here, discoveries earn funding (credits) for expanding the outpost.",
   },
   shield: {
@@ -146,6 +165,7 @@ const BUILDINGS = {
     consumes: { power: 0.5 },
     produces: {},
     radiation: 15,
+    priority: "normal",
     why: "Mars has no global magnetic field and a thin atmosphere, so cosmic rays and solar particles reach the surface. Shielding (thick regolith walls, water or special materials) protects the crew's long-term health.",
   },
 };

@@ -20,10 +20,7 @@ function newGame(missionId, seed) {
   endShown = false;
   $("end").hidden = true;
   selectTile(null);
-  const flows = computeFlows();
-  state.rates = flows.rates;
-  state.powerCapacity = flows.powerCapacity;
-  state.crewCapacity = flows.crewCapacity;
+  refreshFlows();
   say(WATNEY_LINES.start, "good");
   updateHud();
 }

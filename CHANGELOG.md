@@ -37,6 +37,10 @@ they relied on has moved.
   (`tests/strategies.mjs`), which are now the campaign's balance contract.
 - CI runs the tests on every pull request, and the deploy runs them first, so a
   failing test blocks a deploy.
+- Shortage priorities. Every building that draws power or water is *critical*,
+  *normal* or *low*, set from its panel, and can be switched *off* (except
+  Habitats). The HUD's shortage note shows how much each tier is getting, and a
+  switched-off building is dimmed on the map. *First Night* turns priorities off.
 
 ### Changed
 - The simulation no longer touches the page. It queues messages on
@@ -45,6 +49,11 @@ they relied on has moved.
   to `js/render.js`. No change for players. See `docs/PHYSICS.md` § Conventions.
 
 ### Physics
+- Power and water shortages are shared out by priority instead of evenly:
+  critical buildings first, then normal, then low. Habitats and Water
+  Extractors default to critical, Greenhouses and Radiation Shields to normal,
+  and Mines and Science Labs to low. With every building in one tier, the
+  result is the same as before. See `docs/PHYSICS.md` § What is modelled.
 - When power and water ran short at the same time, buildings could draw more
   water than was left after the crew's share: the water factor was a fraction
   of power-limited demand, but it was applied to full demand. Buildings now

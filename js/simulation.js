@@ -23,50 +23,73 @@ function outputMultiplier(t) {
   return m;
 }
 
+// Share `supply` out tier by tier (SUPPLY_TIERS: critical, normal, low).
+// Each tier gets as much of its demand as is left after the tiers before it,
+// as a fraction from 0 to 1; buildings in the same tier share alike.
+function allocate(supply, demand) {
+  const share = {};
+  let left = supply;
+  for (const tier of SUPPLY_TIERS) {
+    const d = demand[tier] || 0;
+    share[tier] = d > 0 ? Math.min(1, left / d) : 1;
+    left = Math.max(0, left - d);
+  }
+  return share;
+}
+
+const sumValues = (obj) => Object.values(obj).reduce((s, v) => s + v, 0);
+const fullShare = () => Object.fromEntries(SUPPLY_TIERS.map((tier) => [tier, 1]));
+
 // Compute every building's actual operating level and the net rates.
+//
+// Shortages are resolved in order: power, then water. Power is short when
+// stored power is empty and consumers want more than is generated; water is
+// short when stored water is empty and the crew and buildings want more than
+// is produced. The crew drinks first and is never throttled. Each shortage is
+// shared out by priority tier (allocate()), so a building's level is
+//   (its tier's share of power) × (its tier's share of water)
+// for whichever of the two it consumes. Water shares are fractions of the
+// buildings' power-limited demand, so the product never draws more than there is.
 function computeFlows() {
   const list = buildings();
   const prod = {}, cons = {};
   const add = (obj, k, v) => { obj[k] = (obj[k] || 0) + v; };
+  const running = (t) => t.building.disabled <= 0 && t.building.priority !== "off";
 
-  // Per-resource supply factor for shortages (power and water can run out).
-  const factor = { power: 1, water: 1 };
-  const level = (t) => {
-    if (t.building.disabled > 0) return 0;
-    const b = BUILDINGS[t.building.type];
-    let f = 1;
-    for (const k of Object.keys(b.consumes)) if (factor[k] !== undefined) f = Math.min(f, factor[k]);
-    return f;
-  };
-
-  // Power: producers have no inputs.
-  let pProd = 0, pCons = 0;
+  // Power: producers have no inputs, and nothing throttles them.
+  let pProd = 0;
+  const pDemand = {};
   for (const t of list) {
     const b = BUILDINGS[t.building.type];
     if (t.building.disabled > 0) continue;
     pProd += (b.produces.power || 0) * outputMultiplier(t);
-    pCons += b.consumes.power || 0;
+    if (running(t) && b.consumes.power) add(pDemand, t.building.priority, b.consumes.power);
   }
-  if (state.resources.power <= 0.01 && pCons > pProd) factor.power = pCons ? pProd / pCons : 1;
+  const pTotal = sumValues(pDemand);
+  const powerShare = state.resources.power <= 0.01 && pTotal > pProd ? allocate(pProd, pDemand) : fullShare();
+  const powerLevel = (t) => {
+    if (!running(t)) return 0;
+    return BUILDINGS[t.building.type].consumes.power ? powerShare[t.building.priority] : 1;
+  };
 
-  // Water: extractors depend on power. The crew drinks first and isn't
-  // throttled, so buildings share only what's left after the crew's needs.
-  // wBuild is what buildings would draw at their power-limited level; the
-  // factor is a fraction of their full demand, because level() takes the
-  // smaller of the power and water factors rather than multiplying them.
+  // Water: extractors depend on power, and buildings want water only as fast
+  // as their power lets them run. The crew drinks first.
   const crewWater = crewNeed("water");
-  let wProd = 0, wBuild = 0, wFull = 0;
+  let wProd = 0;
+  const wDemand = {};
   for (const t of list) {
     const b = BUILDINGS[t.building.type];
-    const lv = level(t);
+    const lv = powerLevel(t);
     wProd += (b.produces.water || 0) * outputMultiplier(t) * lv;
-    if (t.building.disabled > 0) continue;
-    wBuild += (b.consumes.water || 0) * factor.power;
-    wFull += b.consumes.water || 0;
+    if (b.consumes.water && lv > 0) add(wDemand, t.building.priority, b.consumes.water * lv);
   }
-  if (state.resources.water <= 0.01 && crewWater + wBuild > wProd) {
-    factor.water = wFull ? Math.max(0, wProd - crewWater) / wFull : 1;
-  }
+  const wTotal = sumValues(wDemand);
+  const waterShare = state.resources.water <= 0.01 && crewWater + wTotal > wProd
+    ? allocate(Math.max(0, wProd - crewWater), wDemand) : fullShare();
+  const level = (t) => {
+    const lv = powerLevel(t);
+    return BUILDINGS[t.building.type].consumes.water && lv > 0 ? lv * waterShare[t.building.priority] : lv;
+  };
 
   // Final flows.
   let crewCapacity = 0, shielding = 0, powerCapacity = POWER_CAPACITY;
@@ -76,7 +99,7 @@ function computeFlows() {
     t.building.level = lv;
     for (const [k, v] of Object.entries(b.produces)) add(prod, k, v * outputMultiplier(t) * (k === "power" ? (t.building.disabled > 0 ? 0 : 1) : lv));
     for (const [k, v] of Object.entries(b.consumes)) add(cons, k, v * lv);
-    if (t.building.reinforced) shielding += REINFORCE.radiation; // passive, works even when damaged
+    if (t.building.reinforced) shielding += REINFORCE.radiation; // passive, works even when damaged or off
     if (t.building.disabled > 0) continue;
     crewCapacity += b.crew || 0;
     powerCapacity += b.storage || 0;
@@ -84,9 +107,30 @@ function computeFlows() {
   }
   for (const k of Object.keys(CREW_NEEDS)) add(cons, k, crewNeed(k));
 
+  // Overall fraction of demand met, for the HUD.
+  const delivered = (share, demand, total) =>
+    total > 0 ? SUPPLY_TIERS.reduce((s, tier) => s + share[tier] * (demand[tier] || 0), 0) / total : 1;
+  const factor = { power: delivered(powerShare, pDemand, pTotal), water: delivered(waterShare, wDemand, wTotal) };
+
   const rates = {};
   for (const r of RESOURCES) rates[r.key] = (prod[r.key] || 0) - (cons[r.key] || 0);
-  return { rates, prod, factor, crewCapacity, shielding, powerCapacity };
+  return {
+    rates, prod, factor, crewCapacity, shielding, powerCapacity,
+    shares: { power: powerShare, water: waterShare },
+    demand: { power: pDemand, water: wDemand },
+  };
+}
+
+// Recompute the flows and keep what the HUD and the rest of the step read.
+function refreshFlows() {
+  const flows = computeFlows();
+  state.rates = flows.rates;
+  state.efficiency = flows.factor.power;
+  state.waterFactor = flows.factor.water;
+  state.crewCapacity = flows.crewCapacity;
+  state.powerCapacity = flows.powerCapacity;
+  state.supply = { shares: flows.shares, demand: flows.demand };
+  return flows;
 }
 
 // One fixed simulation step. Time comes from the tick count rather than a
@@ -108,12 +152,7 @@ function updateGame() {
 
   updateEvents(dt);
 
-  const flows = computeFlows();
-  state.rates = flows.rates;
-  state.efficiency = flows.factor.power;
-  state.waterFactor = flows.factor.water;
-  state.crewCapacity = flows.crewCapacity;
-  state.powerCapacity = flows.powerCapacity;
+  const flows = refreshFlows();
 
   const res = state.resources;
   for (const r of RESOURCES) {

@@ -28,9 +28,9 @@ Plain browser JavaScript. Classic `<script>` tags in `index.html` share **one gl
 | `js/missions.js` | The campaign and the intro story. Each mission overrides the defaults in `data.js`. Its header comment documents every field. Briefing text makes claims to the player, so it's bound by `docs/PHYSICS.md` like the `why` texts. |
 | `js/rng.js` | The seeded generator (mulberry32). `rand()` is the simulation's only source of randomness. |
 | `js/hexmap.js` | Odd-r offset hex grid, terrain from a seed or a handmade map, neighbours, connectivity |
-| `js/state.js` | The single `state` object, built by `createState(mission, seed, difficulty)`. Build, reinforce and demolish rules, each paired with a `*Blocker()` function that returns the reason it's refused, or `null`. `emit()` and `emitLine()`, which queue messages on `state.outbox`. |
+| `js/state.js` | The single `state` object, built by `createState(mission, seed, difficulty)`. Build, reinforce, demolish and shortage-priority rules, each paired with a `*Blocker()` function that returns the reason it's refused, or `null`. `emit()` and `emitLine()`, which queue messages on `state.outbox`. |
 | `js/events.js` | Random and scripted events, and timed effects |
-| `js/simulation.js` | `computeFlows()` (shortage resolution), `updateGame()` (one fixed `SIM_STEP`: integrate, radiation, health, crew), objectives, and `checkEnd()`, which sets `state.over` and `state.endCause` |
+| `js/simulation.js` | `computeFlows()` (shortage resolution by priority tier, through `allocate()`), `refreshFlows()`, `updateGame()` (one fixed `SIM_STEP`: integrate, radiation, health, crew), objectives, and `checkEnd()`, which sets `state.over` and `state.endCause` |
 | `js/render.js` | Canvas 2-D: sprite loading, hex layout and pixel picking (`view`, `tileCenter`, `tileFromPixel`). The terrain, sprites and outlines are cached in an off-screen static layer, keyed by `staticSignature()`. The crew figures are cosmetic only. |
 | `js/ui.js` | HUD and objectives, build panel, message log. `drainOutbox()` shows the simulation's queued messages. |
 | `js/screens.js` | Intro, mission select and briefing, end screen and debrief, saved progress in `localStorage`. The simulation doesn't run while one is open. |

@@ -42,6 +42,8 @@ function createState(mission, seed, difficulty = "normal") {
     crewCapacity: 0,
     powerCapacity: POWER_CAPACITY,
     efficiency: 1,             // power-limited operating fraction
+    waterFactor: 1,            // water-limited operating fraction
+    supply: null,              // shortage shares and demand by priority tier, for the HUD
     effects: [],               // active events: { kind, label, remaining }
     nextEventIn: events.first * diff.eventGap,
     nextScripted: 0,           // index into events.scripted
@@ -80,7 +82,24 @@ function buildingUnlocked(type) {
 }
 
 function makeBuilding(type) {
-  return { type, disabled: 0, reinforced: false };
+  return { type, disabled: 0, reinforced: false, priority: BUILDINGS[type].priority || null };
+}
+
+// Reason a building can't be given a shortage priority, or null if it can.
+function priorityBlocker(t, priority) {
+  if (!t || !t.building) return "No building";
+  if (state.mission.priorities === false) return "Shortage priorities aren't available in this mission";
+  if (!PRIORITIES[priority]) return "Unknown priority";
+  const b = BUILDINGS[t.building.type];
+  if (!b.priority) return "Draws no power or water, so it has no priority";
+  if (priority === "off" && b.alwaysOn) return `The ${b.name} is life support and can't be switched off`;
+  return null;
+}
+
+function setPriority(t, priority) {
+  if (priorityBlocker(t, priority)) return false;
+  t.building.priority = priority;
+  return true;
 }
 
 function canAffordCost(cost) {

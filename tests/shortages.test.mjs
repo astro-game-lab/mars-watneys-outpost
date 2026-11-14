@@ -49,12 +49,14 @@ test("with no power stored, consumers draw exactly what is generated", () => {
   assert.ok(Math.abs(flows.rates.power) < EPS);
 });
 
-test("power is resolved before water: extractors run no faster than power allows", () => {
+test("power is resolved before water: extractors run no faster than their tier's power allows", () => {
+  // Every consumer in one tier, so the extractors are throttled with the rest.
   const sim = outpostWith(["water", "water", "nuclear", "mine", "mine", "mine"]);
+  for (const t of sim.state.tiles) if (t.building && t.building.priority) t.building.priority = "normal";
   const flows = sim.computeFlows();
-  assert.ok(flows.factor.power < 1, "expected a power shortage");
+  assert.ok(flows.shares.power.normal < 1, "expected a power shortage");
   for (const t of sim.state.tiles.filter((t) => t.building && t.building.type === "water")) {
-    assert.ok(t.building.level <= flows.factor.power + EPS);
+    assert.ok(t.building.level <= flows.shares.power.normal + EPS);
   }
 });
 
@@ -80,8 +82,12 @@ test("with power and water both short, buildings never draw more water than is l
 });
 
 test("when production can't even cover the crew, buildings get no water", () => {
-  const sim = outpostWith(["greenhouse"]);
+  // Plenty of power, no extractor, and a large crew.
+  const sim = outpostWith(["nuclear", "greenhouse"], { power: 100 });
   sim.state.crew = 10;
   const flows = sim.computeFlows();
   assert.equal(flows.factor.water, 0);
+  for (const t of sim.state.tiles.filter((t) => t.building && sim.BUILDINGS[t.building.type].consumes.water)) {
+    assert.equal(t.building.level, 0, `${t.building.type} still runs`);
+  }
 });

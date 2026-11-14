@@ -7,6 +7,7 @@
 //   { build: "mine", toward: [9, 3] }        the free tile closest to a target tile
 //   { build: "lab", at: [5, 3] }             exactly this tile
 //   { reinforce: "habitat" }                 the first unreinforced building of a type
+//   { priority: "lab", to: "off" }           every building of a type, as built so far
 //   { wait: 1200 }                           do nothing until this tick
 //
 // A move may also carry `after: tick` to hold it back until that tick.
@@ -61,6 +62,11 @@ function tryMove(sim, move) {
     if (!sim.canAfford(move.build)) return false;
     const t = chooseTile(sim, move);
     return !!t && sim.build(move.build, t);
+  }
+  if (move.priority) {
+    const list = state.tiles.filter((t) => t.building && t.building.type === move.priority);
+    for (const t of list) if (!sim.setPriority(t, move.to)) throw new Error(sim.priorityBlocker(t, move.to));
+    return true;
   }
   if (move.reinforce) {
     const t = state.tiles.find((t) => t.building && t.building.type === move.reinforce && !t.building.reinforced);

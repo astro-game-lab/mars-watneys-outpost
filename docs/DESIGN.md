@@ -12,7 +12,7 @@ You're the stranded engineer turned colony founder: improvising, rationing, and 
 
 1. **Read the outpost.** The HUD shows each resource with its net rate and time to empty, plus crew, exposure, health and the clock.
 2. **Expand.** Click a dashed tile next to the outpost to build. Terrain matters: Water Extractors do double on ice, and Mines do 1.5× on rock and 2× on high-resource tiles.
-3. **Balance the loop.** Power runs everything, water feeds the Habitats and Greenhouses, Habitats make oxygen and house crew, and Labs earn the credits that pay for more.
+3. **Balance the loop.** Power runs everything, water feeds the Habitats and Greenhouses, Habitats make oxygen and house crew, and Labs earn the credits that pay for more. When power or water runs short, each building's priority decides who goes without: life support first, science last by default. Switching a building off saves its share for the night.
 4. **Survive the sol.** Night kills solar. Events hit at random. Shortages throttle whatever depends on them.
 5. **Grow.** New crew land every two sols if there's a bed and supplies are healthy. More crew means more science and more mouths.
 6. **Win** the mission's objectives before the outpost fails. The campaign builds up one hazard at a time. It ends with *The Outpost*: reach Sol 8 with 1 000 credits earned in total, which takes about 16 minutes at 1× (eight 120 s sols).
@@ -40,7 +40,7 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 
 - **First visit:** an intro screen in Watney's voice tells the story, explains the power → water → air and food → credits loop in four cards, and lists the controls. It reopens with `H`.
 - **The campaign is the tutorial.** Each mission isolates one lesson, with a briefing that gives the science, the objectives, how you can lose, the buildings available, and three first moves.
-  1. *First Night*: storage. Survive two nights without a blackout, using Solar, Battery, Water and Greenhouse only.
+  1. *First Night*: storage. Survive two nights without a blackout, using Solar, Battery, Water and Greenhouse only. Shortage priorities are off here, so storage can't be dodged by switching the Lab off.
   2. *Ice Line*: water from the ground. Bank 2 000 water before Sol 4 on a handmade map whose ice sits past a ridge. Regolith alone falls short.
   3. *Dust Season*: nuclear power. Earn 3 000 credits before Sol 6 through near-constant 90 s storms. Solar alone falls short.
   4. *Flare Watch*: shielding. Reach Sol 5 with exposure at 10% or less, through frequent flares and one scripted flare.

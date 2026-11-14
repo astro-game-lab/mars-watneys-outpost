@@ -154,7 +154,7 @@ function drawTileStatic(c, t) {
     }
     const sp = spriteBitmap(t.building.type);
     if (sp) {
-      c.globalAlpha = t.building.disabled > 0 ? 0.45 : 1;
+      c.globalAlpha = t.building.disabled > 0 || t.building.priority === "off" ? 0.45 : 1;
       c.drawImage(sp.canvas, x - sp.w / 2, y - sp.h / 2, sp.w, sp.h);
       c.globalAlpha = 1;
     }
@@ -172,7 +172,7 @@ function staticSignature() {
   for (const t of state.tiles) {
     const b = t.building;
     sig += `${TERRAIN_CODE[t.terrain]}:`;
-    sig += b ? `${BUILDING_CODE[b.type]}${b.reinforced ? "r" : ""}${b.disabled > 0 ? "d" : ""},` : ".,";
+    sig += b ? `${BUILDING_CODE[b.type]}${b.reinforced ? "r" : ""}${b.disabled > 0 ? "d" : ""}${b.priority === "off" ? "o" : ""},` : ".,";
   }
   return sig;
 }
@@ -203,18 +203,21 @@ function drawTileDynamic(t) {
     ctx.globalAlpha = 1;
   }
   if (!t.building) return;
-  let mark = null;
+  let mark = null, color = "rgba(180, 20, 20, 0.85)";
   if (t.building.disabled > 0) mark = "🔧";
+  else if (t.building.priority === "off") { mark = "OFF"; color = "rgba(60, 60, 60, 0.9)"; }
   else if (t.building.level !== undefined && t.building.level < 0.99) mark = "⚡";
   if (mark) {
-    ctx.font = `${Math.round(size * 0.45)}px system-ui`;
+    const text = mark === "OFF";   // plain text needs its own colour; emoji bring theirs
+    ctx.font = text ? `bold ${Math.round(size * 0.2)}px system-ui` : `${Math.round(size * 0.45)}px system-ui`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "rgba(180, 20, 20, 0.85)";
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(x + size * 0.5, y - size * 0.5, size * 0.28, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillText(mark, x + size * 0.5, y - size * 0.48);
+    if (text) ctx.fillStyle = "#fff";
+    ctx.fillText(mark, x + size * 0.5, y - size * (text ? 0.5 : 0.48));
   }
 }
 
