@@ -119,7 +119,7 @@ There's no test suite. These are the checks the model needs, roughly in priority
 | Shortage resolution | Throttled consumers never draw more than is supplied, and the power-before-water ordering holds | _todo_ |
 | Connectivity | Demolition never splits the outpost | _todo_ |
 | Step-size independence | Mission outcome doesn't depend on frame rate | Holds by construction: the simulation only advances in fixed `SIM_STEP` steps |
-| Mission balance | Every mission is winnable at every difficulty, and the strategy it warns against loses | Checked by hand 2026-11-12 with scripted build orders. See `ideas/splash-campaign-difficulty.md`. There's no automated test yet. |
+| Mission balance | Every mission is winnable at every difficulty, and the strategy it warns against loses | Checked by hand 2026-11-12 with scripted build orders. There's no automated test yet. |
 
 ## Numerical notes
 

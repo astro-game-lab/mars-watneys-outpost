@@ -16,7 +16,6 @@ An [astro-game-lab](https://github.com/astro-game-lab) game, and an unofficial f
 | --- | --- | --- |
 | [`docs/PHYSICS.md`](docs/PHYSICS.md) | What the model claims, every gameplay departure, the scientific claims in the building texts and their sources, and where the repo deviates from org conventions | **Any change to a rate, rule, event or `why` text updates it in the same commit.** A new departure gets a row. A new claim to the player gets a row with a source. |
 | [`docs/DESIGN.md`](docs/DESIGN.md) | What the game is, the loop, the campaign and scope | Game-design and UI work |
-| [`ideas/`](ideas/) | Plans for future work, one file per plan, with its status at the top | Before starting work a plan covers. Update the status when it lands. |
 | [`ATTRIBUTIONS.md`](ATTRIBUTIONS.md) | Provenance of every third-party asset and the *Martian* material | Adding any asset, image or borrowed code |
 
 ## Architecture

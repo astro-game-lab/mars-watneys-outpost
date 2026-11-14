@@ -90,7 +90,6 @@ js/screens.js     intro, mission select and briefing, end screen and debrief, sa
 js/main.js        entry point, fixed-step frame loop, input, seeds
 sprites/          building sprites (SVG)
 assets/           map background
-ideas/            plans for future work (not deployed)
 ```
 
 The scripts are classic `<script>` tags that share one global scope. **The order in `index.html` matters.** Tune the game in `js/data.js` and the missions in `js/missions.js`. The rest of the code shouldn't contain balance numbers.
