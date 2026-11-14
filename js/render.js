@@ -48,9 +48,21 @@ function layoutView(w, h) {
   const availW = w - left - 20;
   const gridW = SQRT3 * (COLS + 0.5);
   const gridH = 1.5 * (ROWS - 1) + 2;
-  view.size = Math.min((availW * 0.95) / gridW, (h * 0.85) / gridH);
-  view.originX = left + (availW - gridW * view.size) / 2 + (SQRT3 / 2) * view.size;
-  view.originY = (h - gridH * view.size) / 2 + view.size;
+  const place = (size) => {
+    view.size = size;
+    view.originX = left + (availW - gridW * size) / 2 + (SQRT3 / 2) * size;
+    view.originY = (h - gridH * size) / 2 + size;
+  };
+  // The clock box sits over the top-right corner of the screen, and a tile
+  // under it can't be clicked. Shrink the grid, still centred, until none is.
+  const clock = document.getElementById("clockbox").getBoundingClientRect();
+  const underClock = () => state.tiles.some((t) => {
+    const { x, y } = tileCenter(t), r = view.size * 0.6;
+    return x + r > clock.left && x - r < clock.right && y + r > clock.top && y - r < clock.bottom;
+  });
+  let size = Math.min((availW * 0.95) / gridW, (h * 0.85) / gridH);
+  place(size);
+  for (let i = 0; i < 40 && underClock(); i++) place(size *= 0.97);
 }
 
 const astronauts = [];
