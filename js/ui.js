@@ -240,6 +240,15 @@ function workText(b, kind, verb) {
 
 // ---------- Side panel: build menu / building info ----------
 let openWhy = null;
+let panelKind = null;   // the layout the panel was drawn for (panelKindOf)
+
+// Which layout a tile's panel needs. When it changes under an open panel (a
+// site is finished, a neighbour is demolished), the panel is drawn again.
+function panelKindOf(t) {
+  if (!t) return null;
+  if (t.building) return t.building.construct > 0 ? "site" : "building";
+  return canPlaceOn(t) ? "build" : "info";
+}
 
 function selectTile(t) {
   state.selected = t;
@@ -250,6 +259,7 @@ function selectTile(t) {
 function renderPanel() {
   const panel = $("panel");
   const t = state.selected;
+  panelKind = panelKindOf(t);
   if (!t) { panel.hidden = true; return; }
   panel.hidden = false;
   const terrain = TERRAIN[t.terrain].name;
@@ -346,6 +356,7 @@ function buildOption(key, t) {
 // Refresh parts of the panel that change every tick.
 function updatePanelLive() {
   const t = state.selected;
+  if (panelKindOf(t) !== panelKind) return renderPanel();
   if (t.building) {
     const live = $("live");
     if (!live) return;
