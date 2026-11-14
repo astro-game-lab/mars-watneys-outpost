@@ -168,10 +168,19 @@ function screenKey(e) {
 }
 
 // ---------- End screen and debrief ----------
+// Water and oxygen hints follow this mission's buildings: in Thin Air, the
+// Habitats make no oxygen and drink no water.
 const NEED_HINTS = {
-  water: "Water Extractors need power, and on ice they yield twice as much. Habitats and Greenhouses drink too.",
+  water: () => {
+    const drinkers = ["habitat", "greenhouse"].filter((k) => buildingUnlocked(k) && spec(k).consumes.water)
+      .map((k) => `${spec(k).name}s`);
+    return "Water Extractors need power, and on ice they yield twice as much." +
+      (drinkers.length ? ` ${drinkers.join(" and ")} drink too.` : "");
+  },
   food: "Only Greenhouses make food, and they need water and power. Build one early.",
-  oxygen: "Habitats make oxygen from water and power. When either runs short, so does the air.",
+  oxygen: () => spec("habitat").produces.oxygen
+    ? "Habitats make oxygen from water and power. When either runs short, so does the air."
+    : "This mission's Habitats make no oxygen, so the air comes from Oxygen Plants, which need only power. Build them for the crew you'll have, and keep them powered through the night.",
   radiation: "Exposure above 50% hurts the crew. Radiation Shields and regolith reinforcement bring it down, and flares push it up.",
   cold: "A Habitat that loses power cools fast at night, and the crew sleeping in it suffer. Keep Habitats at Critical priority, and bank enough power for the hours before dawn, when heating needs the most.",
 };
@@ -215,7 +224,8 @@ function lossDebrief(cause) {
     : worst === "cold" ? "the cold in a Habitat that lost its heating" : `running out of ${worst}`;
   const lost = state.stats.lost;
   const who = lost ? `${lost.name} didn't make it` : "The crew didn't make it";
-  const hints = [NEED_HINTS[worst], "A big stockpile means nothing if it's falling fast. Watch the rates."];
+  const hint = NEED_HINTS[worst];
+  const hints = [typeof hint === "function" ? hint() : hint,"A big stockpile means nothing if it's falling fast. Watch the rates."];
   const dosed = state.crewMembers.find((m) => lost && m.name === lost.name);
   if (dosed && dosed.dose > 0.25 * DOSE_LIMIT) {
     hints.push(`${lost.name}'s radiation dose had already cut their maximum health to ${Math.round(maxHealth(dosed))}. The most exposed crew are the most fragile.`);

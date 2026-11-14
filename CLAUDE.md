@@ -35,7 +35,7 @@ Plain browser JavaScript. Classic `<script>` tags in `index.html` share **one gl
 | `js/ui.js` | HUD and objectives, build panel, message log. `drainOutbox()` shows the simulation's queued messages. `checkTips()` shows Watney's tips: it only reads the state, so it can't affect determinism (`tests/tips.test.mjs` checks this). |
 | `js/screens.js` | Intro, mission select and briefing, end screen and debrief, saved progress in `localStorage`. The simulation doesn't run while one is open. |
 | `js/main.js` | `newGame()`, seeds, the 30 fps frame loop with its fixed-step accumulator, input. Each frame it drains the outbox and shows the end screen once `state.over` is set. |
-| `tests/` | Node tests of the simulation. `load-sim.mjs` runs the seven simulation files in an empty `node:vm` context. `bot.mjs` plays a mission from a build order. `strategies.mjs` holds each mission's winning and warned-against build orders. `helpers.mjs` has `buildNow()`, which skips construction for tests about a working building. |
+| `tests/` | Node tests of the simulation. `load-sim.mjs` runs the seven simulation files in an empty `node:vm` context. `load-ui.mjs` adds `js/ui.js` and `js/screens.js` over a stand-in DOM, for the UI's text and rules (debriefs, progress, unlocks). `bot.mjs` plays a mission from a build order. `strategies.mjs` holds each mission's winning and warned-against build orders. `helpers.mjs` has `buildNow()`, which skips construction for tests about a working building. |
 
 The `*Blocker()` pattern is how the UI explains a refusal. Keep it: any new action that can be refused gets a blocker that returns a player-facing reason.
 
@@ -65,7 +65,7 @@ npm test                       # Node 22 or later; nothing to install
 
 The suite takes about a minute, most of it the balance tests, which play every mission at every difficulty. For a quick run, pick files: `node --test tests/shortages.test.mjs`. CI runs the full suite on every pull request, and `deploy.yml` runs it before publishing, so a failing test blocks a deploy. There's no lint.
 
-Tests don't cover the UI, so also verify changes by playing through in a browser. The Playwright MCP server works well for this. Check the browser console for errors, because a broken global or a script-order mistake fails silently until it's called. `python3 -m http.server` lets the browser cache scripts, so after editing JS, hard-reload or use a no-cache server, or you'll test stale code.
+Tests don't cover drawing, input or the frame loop, so also verify changes by playing through in a browser. The Playwright MCP server works well for this. Check the browser console for errors, because a broken global or a script-order mistake fails silently until it's called. `python3 -m http.server` lets the browser cache scripts, so after editing JS, hard-reload or use a no-cache server, or you'll test stale code.
 
 Balance is checked by `tests/balance.test.mjs`. Every mission must be winnable at every difficulty, and the strategy its briefing warns against must lose. The build orders in `tests/strategies.mjs` are that contract: a change to a rate, rule or mission keeps them passing, or updates them in the same change and says why. A known gap is marked with `knownGap`, which makes its check a `todo` rather than a failure.
 
