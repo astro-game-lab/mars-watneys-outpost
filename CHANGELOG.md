@@ -67,6 +67,15 @@ they relied on has moved.
   runs headless under Node. Hex layout, pixel picking and sprite loading moved
   to `js/render.js`. No change for players. See `docs/PHYSICS.md` § Conventions.
 
+### Changed (missions)
+- *The Outpost* asks for 4 000 credits instead of 1 000. With every mechanic in
+  play, a sound outpost was earning five to seven times the old target, so the
+  science economy no longer mattered.
+- *Ice Line* starts with 260 water instead of 60, for room on *Martian*, where
+  Watney now builds everything alone. Regolith alone still falls short.
+- *Dust Season*'s briefing mentions dust on the panels, and *Crew Rotation*'s
+  warns that anyone sent home at the dose limit lowers the crew count.
+
 ### Physics
 - Buildings are no longer instant: each takes 6 to 18 seconds of one crew
   member's work, and damage stays until someone repairs it. *First Night*'s

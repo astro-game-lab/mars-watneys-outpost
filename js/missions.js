@@ -78,7 +78,7 @@ const MISSIONS = [
       "..r..#....r",
       "r....r..#..",
     ],
-    start: { resources: { water: 60, food: 120, materials: 120, credits: 400 } },
+    start: { resources: { water: 260, food: 120, materials: 120, credits: 400 } },
     buildings: ["water", "solar", "battery", "greenhouse", "mine", "habitat"],
     events: { first: 50, interval: [50, 80], weights: { failure: 2, supply: 1 } },
     crewArrivals: false,
@@ -91,7 +91,7 @@ const MISSIONS = [
     lesson: "Solar power is at the mercy of the weather. Nuclear power runs through storms and nights alike.",
     briefing: [
       "It's dust storm season. On Mars a storm can keep growing until it wraps the whole planet. In 2018 one blotted out the Sun for months and ended the Opportunity rover's mission.",
-      "Ours will be shorter, but there will be a lot of them, and each one cuts solar output by 70%. Batteries buy time. What I really need is power that doesn't care about the weather.",
+      "Ours will be shorter, but there will be a lot of them, and each one cuts solar output by 70%. They also coat the panels in dust, which stays until someone cleans it off. Batteries buy time. What I really need is power that doesn't care about the weather.",
       "NASA has approved a Nuclear Generator. It's expensive, but it runs day and night, storm or no storm. Earn 3,000 credits for the science program before Sol 6.",
     ],
     tips: [
@@ -138,7 +138,7 @@ const MISSIONS = [
     briefing: [
       "NASA is sending company. A lot of company. Real crews wait for a launch window, which comes round about every 26 months. Here someone has found a shortcut, because there's a lander every sol.",
       "Every new crewmate means more science and more hands. They also mean another bed, another pair of lungs and another stomach. NASA won't land anyone unless there's a free bed and water, food and oxygen are all in good shape.",
-      "Get the crew up to six before Sol 9.",
+      "Get the crew up to six before Sol 9. And mind the radiation: anyone who reaches the career dose limit goes home, and the count goes down with them.",
     ],
     tips: [
       "Each Habitat sleeps two, so you need a third before the fifth crew member lands.",
@@ -157,7 +157,7 @@ const MISSIONS = [
     lesson: "A closed loop of power, water, air and food, on a planet that isn't trying to help.",
     briefing: [
       "This is the full mission: everything from the last five, all at once, on fresh ground every time.",
-      "Keep everyone alive until Sol 8 and earn 1,000 credits of science. NASA lands a new crew member every two sols if there's a bed and supplies are healthy. Dust storms, flares, micrometeorites and dodgy pumps will all turn up, along with the odd supply drop from home.",
+      "Keep everyone alive until Sol 8 and earn 4,000 credits of science. NASA lands a new crew member every two sols if there's a bed and supplies are healthy. Dust storms, flares, micrometeorites and dodgy pumps will all turn up, along with the odd supply drop from home.",
       "No pressure. Well, some pressure: about 0.6% of Earth's.",
     ],
     tips: [
@@ -167,7 +167,7 @@ const MISSIONS = [
     ],
     seed: null,
     buildings: null,
-    objectives: [{ type: "sol", value: 8 }, { type: "credits", value: 1000 }],
+    objectives: [{ type: "sol", value: 8 }, { type: "credits", value: 4000 }],
     failures: [],
   },
 ];

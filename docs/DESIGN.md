@@ -15,7 +15,7 @@ You're the stranded engineer turned colony founder: improvising, rationing, and 
 3. **Balance the loop.** Power runs everything, water feeds the Habitats and Greenhouses, Habitats make oxygen and house crew, Oxygen Plants pull oxygen out of the air with power alone, and Labs earn the credits that pay for more. When power or water runs short, each building's priority decides who goes without: life support first, science last by default. Switching a building off saves its share for the night.
 4. **Survive the sol.** Night kills solar. Events hit at random. Shortages throttle whatever depends on them.
 5. **Grow.** New crew land every two sols if there's a bed and supplies are healthy. More crew means more science and more mouths.
-6. **Win** the mission's objectives before the outpost fails. The campaign builds up one hazard at a time. It ends with *The Outpost*: reach Sol 8 with 1 000 credits earned in total, which takes about 16 minutes at 1× (eight 120 s sols).
+6. **Win** the mission's objectives before the outpost fails. The campaign builds up one hazard at a time. It ends with *The Outpost*: reach Sol 8 with 4 000 credits earned in total, which takes about 16 minutes at 1× (eight 120 s sols).
 
 ## The science
 
