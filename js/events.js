@@ -15,7 +15,7 @@ const EVENTS = {
     const list = buildings().filter((t) => !(t.building.construct > 0));
     const t = list[Math.floor(rand() * list.length)];
     // Damage waits for a crew member to repair it (updateWork in js/simulation.js).
-    if (t.building.disabled > 0) t.building.disabled += state.events.durations.meteor;
+    if (t.building.disabled > 0) addWork(t, "repair", state.events.durations.meteor);
     else startJob(t, "repair", state.events.durations.meteor);
     emit(`Micrometeorite hit the ${BUILDINGS[t.building.type].name}! It's out until someone repairs it.`, "bad");
   },

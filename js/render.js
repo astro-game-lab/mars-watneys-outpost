@@ -229,14 +229,17 @@ function drawTileDynamic(t) {
     ctx.globalAlpha = 1;
   }
   if (!t.building) return;
-  // One status marker per building, top-right of its hex. A construction site's
-  // marker has a ring around it showing how much of the work is done.
+  // One status marker per building, top-right of its hex. Construction and
+  // repair markers have a ring around them showing how much of the work is done.
   let mark = null, color = "rgba(180, 20, 20, 0.85)", progress = null;
   if (t.building.construct > 0) {
     mark = "🏗️";
     color = "rgba(120, 72, 30, 0.9)";
-    progress = 1 - t.building.construct / BUILDINGS[t.building.type].work;
-  } else if (t.building.disabled > 0) mark = "🔧";
+    progress = jobProgress(t.building, "construct");
+  } else if (t.building.disabled > 0) {
+    mark = "🔧";
+    progress = jobProgress(t.building, "repair");
+  }
   else if (beingWorked(t.building, "clean")) { mark = "🧹"; color = "rgba(46, 90, 122, 0.9)"; }
   else if (t.building.type === "greenhouse" && t.building.tempK < FROST_K) { mark = "❄️"; color = "rgba(46, 90, 122, 0.9)"; }
   else if (t.building.tempK < COLD_K) { mark = "🥶"; color = "rgba(46, 90, 122, 0.9)"; }

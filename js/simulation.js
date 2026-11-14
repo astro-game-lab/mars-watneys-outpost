@@ -136,6 +136,7 @@ function finishJob(t, kind, member) {
   const b = t.building, name = BUILDINGS[b.type].name;
   b[JOB_FIELD[kind]] = 0;
   delete b.queued[kind];
+  delete b.jobTotal[kind];
   if (b.working) delete b.working[kind];
   if (kind === "construct") emit(`The ${name} is finished${member.arrival ? `, thanks to ${member.name}` : ""}. Up and running.`, "good");
   else if (kind === "repair") emit(`${member.name} has the ${name} working again.`, "good");

@@ -117,3 +117,16 @@ test("jobs left over when every crew member is busy are counted as waiting", () 
   assert.equal(sim.state.jobsWaiting, 2);
   assert.ok(sim.state.crewMembers.every((m) => m.job));
 });
+
+test("repair progress counts every hit: a second strike adds to the work and to the total", () => {
+  const sim = setUp({ crew: 1 });
+  const lab = sim.state.tiles.find((t) => t.building && t.building.type === "lab");
+  sim.startJob(lab, "repair", 10);
+  steps(sim, stepsFor(sim, 5));
+  assert.ok(Math.abs(sim.jobProgress(lab.building, "repair") - 0.5) < 1e-6);
+  sim.addWork(lab, "repair", 10);              // hit again: 15 left of 20
+  assert.ok(Math.abs(sim.jobProgress(lab.building, "repair") - 0.25) < 1e-6);
+  steps(sim, stepsFor(sim, 15));
+  assert.equal(lab.building.disabled, 0);
+  assert.equal(lab.building.jobTotal.repair, undefined);
+});

@@ -118,7 +118,8 @@ function buildingUnlocked(type) {
 function makeBuilding(type) {
   const b = {
     type, disabled: 0, reinforced: false, priority: BUILDINGS[type].priority || null,
-    construct: 0, reinforcing: 0, queued: {},   // remaining work per job, and when each was queued
+    construct: 0, reinforcing: 0,   // remaining work per job (JOB_FIELD)
+    queued: {}, jobTotal: {},       // when each job was queued, and its total work, for progress
   };
   if (BUILDINGS[type].solar) Object.assign(b, { dust: 0, cleaning: 0 });
   if (BUILDINGS[type].heat) b.tempK = SETPOINT_K;
@@ -132,6 +133,19 @@ function makeBuilding(type) {
 function startJob(t, kind, work) {
   t.building[JOB_FIELD[kind]] = work;
   t.building.queued[kind] = state.jobSeq++;
+  t.building.jobTotal[kind] = work;
+}
+
+// More work on a job already queued, such as a second micrometeorite hit.
+function addWork(t, kind, work) {
+  t.building[JOB_FIELD[kind]] += work;
+  t.building.jobTotal[kind] = (t.building.jobTotal[kind] || 0) + work;
+}
+
+// How much of a job is done, from 0 to 1.
+function jobProgress(b, kind) {
+  const left = b[JOB_FIELD[kind]], total = b.jobTotal[kind] || left;
+  return total > 0 ? 1 - left / total : 1;
 }
 
 // Not working: damaged or still being built. Switched off is separate.

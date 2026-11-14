@@ -316,14 +316,13 @@ function updatePanelLive() {
     const lv = t.building.level ?? 1;
     const bld = t.building;
     if (bld.construct > 0) {
-      const total = BUILDINGS[bld.type].work;
-      live.innerHTML = `<div class="kv"><span>Status</span><span>🏗️ ${Math.floor(100 * (1 - bld.construct / total))}% · ${workText(bld, "construct", "being built")}</span></div>` +
+      live.innerHTML = `<div class="kv"><span>Status</span><span>🏗️ ${Math.floor(100 * jobProgress(bld, "construct"))}% · ${workText(bld, "construct", "being built")}</span></div>` +
         `<div class="kv"><span>Work left</span><span>${Math.ceil(bld.construct)}s of crew time</span></div>`;
       const cbtn = document.querySelector('#panel button[data-act="cancel"]');
       if (cbtn) cbtn.disabled = !!cancelBlocker(t);
       return;
     }
-    const status = bld.disabled > 0 ? `🔧 Damaged · ${Math.ceil(bld.disabled)}s of repairs · ${workText(bld, "repair", "being repaired")}`
+    const status = bld.disabled > 0 ? `🔧 Damaged · repairs ${Math.floor(100 * jobProgress(bld, "repair"))}% done · ${workText(bld, "repair", "being repaired")}`
       : bld.cleaning > 0 && beingWorked(bld, "clean") ? `🧹 Being cleaned by ${bld.working.clean} · ${Math.ceil(bld.cleaning)}s left`
       : t.building.priority === "off" ? "💤 Switched off"
       : lv < 0.99 ? `⚡ Short of inputs — running at ${Math.round(lv * 100)}%` : "✅ Running";
