@@ -282,15 +282,15 @@ function refreshFlows() {
   return flows;
 }
 
-// One fixed simulation step. Time comes from the tick count rather than a
-// running sum, so sol boundaries land on the same step every run.
+// One fixed simulation step. The clock moves on by one whole step rather than
+// summing a float, so sol boundaries land on the same step every run.
 function updateGame() {
   if (state.over || state.paused) return;
   const dt = SIM_STEP;
 
   const prevPhase = dayPhase(solTime());
   state.tick++;
-  state.time = (state.startTick + state.tick) * SIM_STEP;
+  state.time = (clockSteps() + 1) * SIM_STEP;   // one step on from the clock, so a time a test sets holds
   const newSol = Math.floor(clockSteps() / STEPS_PER_SOL) + 1;
   if (newSol !== state.sol) {
     state.sol = newSol;

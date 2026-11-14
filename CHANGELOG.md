@@ -62,6 +62,10 @@ they relied on has moved.
   of the Solar Arrays. They're in the default mix and in *Dust Season*.
 
 ### Changed
+- Tests that set the clock now run at the time they set. The first step used
+  to reset it to the mission's start, so the night-time temperature tests ran
+  in the morning, and the construction and dust tests in the morning rather
+  than at midday. No change for players.
 - The simulation no longer touches the page. It queues messages on
   `state.outbox` for the UI and ends a mission by setting `state.over`, so it
   runs headless under Node. Hex layout, pixel picking and sprite loading moved
