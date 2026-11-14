@@ -125,9 +125,9 @@ Each building's `why` text in `js/data.js` makes a factual claim, and so do the 
 | Oxygen Plant | Mars' air is about 95% carbon dioxide | 95.1% CO₂ by volume. NASA Mars Fact Sheet (NSSDCA). | Agrees |
 | Oxygen Plant | Splitting carbon dioxide yields oxygen and carbon monoxide, with power and no water. NASA's MOXIE did this on Perseverance, making 122 g of oxygen in 16 runs before it finished in 2023 | NASA, "NASA's Oxygen-Generating Experiment MOXIE Completes Mars Mission", 6 September 2023: 122 g in total, 16 runs, oxygen removed from each CO₂ molecule by an electrochemical process. | Agrees |
 | Radiation Shield, regolith reinforcement | No global magnetic field and a thin atmosphere let radiation reach the surface, and a couple of metres of regolith blocks a large share | Hassler et al. (2014) for surface dose | **Partly.** Regolith blocks solar particle events very well. Against galactic cosmic rays the reduction is real but modest, because secondary particles build up. "A large share" overstates it for cosmic rays. |
-| Story | The nearest hardware store is about 225 million kilometres away | The mean Earth–Mars distance is about 225 million km. It ranges from about 55 to 400 million km over the synodic cycle. NASA Mars facts. | Agrees, as an average |
+| Story | The nearest hardware store is somewhere between 55 and 400 million kilometres away, depending on where Earth and Mars are in their orbits | NASA Mars Fact Sheet (NSSDCA): distance from Earth 54.6 to 401.4 million km. Until 2026-11-14 the story said "about 225 million kilometres", a widely quoted average that is really the midpoint of that range: averaged over time, the two planets are about 253 million km apart (1.69 AU, computed from the semi-major axes). | Agrees |
 | *First Night* | Mars gets well under half the sunlight Earth does, and none of it at night | ≈ 43% of Earth's irradiance (see [Constants](#constants)) | Agrees |
-| *Ice Line* | Shipping water from Earth costs thousands of dollars a kilogram | Launch to low Earth orbit costs roughly $1 500–10 000 per kg on current vehicles. Delivery to the Martian surface costs far more. | Agrees. It understates the cost to Mars. |
+| *Ice Line* | Shipping water from Earth costs thousands of dollars a kilogram | Launch to low Earth orbit averaged $3,868 per kg in 2025, from a 2026 *PNAS Nexus* study reported by the University of Cambridge. Delivery to the Martian surface costs far more. The Mine's text makes the same claim. | Agrees. It understates the cost to Mars. |
 | *Ice Line* | Orbiters have mapped water ice in the ground, and Phoenix dug some up in 2008 | Mars Odyssey neutron spectrometer and MRO SHARAD mapping. Phoenix exposed subsurface ice in its trench in 2008. | Agrees |
 | *Dust Season* | A storm can grow until it wraps the whole planet, and the 2018 one blotted out the Sun for months and ended Opportunity | The 2018 planet-encircling dust storm. Opportunity went silent in June 2018 and its mission was declared over in February 2019. | Agrees |
 | *Dust Season* | Nuclear power runs day and night, storm or no storm | NASA/DOE Kilopower and KRUSTY, as for the Nuclear Generator | Agrees |
@@ -157,3 +157,48 @@ The tests in `tests/` run with `npm test` (Node's built-in runner, nothing to in
 - **Timestep:** `SIM_STEP` = 0.05 game seconds. The frame loop is capped at 30 fps, so it runs about 0.7 steps per frame at 1× and about 2.7 at 4×. A slow frame is capped at 0.1 s of wall time, so at most 8 steps run in one frame.
 - **Known drift:** shortages are detected only once a stock reaches about zero (`≤ 0.01`), so one step of over-draw is clamped away. With the fixed step this is the same at every speed.
 - **Known drift:** power is shared out before water. If a building is also starved of water, the power it was allotted goes unused for that step. Stored power then rises above zero, and the next step has no power shortage. The effect lasts one step at a time.
+
+## Sources
+
+Links for the sources cited above, grouped by what they support. Each was checked when it was added: the claim rows quote what the page says. If a link breaks, the citation in the row (title, author, date) is enough to find it again.
+
+**Mars, from NASA**
+- NASA Mars Fact Sheet (NSSDCA): 95.1% carbon dioxide, the Viking 1 site's daily temperature range of 184–242 K, the surface pressure, and the distance from Earth (54.6 to 401.4 million km). <https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html>
+- NASA/JPL photojournal PIA00530, "Frost on Utopia Planitia": night-time lows of about 160 K at the Viking 2 site in late winter (*Long Night*). <https://www.jpl.nasa.gov/images/pia00530-frost-on-utopia-planitia/>
+
+**Oxygen from the atmosphere**
+- NASA, "NASA's Oxygen-Generating Experiment MOXIE Completes Mars Mission", 6 September 2023: 122 g of oxygen in 16 runs (Oxygen Plant, *Thin Air*). <https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-oxygen-generating-experiment-moxie-completes-mars-mission/>
+
+**Dust on solar panels**
+- NASA/JPL, "NASA Retires InSight Mars Lander Mission After Years of Science", 21 December 2022: InSight ran out of energy as dust built up on its panels. <https://www.jpl.nasa.gov/news/nasa-retires-insight-mars-lander-mission-after-years-of-science>
+- NASA/JPL, "Spirit Gets Energy Boost From Cleaner Solar Panels", February 2009. <https://www.jpl.nasa.gov/news/spirit-gets-energy-boost-from-cleaner-solar-panels/>
+- *Astronomy*, "Mars dust devil whisks Spirit clean": the March 2005 (sol 420) cleaning credited to a dust devil. <https://www.astronomy.com/space-exploration/mars-dust-devil-whisks-spirit-clean/>
+- Lorenz et al., "Lander and rover histories of dust accumulation on and removal from solar arrays on Mars", *Planetary and Space Science* (2021): about 0.2% a sol as typical. Open-access copy: <https://hal.sorbonne-universite.fr/hal-03369920>
+
+**Radiation**
+- Hassler et al., *Science* 343 (2014) 1244797, Curiosity RAD: about 0.64 mSv a day at Gale Crater, and a solar particle event. <https://doi.org/10.1126/science.1244797>
+- NASA Office of the Chief Health and Medical Officer, radiation protection technical brief: NASA-STD-3001 Vol. 1 Rev C's career limit below 600 mSv. <https://www.nasa.gov/wp-content/uploads/2023/03/radiation-protection-technical-brief-ochmo.pdf>
+
+**Temperature and heating**
+- SpaceX Crew Dragon environmental control and life support paper, ICES-2020-333: a cabin requirement of 18.3–26.7 °C. This copy is hosted on an MIT course page, not by NASA or SpaceX. <https://web.mit.edu/2.70/Reading%20Materials/SpaceX%20Dragon%20capsule%20ICES-2020-333.pdf>
+- *Encyclopaedia Britannica*, "Mars: atmospheric structure": surface temperatures of about 186 K before dawn and 253 K in the afternoon. <https://www.britannica.com/place/Mars-planet/Atmospheric-structure>
+
+**Frost on potatoes**
+- Michigan State University Extension, on freeze damage in vegetables: light frost at −2 to 0 °C. <https://www.canr.msu.edu/news/identifying_and_preventing_freeze_damage_in_fall_vegetables_part_2>
+- NC State Extension, "Frost and Freeze Protection for Vegetable Crops". <https://vegetables.ces.ncsu.edu/2020/05/frost-and-freeze-protection-for-vegetable-crops/>
+- Iowa State University Extension, "Freezing temps damaged my potato plants. Should I replant?": regrowth from the tuber. <https://yardandgarden.extension.iastate.edu/faq/freezing-temps-damaged-my-potato-plants-should-i-replant>
+
+**Constants**
+- Allison and McEwen, *Planetary and Space Science* 48 (2000) 215–235: the length of a sol. <https://doi.org/10.1016/S0032-0633(99)00092-6>
+- Kopp and Lean, *Geophysical Research Letters* 38 (2011) L01706: total solar irradiance at Earth. <https://doi.org/10.1029/2010GL045777>
+
+**Missions and hardware**
+- NASA, "NASA's Record-Setting Opportunity Rover Mission on Mars Comes to End", 13 February 2019: Opportunity went silent when a Mars-wide dust storm covered its site in June 2018 (Solar Array, *Dust Season*). <https://www.nasa.gov/news-release/nasas-record-setting-opportunity-rover-mission-on-mars-comes-to-end/>
+- NASA/JPL, "Odyssey Finds Water Ice in Abundance Under Mars' Surface", 28 May 2002 (Water Extractor, *Ice Line*). <https://www.jpl.nasa.gov/news/odyssey-finds-water-ice-in-abundance-under-mars-surface/>
+- NASA/JPL, "Mars Ice Deposit Holds as Much Water as Lake Superior", 22 November 2016: the SHARAD radar maps buried ice in Utopia Planitia (Water Extractor, *Ice Line*). <https://www.jpl.nasa.gov/news/mars-ice-deposit-holds-as-much-water-as-lake-superior/>
+- NASA/JPL, "Bright Chunks at Phoenix Lander's Mars Site Must Have Been Ice", 19 June 2008 (Water Extractor, *Ice Line*). <https://www.jpl.nasa.gov/news/bright-chunks-at-phoenix-landers-mars-site-must-have-been-ice/>
+- NASA and NNSA, "Demonstration proves nuclear fission system can provide space exploration power", 2 May 2018: the Kilopower KRUSTY test, for systems of up to 10 kW where sunlight is unreliable (Nuclear Generator, *Dust Season*). <https://nnss.gov/wp-content/uploads/2023/04/NR180011_KilopowerDemonstration.pdf>. NASA's Kilopower page: <https://www.nasa.gov/directorates/spacetech/kilopower>
+- Takada et al., "Advanced Oxygen Generation Assembly for Exploration Missions", ICES 2019: the ISS Oxygen Generation Assembly electrolyses water to supply the crew's oxygen (Habitat). <https://ntrs.nasa.gov/citations/20190030425>
+
+**Launch costs**
+- University of Cambridge, "Space cargo costs set to plummet", July 2026, reporting a *PNAS Nexus* study: launch to low Earth orbit averaged $3,868 per kg in 2025 (*Ice Line*, Mine). <https://www.cam.ac.uk/stories/space-cargo-costs-set-to-plummet>

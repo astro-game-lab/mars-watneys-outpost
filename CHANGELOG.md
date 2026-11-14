@@ -84,6 +84,10 @@ they relied on has moved.
   limit. Its exposure objective could be met by shielding at the last moment,
   while the real cost, dose, built up unseen. The HUD shows the highest dose
   against the cap, and the debrief names who passed it.
+- The intro story gives the Earth–Mars distance as 55 to 400 million kilometres
+  (NSSDCA). It used to say about 225 million, a widely quoted average that is
+  really the midpoint of that range: averaged over time, the planets are about
+  253 million km apart.
 - *Dust Season*'s briefing mentions dust on the panels, and *Crew Rotation*'s
   warns that anyone sent home at the dose limit lowers the crew count.
 

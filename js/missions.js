@@ -31,7 +31,7 @@
 const STORY = [
   "Mark Watney here: botanist, mechanical engineer, and as of this morning the person in charge of a small outpost on Mars. NASA has given me a couple of Habitats, a Science Lab, one Solar Array, and a planet that is not on my side.",
   "The job sounds simple. Keep the crew breathing, drinking and eating. Do enough science to keep the funding coming. Don't let a sunset turn into a crisis. Repeat every sol.",
-  "The nearest hardware store is about 225 million kilometres away, so whatever this place needs, I build here.",
+  "The nearest hardware store is somewhere between 55 and 400 million kilometres away, depending on where Earth and Mars are in their orbits, so whatever this place needs, I build here.",
 ];
 
 const MISSIONS = [
