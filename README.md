@@ -77,6 +77,7 @@ Then open <http://localhost:8000/>. Opening `index.html` straight from disk most
 ```
 index.html        page shell, HUD markup, script order
 style.css         HUD and panel styling
+favicon.ico       browser-tab icon (16, 32, 48 px)
 js/data.js        every balance number, terrain, buildings, events, difficulty, Watney's lines
 js/missions.js    the campaign: maps, objectives, briefings, and the intro story
 js/rng.js         the seeded random number generator
