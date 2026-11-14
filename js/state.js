@@ -280,8 +280,15 @@ function demolishBlocker(t) {
   if (t && t.building && t.building.construct > 0) return "Still under construction: cancel it for a full refund";
   if (!canDemolish(t)) return "Would disconnect the outpost";
   const b = BUILDINGS[t.building.type];
-  if (b.crew && t.building.disabled <= 0 && state.crewCapacity - b.crew < state.crew) return "The crew needs these beds";
+  if (b.crew && totalBeds() - b.crew < state.crew) return "The crew needs these beds";
   return null;
+}
+
+// Beds in every finished Habitat. A damaged one still has its beds: they're
+// back once it's repaired, so it can't be demolished out from under the crew.
+function totalBeds() {
+  return buildings().filter((t) => !(t.building.construct > 0))
+    .reduce((n, t) => n + (BUILDINGS[t.building.type].crew || 0), 0);
 }
 
 function demolish(t) {
