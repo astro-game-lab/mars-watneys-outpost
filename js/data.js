@@ -367,7 +367,7 @@ const TIPS = [
 const WATNEY_LINES = {
   start: "Okay. I'm alone on Mars. Let's science the heck out of this.",
   lowPower: "We're going to need more power.",
-  noPower: "Batteries are dead. Everything's running at half speed. Not great.",
+  noPower: "Batteries are dead. We're living on whatever the generators make right now, critical stuff first. Not great.",
   lowWater: "Water reserves are getting low.",
   lowFood: "I'm running out of potatoes. That's a sentence I never wanted to say.",
   lowOxygen: "Oxygen is dropping. I kind of need that.",
