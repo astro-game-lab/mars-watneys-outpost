@@ -274,6 +274,7 @@ function renderPanel() {
       <div class="sub">${terrain} · under construction</div>
       <div id="live"></div>
       <div class="kv"><span>When finished</span><span>${makesText(b)}</span></div>
+      ${priorityControl(t)}
       <div class="why">${b.why}</div>
       <div class="actions">
         <button data-act="cancel" ${cancelBlocker(t) ? "disabled" : ""}
