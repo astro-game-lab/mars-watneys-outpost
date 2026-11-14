@@ -349,7 +349,7 @@ function buildOption(key, t) {
         <button data-act="why" data-key="${key}" class="whybtn">Why?</button>
         <button data-act="build" data-key="${key}" ${blocker ? "disabled" : ""}>Build</button>
       </div>
-      <div class="ocost">Cost: ${fmtList(b.cost)} · ${b.work}s to build ${blocker ? `<span class="blk">· ${blocker}</span>` : ""}</div>
+      <div class="ocost">Cost: ${fmtList(b.cost)} · ${b.work}s to build <span class="blk">${blocker ? `· ${blocker}` : ""}</span></div>
       <div class="ocost">Uses: ${fmtList(b.consumes, true)}${b.heat ? ` + heating up to ${ICON.power} ${b.heat}/s, most before dawn` : ""} → Makes: ${makesText(b)}${b.solar ? " (× daylight)" : ""}</div>
       ${bonus ? `<div class="bonus">★ ${TERRAIN[t.terrain].name} bonus: ×${bonus} output</div>` : ""}
       ${b.needsHabitat ? `<div class="ocost">Must touch a Habitat</div>` : ""}
@@ -409,6 +409,12 @@ function updatePanelLive() {
         ? `🧱 ${Math.floor(100 * jobProgress(bld, "reinforce"))}% · ${workText(bld, "reinforce", "being done")}`
         : "✓ Reinforced";
     }
+    const dbtn = document.querySelector('#panel button[data-act="demolish"]');
+    if (dbtn) {
+      const blocker = demolishBlocker(t);
+      dbtn.disabled = !!blocker;
+      dbtn.title = blocker || "Refunds 50% of the cost";
+    }
     const cbtn = document.querySelector('#panel button[data-act="clean"]');
     if (cbtn) {
       const blocker = cleanBlocker(t);
@@ -418,7 +424,11 @@ function updatePanelLive() {
   } else {
     // Update affordability of build options without losing the open "Why?"
     for (const btn of document.querySelectorAll('#panel button[data-act="build"]')) {
-      btn.disabled = !!buildBlocker(btn.dataset.key, t);
+      const blocker = buildBlocker(btn.dataset.key, t);
+      btn.disabled = !!blocker;
+      const opt = btn.closest(".opt");
+      opt.classList.toggle("blocked", !!blocker);
+      opt.querySelector(".blk").textContent = blocker ? `· ${blocker}` : "";
     }
   }
 }
