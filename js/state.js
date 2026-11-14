@@ -294,7 +294,8 @@ function totalBeds() {
 function demolish(t) {
   if (demolishBlocker(t)) return false;
   const cost = { ...BUILDINGS[t.building.type].cost };
-  if (t.building.reinforced) cost.materials = (cost.materials || 0) + REINFORCE.cost.materials;
+  // Regolith paid for counts, whether it's piled on yet or still being piled.
+  if (t.building.reinforced || t.building.reinforcing > 0) cost.materials = (cost.materials || 0) + REINFORCE.cost.materials;
   for (const [k, v] of Object.entries(cost)) state.resources[k] += Math.floor(v / 2);
   t.building = null;
   return true;

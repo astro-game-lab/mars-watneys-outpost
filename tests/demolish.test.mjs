@@ -67,3 +67,15 @@ test("a Habitat still under construction gives no beds to count on", () => {
   const [, spare] = all(sim, "habitat").filter((t) => t !== site);
   assert.equal(sim.demolishBlocker(spare), "The crew needs these beds");
 });
+
+test("regolith paid for but still being piled on is refunded like finished regolith", () => {
+  const sim = outpost();
+  const { state, BUILDINGS, REINFORCE } = sim;
+  const t = state.tiles.find((t) => !sim.buildBlocker("solar", t));
+  buildNow(sim, "solar", t);
+  assert.ok(sim.reinforce(t));
+  assert.ok(t.building.reinforcing > 0);
+  const mats = state.resources.materials;
+  assert.ok(sim.demolish(t));
+  assert.equal(state.resources.materials - mats, Math.floor((BUILDINGS.solar.cost.materials + REINFORCE.cost.materials) / 2));
+});
