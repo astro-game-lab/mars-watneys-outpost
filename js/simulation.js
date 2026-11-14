@@ -23,6 +23,13 @@ function outputMultiplier(t) {
   return m;
 }
 
+// Power a building draws at full operation right now: its base load plus
+// heating, which depends on the time of day.
+function powerDemand(t) {
+  const b = BUILDINGS[t.building.type];
+  return (b.consumes.power || 0) + (b.heat || 0) * thermalLoad(solTime());
+}
+
 // Share `supply` out tier by tier (SUPPLY_TIERS: critical, normal, low).
 // Each tier gets as much of its demand as is left after the tiers before it,
 // as a fraction from 0 to 1; buildings in the same tier share alike.
@@ -63,13 +70,14 @@ function computeFlows() {
     const b = BUILDINGS[t.building.type];
     if (t.building.disabled > 0) continue;
     pProd += (b.produces.power || 0) * outputMultiplier(t);
-    if (running(t) && b.consumes.power) add(pDemand, t.building.priority, b.consumes.power);
+    const demand = powerDemand(t);
+    if (running(t) && demand > 0) add(pDemand, t.building.priority, demand);
   }
   const pTotal = sumValues(pDemand);
   const powerShare = state.resources.power <= 0.01 && pTotal > pProd ? allocate(pProd, pDemand) : fullShare();
   const powerLevel = (t) => {
     if (!running(t)) return 0;
-    return BUILDINGS[t.building.type].consumes.power ? powerShare[t.building.priority] : 1;
+    return powerDemand(t) > 0 ? powerShare[t.building.priority] : 1;
   };
 
   // Water: extractors depend on power, and buildings want water only as fast
@@ -98,7 +106,8 @@ function computeFlows() {
     const lv = level(t);
     t.building.level = lv;
     for (const [k, v] of Object.entries(b.produces)) add(prod, k, v * outputMultiplier(t) * (k === "power" ? (t.building.disabled > 0 ? 0 : 1) : lv));
-    for (const [k, v] of Object.entries(b.consumes)) add(cons, k, v * lv);
+    for (const [k, v] of Object.entries(b.consumes)) if (k !== "power") add(cons, k, v * lv);
+    if (lv > 0) add(cons, "power", powerDemand(t) * lv);
     if (t.building.reinforced) shielding += REINFORCE.radiation; // passive, works even when damaged or off
     if (t.building.disabled > 0) continue;
     crewCapacity += b.crew || 0;

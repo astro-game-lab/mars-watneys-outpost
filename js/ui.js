@@ -148,6 +148,7 @@ function updateHud() {
   $("clock").textContent = clockText(t);
   $("phase").textContent = dayPhase(t);
   $("solar-pct").textContent = `Solar ${Math.round(daylight(t) * (hasEffect("dust") ? 30 : 100))}%`;
+  $("heat-pct").textContent = `Heating ${Math.round(thermalLoad(t) * 100)}%`;
   const sun = $("sun");
   const day = Math.min(1, Math.max(0, (t - 0.2) / 0.65));
   const up = t >= 0.2 && t < 0.85;
@@ -185,6 +186,7 @@ function renderPanel() {
       <div class="sub">${terrain}</div>
       <div id="live"></div>
       <div class="kv"><span>Consumes</span><span>${fmtList(b.consumes, true)}</span></div>
+      ${b.heat ? `<div class="kv"><span>Heating</span><span>${ICON.power} up to ${b.heat}/s, most at night</span></div>` : ""}
       <div class="kv"><span>Produces</span><span>${makesText(b)}</span></div>
       ${priorityControl(t)}
       <div class="why">${b.why}</div>
@@ -243,7 +245,7 @@ function buildOption(key, t) {
         <button data-act="build" data-key="${key}" ${blocker ? "disabled" : ""}>Build</button>
       </div>
       <div class="ocost">Cost: ${fmtList(b.cost)} ${blocker ? `<span class="blk">· ${blocker}</span>` : ""}</div>
-      <div class="ocost">Uses: ${fmtList(b.consumes, true)} → Makes: ${makesText(b)}${b.solar ? " (× daylight)" : ""}</div>
+      <div class="ocost">Uses: ${fmtList(b.consumes, true)}${b.heat ? ` + heating up to ${ICON.power} ${b.heat}/s at night` : ""} → Makes: ${makesText(b)}${b.solar ? " (× daylight)" : ""}</div>
       ${bonus ? `<div class="bonus">★ ${TERRAIN[t.terrain].name} bonus: ×${bonus} output</div>` : ""}
       ${b.needsHabitat ? `<div class="ocost">Must touch a Habitat</div>` : ""}
       ${openWhy === key ? `<div class="why">${b.why}</div>` : ""}
@@ -264,8 +266,10 @@ function updatePanelLive() {
     const mult = outputMultiplier(t);
     const actual = Object.entries(b.produces)
       .map(([k, v]) => `${ICON[k]} ${(v * mult * (t.building.disabled > 0 ? 0 : k === "power" ? 1 : lv)).toFixed(1)}/s`).join("  ");
+    const drawing = powerDemand(t) > 0 ? `${ICON.power} ${(powerDemand(t) * lv).toFixed(1)}/s` : "";
     live.innerHTML = `<div class="kv"><span>Status</span><span>${status}</span></div>` +
-      (actual ? `<div class="kv"><span>Output now</span><span>${actual}</span></div>` : "");
+      (actual ? `<div class="kv"><span>Output now</span><span>${actual}</span></div>` : "") +
+      (drawing ? `<div class="kv"><span>Drawing now</span><span>${drawing}${b.heat ? " incl. heating" : ""}</span></div>` : "");
     const rbtn = document.querySelector('#panel button[data-act="reinforce"]');
     if (rbtn) rbtn.disabled = !!reinforceBlocker(t);
   } else {

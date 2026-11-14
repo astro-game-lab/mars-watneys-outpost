@@ -40,7 +40,7 @@ const MISSIONS = [
       "Job for today: get through two nights without a blackout.",
     ],
     tips: [
-      "Watch ⚡ Power's rate and time left in the HUD before evening.",
+      "Watch ⚡ Power's rate and time left in the HUD before evening. At night the Habitats and the Lab also draw power for heating.",
       "A second Solar Array fills the batteries faster. A Battery Bank holds more for the night.",
       "On Normal difficulty, water and food will hold for this mission. Power won't.",
     ],

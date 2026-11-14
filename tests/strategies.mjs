@@ -12,8 +12,10 @@ export const OUTPOST_SEEDS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 export const STRATEGIES = {
   "first-night": {
-    // Storage and a second array get the outpost through two nights.
-    win: [{ build: "solar" }, { build: "battery" }, { build: "water" }, { build: "solar" }],
+    // A second array and two Battery Banks get the outpost through two nights,
+    // heating included. With one bank it takes a third array instead; one
+    // bank and two arrays go flat on the first night.
+    win: [{ build: "solar" }, { build: "battery" }, { build: "battery" }, { build: "solar" }, { build: "water" }],
     // The briefing: the Sun sets and the batteries go flat.
     warned: { why: "no extra generation or storage", moves: [] },
   },

@@ -52,8 +52,7 @@ test("in a power shortage, each tier runs at its share, and higher tiers are ser
   }
   assert.ok(shares.power.critical >= shares.power.normal && shares.power.normal >= shares.power.low);
   for (const t of built(sim)) {
-    const b = sim.BUILDINGS[t.building.type];
-    if (b.consumes.power) assert.ok(Math.abs(t.building.level - shares.power[t.building.priority]) < EPS, t.building.type);
+    if (sim.powerDemand(t) > 0) assert.ok(Math.abs(t.building.level - shares.power[t.building.priority]) < EPS, t.building.type);
   }
 });
 

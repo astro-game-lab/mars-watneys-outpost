@@ -34,7 +34,7 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 | Solar depends on daylight and dust, and storage and nuclear power are the answers | Every quantity: rates are balance values, not hardware figures |
 | Water and materials come from the ground | A 120 s sol, crew every 2 sols, random resupply |
 | Shielding and regolith reduce exposure | Exposure is a 0–100 score, and its damage heals |
-| Habitats make oxygen from water and power | No thermal load, no recycling, no seasons |
+| Habitats make oxygen from water and power, and nights cost heating | Heating is a four-step curve with no insulation. No recycling, no seasons. |
 
 ## Difficulty and onboarding
 

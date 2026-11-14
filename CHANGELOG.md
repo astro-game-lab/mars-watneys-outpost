@@ -49,6 +49,12 @@ they relied on has moved.
   to `js/render.js`. No change for players. See `docs/PHYSICS.md` § Conventions.
 
 ### Physics
+- Heating. Habitats, Greenhouses and Science Labs draw extra power to stay
+  warm: all of it at night, half in the morning and evening, a fifth at
+  midday. The clock box shows the current heating level. Nights now cost
+  more power, so in *First Night* one extra Solar Array and one Battery Bank
+  are no longer enough: it takes a second bank or a third array. See
+  `docs/PHYSICS.md` § What is modelled.
 - Power and water shortages are shared out by priority instead of evenly:
   critical buildings first, then normal, then low. Habitats and Water
   Extractors default to critical, Greenhouses and Radiation Shields to normal,

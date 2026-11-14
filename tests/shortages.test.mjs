@@ -34,7 +34,8 @@ function actual(sim) {
     for (const [k, v] of Object.entries(b.produces)) {
       prod[k] = (prod[k] || 0) + v * sim.outputMultiplier(t) * (k === "power" ? 1 : t.building.level);
     }
-    for (const [k, v] of Object.entries(b.consumes)) draw[k] = (draw[k] || 0) + v * t.building.level;
+    for (const [k, v] of Object.entries(b.consumes)) if (k !== "power") draw[k] = (draw[k] || 0) + v * t.building.level;
+    draw.power = (draw.power || 0) + sim.powerDemand(t) * t.building.level;   // base load plus heating
   }
   return { prod, draw };
 }

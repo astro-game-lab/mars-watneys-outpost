@@ -91,15 +91,18 @@ const SUPPLY_TIERS = ["critical", "normal", "low"];   // served in this order
 
 // Buildings. produces/consumes are per second at 100% efficiency. `priority`
 // is the default shortage priority; `alwaysOn` buildings can't be switched off.
+// `heat` is the extra power a pressurised building draws to stay warm, at
+// full heating; how much of it is drawn depends on the time of day (thermalLoad).
 const BUILDINGS = {
   habitat: {
     name: "Habitat", icon: "🏠", sprite: "habitat",
     cost: { materials: 40, credits: 60 },
     consumes: { power: 1, water: 0.5 },
     produces: { oxygen: 1.5 },
+    heat: 1,
     crew: 2, radiation: 5,
     priority: "critical", alwaysOn: true,
-    why: "Habitats are pressurised shelters with built-in life support that turns water and power into breathable oxygen (via electrolysis). Their walls also block some of the radiation that the thin Martian atmosphere lets through.",
+    why: "Habitats are pressurised shelters with built-in life support that turns water and power into breathable oxygen (via electrolysis). Their walls also block some of the radiation that the thin Martian atmosphere lets through. They need heating too, hardest at night: the thin air holds little of the day's warmth, so Martian nights are far colder than the days.",
   },
   water: {
     name: "Water Extractor", icon: "💧", sprite: "water",
@@ -115,6 +118,7 @@ const BUILDINGS = {
     cost: { materials: 30, credits: 100 },
     consumes: { power: 2, water: 1 },
     produces: { food: 2, oxygen: 0.3 },
+    heat: 1,
     priority: "normal",
     why: "Growing food locally reduces how much must be shipped from Earth, but plants need water, energy, warmth and light. As a bonus, photosynthesis adds a little oxygen.",
   },
@@ -155,6 +159,7 @@ const BUILDINGS = {
     cost: { materials: 40, credits: 120 },
     consumes: { power: 2 },
     produces: { credits: 3 },
+    heat: 0.5,
     needsHabitat: true,
     priority: "low",
     why: "Science is why we go to Mars: studying rocks, ice and the atmosphere to learn whether Mars ever had life. Here, discoveries earn funding (credits) for expanding the outpost.",
@@ -187,6 +192,14 @@ function daylight(t) {
   if (t < 0.35) return 0.4;                 // morning
   if (t < 0.65) return 1;                   // midday
   return 0.3;                               // evening
+}
+// Share of each building's `heat` drawn by time of day (0..1 of a sol). The
+// phases match daylight(): heating works hardest at night.
+function thermalLoad(t) {
+  if (t < 0.2 || t >= 0.85) return 1;       // night
+  if (t < 0.35) return 0.5;                 // morning
+  if (t < 0.65) return 0.2;                 // midday
+  return 0.5;                               // evening
 }
 function dayPhase(t) {
   if (t < 0.2 || t >= 0.85) return "🌑 Night";
