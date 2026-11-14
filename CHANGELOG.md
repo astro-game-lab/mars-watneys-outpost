@@ -30,8 +30,32 @@ they relied on has moved.
 - Difficulty tiers, *Hard* and *Martian*, unlocked by finishing the campaign.
 - Campaign progress saved in the browser.
 - `?seed=N` in the URL to replay a map and its events in *The Outpost*.
+- Automated tests of the simulation, run with `npm test` (Node's built-in runner,
+  nothing to install): determinism, resource bookkeeping, shortage resolution,
+  connectivity, simulation purity, and mission balance. The balance tests play
+  every mission at every difficulty from scripted build orders
+  (`tests/strategies.mjs`), which are now the campaign's balance contract.
+- CI runs the tests on every pull request, and the deploy runs them first, so a
+  failing test blocks a deploy.
+
+### Changed
+- The simulation no longer touches the page. It queues messages on
+  `state.outbox` for the UI and ends a mission by setting `state.over`, so it
+  runs headless under Node. Hex layout, pixel picking and sprite loading moved
+  to `js/render.js`. No change for players. See `docs/PHYSICS.md` § Conventions.
 
 ### Physics
+- When power and water ran short at the same time, buildings could draw more
+  water than was left after the crew's share: the water factor was a fraction
+  of power-limited demand, but it was applied to full demand. Buildings now
+  share exactly what's left. Found by the new shortage tests. See
+  `docs/PHYSICS.md` § What is modelled and § Validation.
+- *Dust Season* now asks for 3 000 credits instead of 1 000, and its storms last
+  90 s instead of 45 s, so they run into each other. Before, a solar-only
+  build won on *Normal* and *Hard*, and the mission didn't teach its lesson.
+  Now the best solar-only build tested reaches about 79% of the target by the
+  deadline, and a build with a Nuclear Generator wins on Sol 3. See
+  `docs/PHYSICS.md` § Gameplay departures.
 - Water shortages now feed the crew first. Buildings share only the water left
   after the crew's needs, and shortage detection counts every crew member's
   water, not just one. Water, food and oxygen hurt health only when the stock is
@@ -50,7 +74,5 @@ they relied on has moved.
   unchanged.
 
 ### Known gaps
-- The simulation still calls the UI directly (`say()`, `endGame()`), so it
-  can't run headless. See `docs/PHYSICS.md` § Conventions.
-- Mission balance was checked with scripted build orders, not with players.
-- No tests, lint or CI.
+- Mission balance is checked with scripted build orders, not with players.
+- No lint.

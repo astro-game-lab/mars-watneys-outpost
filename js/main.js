@@ -17,7 +17,7 @@ function newGame(missionId, seed) {
   createState(mission, seed, chosenDifficulty());
   astronauts.length = 0;
   $("messages").innerHTML = "";
-  for (const k of Object.keys(lastSaid)) delete lastSaid[k];
+  endShown = false;
   $("end").hidden = true;
   selectTile(null);
   const flows = computeFlows();
@@ -28,6 +28,7 @@ function newGame(missionId, seed) {
   updateHud();
 }
 
+let endShown = false;          // the end screen for this mission has been shown
 let lastFrame = performance.now();
 let hudTimer = 0;
 let simAccumulator = 0;       // game seconds owed to the simulation
@@ -52,6 +53,11 @@ function frame(now) {
     updateAstronauts(realDt * state.speed);
   } else {
     simAccumulator = 0;
+  }
+  drainOutbox();
+  if (state.over && !endShown) {
+    endShown = true;
+    endGame(state.over, state.endCause);
   }
   render(now / 1000);
 

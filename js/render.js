@@ -6,6 +6,53 @@ const ctx = canvas.getContext("2d");
 const bg = new Image();
 bg.src = "assets/mars3.png";
 
+// Building sprites, keyed by building type.
+const SPRITES = Object.fromEntries(BUILD_ORDER.map((k) => {
+  const img = new Image();
+  img.src = `sprites/${BUILDINGS[k].sprite}.svg`;
+  return [k, img];
+}));
+
+// ---------- Layout ----------
+// Pointy-top hexes in odd-r offset layout; js/hexmap.js has the grid itself.
+const SQRT3 = Math.sqrt(3);
+const view = { size: 40, originX: 0, originY: 0 };
+
+function tileCenter(t) {
+  return {
+    x: view.originX + SQRT3 * view.size * (t.col + 0.5 * (t.row & 1)),
+    y: view.originY + 1.5 * view.size * t.row,
+  };
+}
+
+// Pixel -> axial (fractional) -> cube round -> odd-r offset.
+function tileFromPixel(x, y) {
+  const px = x - view.originX;
+  const py = y - view.originY;
+  const q = ((SQRT3 / 3) * px - (1 / 3) * py) / view.size;
+  const r = ((2 / 3) * py) / view.size;
+  const s = -q - r;
+
+  let rq = Math.round(q), rr = Math.round(r), rs = Math.round(s);
+  const dq = Math.abs(rq - q), dr = Math.abs(rr - r), ds = Math.abs(rs - s);
+  if (dq > dr && dq > ds) rq = -rr - rs;
+  else if (dr > ds) rr = -rq - rs;
+
+  const col = rq + (rr - (rr & 1)) / 2;
+  return tileAt(col, rr);
+}
+
+// Fit the grid into the area left of the side panels.
+function layoutView(w, h) {
+  const left = Math.min(300, w * 0.3);
+  const availW = w - left - 20;
+  const gridW = SQRT3 * (COLS + 0.5);
+  const gridH = 1.5 * (ROWS - 1) + 2;
+  view.size = Math.min((availW * 0.95) / gridW, (h * 0.85) / gridH);
+  view.originX = left + (availW - gridW * view.size) / 2 + (SQRT3 / 2) * view.size;
+  view.originY = (h - gridH * view.size) / 2 + view.size;
+}
+
 const astronauts = [];
 
 // Performance: everything that rarely changes (background, terrain, expansion
@@ -55,7 +102,7 @@ function drawBackground(c, w, h) {
 
 // Bitmap of a building sprite sized for the current hex size and DPR.
 function spriteBitmap(type) {
-  const img = BUILDINGS[type].img;
+  const img = SPRITES[type];
   if (!img.complete || !img.naturalWidth) return null;
   const dpr = window.devicePixelRatio || 1;
   const box = view.size * 1.6;
@@ -115,16 +162,17 @@ function drawTileStatic(c, t) {
 }
 
 const TERRAIN_CODE = Object.fromEntries(Object.keys(TERRAIN).map((k, i) => [k, i]));
+const BUILDING_CODE = Object.fromEntries(BUILD_ORDER.map((k, i) => [k, i]));
 
 // Changes whenever anything drawn into the static layer would change,
 // including the terrain, which differs between missions and seeds.
 function staticSignature() {
   let sig = `${canvas.width}x${canvas.height}|${view.size}|${bg.complete && bg.naturalWidth ? 1 : 0}|`;
-  for (const k of BUILD_ORDER) sig += BUILDINGS[k].img.naturalWidth ? 1 : 0;
+  for (const k of BUILD_ORDER) sig += SPRITES[k].naturalWidth ? 1 : 0;
   for (const t of state.tiles) {
     const b = t.building;
-    sig += TERRAIN_CODE[t.terrain];
-    sig += b ? `${b.type[0]}${b.type[1]}${b.reinforced ? "r" : ""}${b.disabled > 0 ? "d" : ""},` : ".";
+    sig += `${TERRAIN_CODE[t.terrain]}:`;
+    sig += b ? `${BUILDING_CODE[b.type]}${b.reinforced ? "r" : ""}${b.disabled > 0 ? "d" : ""},` : ".,";
   }
   return sig;
 }

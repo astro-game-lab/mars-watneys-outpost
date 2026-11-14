@@ -47,11 +47,28 @@ function createState(mission, seed, difficulty = "normal") {
     nextScripted: 0,           // index into events.scripted
     // For the debrief: health lost to each cause, and when each need first ran out.
     stats: { damage: { water: 0, food: 0, oxygen: 0, radiation: 0 }, firstEmpty: {} },
+    outbox: [],                // messages for the UI: { kind: "say", text, tone } | { kind: "line", key }
+    lastSaid: {},              // game time each keyed line was last queued, for its cooldown
     tiles: createTiles(rng, mission.map),
     selected: null,
     hovered: null,
   };
   placeStartingOutpost(start.outpost);
+}
+
+// ---------- Messages ----------
+// The simulation never calls the UI. It queues messages here, and the UI
+// drains the queue once per frame (drainOutbox() in js/ui.js).
+function emit(text, tone = "") {
+  state.outbox.push({ kind: "say", text, tone });
+}
+
+// A keyed line from WATNEY_LINES, queued at most once per cooldown (game seconds).
+function emitLine(key, cooldown = 45) {
+  const last = state.lastSaid[key];
+  if (last !== undefined && state.time - last < cooldown) return;
+  state.lastSaid[key] = state.time;
+  state.outbox.push({ kind: "line", key });
 }
 
 function difficulty() {

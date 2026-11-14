@@ -159,12 +159,7 @@ const REINFORCE = {
 
 const BUILD_ORDER = ["habitat", "water", "greenhouse", "solar", "nuclear", "battery", "mine", "lab", "shield"];
 
-for (const key of BUILD_ORDER) {
-  const b = BUILDINGS[key];
-  b.key = key;
-  b.img = new Image();
-  b.img.src = `sprites/${b.sprite}.svg`;
-}
+for (const key of BUILD_ORDER) BUILDINGS[key].key = key;
 
 // Solar output by time of day (0..1 of a sol)
 function daylight(t) {

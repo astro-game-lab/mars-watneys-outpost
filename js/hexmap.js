@@ -1,8 +1,6 @@
 // Hex map: pointy-top hexes in "odd-r" offset layout (from tile-game-demo).
 // The terrain generator uses the mission's seeded generator (js/rng.js).
-
-const SQRT3 = Math.sqrt(3);
-const view = { size: 40, originX: 0, originY: 0 };
+// Pixel layout and picking are drawing concerns, so they live in js/render.js.
 
 // Terrain from a handmade map (rows of TERRAIN_CHARS), or drawn from the
 // mission's seeded generator.
@@ -55,39 +53,4 @@ function canPlaceOn(t) {
 
 function canDemolish(t) {
   return !!t && !!t.building && staysConnected(t);
-}
-
-function tileCenter(t) {
-  return {
-    x: view.originX + SQRT3 * view.size * (t.col + 0.5 * (t.row & 1)),
-    y: view.originY + 1.5 * view.size * t.row,
-  };
-}
-
-// Pixel -> axial (fractional) -> cube round -> odd-r offset.
-function tileFromPixel(x, y) {
-  const px = x - view.originX;
-  const py = y - view.originY;
-  const q = ((SQRT3 / 3) * px - (1 / 3) * py) / view.size;
-  const r = ((2 / 3) * py) / view.size;
-  const s = -q - r;
-
-  let rq = Math.round(q), rr = Math.round(r), rs = Math.round(s);
-  const dq = Math.abs(rq - q), dr = Math.abs(rr - r), ds = Math.abs(rs - s);
-  if (dq > dr && dq > ds) rq = -rr - rs;
-  else if (dr > ds) rr = -rq - rs;
-
-  const col = rq + (rr - (rr & 1)) / 2;
-  return tileAt(col, rr);
-}
-
-// Fit the grid into the area left of the side panels.
-function layoutView(w, h) {
-  const left = Math.min(300, w * 0.3);
-  const availW = w - left - 20;
-  const gridW = SQRT3 * (COLS + 0.5);
-  const gridH = 1.5 * (ROWS - 1) + 2;
-  view.size = Math.min((availW * 0.95) / gridW, (h * 0.85) / gridH);
-  view.originX = left + (availW - gridW * view.size) / 2 + (SQRT3 / 2) * view.size;
-  view.originY = (h - gridH * view.size) / 2 + view.size;
 }

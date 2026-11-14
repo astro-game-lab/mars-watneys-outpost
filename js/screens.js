@@ -193,9 +193,9 @@ function lossDebrief(cause) {
   };
 }
 
+// Show the end screen. Called by the frame loop once the simulation has set
+// state.over and state.endCause.
 function endGame(result, cause) {
-  state.over = result;
-  state.endCause = cause;
   inMission = false;
   selectTile(null);
   const m = state.mission;

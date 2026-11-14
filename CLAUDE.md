@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 An [astro-game-lab](https://github.com/astro-game-lab) game, and an unofficial fan work inspired by *The Martian*. Unlike the org's other games it has no orbital mechanics. Its science is life support: power, water, oxygen, food and radiation on the Martian surface.
 
-**Status: playable prototype.** A six-mission campaign with difficulty tiers, nine buildings, five events. No build step, no tests, no CI. `README.md` describes what exists and is kept honest. Trust it over assumptions.
+**Status: playable prototype.** A six-mission campaign with difficulty tiers, nine buildings, five events. No build step. The simulation runs headless under Node, with tests and CI. `README.md` describes what exists and is kept honest. Trust it over assumptions.
 
 ## The documents
 
@@ -27,14 +27,15 @@ Plain browser JavaScript. Classic `<script>` tags in `index.html` share **one gl
 | `js/data.js` | Every balance number and shared content: terrain, buildings, `why` texts, event defaults, difficulty tiers, `SIM_STEP`, Watney's lines. **Tune here, nowhere else** (missions aside). |
 | `js/missions.js` | The campaign and the intro story. Each mission overrides the defaults in `data.js`. Its header comment documents every field. Briefing text makes claims to the player, so it's bound by `docs/PHYSICS.md` like the `why` texts. |
 | `js/rng.js` | The seeded generator (mulberry32). `rand()` is the simulation's only source of randomness. |
-| `js/hexmap.js` | Odd-r offset hex grid, terrain from a seed or a handmade map, neighbours, connectivity, pixel picking, layout |
-| `js/state.js` | The single `state` object, built by `createState(mission, seed, difficulty)`, plus build, reinforce and demolish rules, each paired with a `*Blocker()` function that returns the reason it's refused, or `null` |
+| `js/hexmap.js` | Odd-r offset hex grid, terrain from a seed or a handmade map, neighbours, connectivity |
+| `js/state.js` | The single `state` object, built by `createState(mission, seed, difficulty)`. Build, reinforce and demolish rules, each paired with a `*Blocker()` function that returns the reason it's refused, or `null`. `emit()` and `emitLine()`, which queue messages on `state.outbox`. |
 | `js/events.js` | Random and scripted events, and timed effects |
-| `js/simulation.js` | `computeFlows()` (shortage resolution), `updateGame()` (one fixed `SIM_STEP`: integrate, radiation, health, crew), objectives and `checkEnd()` |
-| `js/render.js` | Canvas 2-D. The terrain, sprites and outlines are cached in an off-screen static layer, keyed by `staticSignature()`. The crew figures are cosmetic only. |
-| `js/ui.js` | HUD and objectives, build panel, message log |
+| `js/simulation.js` | `computeFlows()` (shortage resolution), `updateGame()` (one fixed `SIM_STEP`: integrate, radiation, health, crew), objectives, and `checkEnd()`, which sets `state.over` and `state.endCause` |
+| `js/render.js` | Canvas 2-D: sprite loading, hex layout and pixel picking (`view`, `tileCenter`, `tileFromPixel`). The terrain, sprites and outlines are cached in an off-screen static layer, keyed by `staticSignature()`. The crew figures are cosmetic only. |
+| `js/ui.js` | HUD and objectives, build panel, message log. `drainOutbox()` shows the simulation's queued messages. |
 | `js/screens.js` | Intro, mission select and briefing, end screen and debrief, saved progress in `localStorage`. The simulation doesn't run while one is open. |
-| `js/main.js` | `newGame()`, seeds, the 30 fps frame loop with its fixed-step accumulator, input |
+| `js/main.js` | `newGame()`, seeds, the 30 fps frame loop with its fixed-step accumulator, input. Each frame it drains the outbox and shows the end screen once `state.over` is set. |
+| `tests/` | Node tests of the simulation. `load-sim.mjs` runs the seven simulation files in an empty `node:vm` context. `bot.mjs` plays a mission from a build order. `strategies.mjs` holds each mission's winning and warned-against build orders. |
 
 The `*Blocker()` pattern is how the UI explains a refusal. Keep it: any new action that can be refused gets a blocker that returns a player-facing reason.
 
@@ -43,7 +44,7 @@ The `*Blocker()` pattern is how the UI explains a refusal. Keep it: any new acti
 The org's rules assume a deterministic, SI-unit physics core. `docs/PHYSICS.md` § Conventions lists where this repo stands. In short:
 
 - **Deterministic.** All simulation randomness goes through `rand()` / `state.rng`, and `updateGame()` advances a fixed `SIM_STEP`. Keep it that way: never call `Math.random` or read the clock in simulation code, and never pass a frame delta into it. Cosmetic randomness gets its own generator, like `crewRng` in `js/render.js`.
-- **Not separated.** `js/simulation.js` and `js/events.js` call `say()` and `endGame()` from the UI.
+- **Separated.** The simulation files (`data` through `simulation` in load order) have no DOM access and make no UI calls. Messages go through `emit()`/`emitLine()` onto `state.outbox`, and a mission ends by setting `state.over`. `tests/purity.test.mjs` enforces this, and the test loader fails if a simulation file touches anything outside its context.
 - **Abstract units.** Resources are balance units, not SI.
 
 Don't add to these gaps. If a task touches these areas, ask whether to fix the underlying issue first rather than building on it.
@@ -58,9 +59,15 @@ The numbers are a game economy. The **relationships** are claims about Mars. Whe
 python3 -m http.server 8000    # then open http://localhost:8000/
 ```
 
-There are no tests or lint. Verify changes by playing through in a browser. The Playwright MCP server works well for this. Check the browser console for errors, because a broken global or a script-order mistake fails silently until it's called. `python3 -m http.server` lets the browser cache scripts, so after editing JS, hard-reload or use a no-cache server, or you'll test stale code.
+```bash
+npm test                       # Node 22 or later; nothing to install
+```
 
-Because the simulation is deterministic, balance can be checked headlessly from the page: `newGame(id, seed)`, call `build(type, tile)` as a bot would, then loop `updateGame()` until `state.over`. A balance change to a mission should keep it winnable at every difficulty, and should keep the strategy it warns against losing.
+The suite takes about 40 seconds, most of it the balance tests, which play every mission at every difficulty. For a quick run, pick files: `node --test tests/shortages.test.mjs`. CI runs the full suite on every pull request, and `deploy.yml` runs it before publishing, so a failing test blocks a deploy. There's no lint.
+
+Tests don't cover the UI, so also verify changes by playing through in a browser. The Playwright MCP server works well for this. Check the browser console for errors, because a broken global or a script-order mistake fails silently until it's called. `python3 -m http.server` lets the browser cache scripts, so after editing JS, hard-reload or use a no-cache server, or you'll test stale code.
+
+Balance is checked by `tests/balance.test.mjs`. Every mission must be winnable at every difficulty, and the strategy its briefing warns against must lose. The build orders in `tests/strategies.mjs` are that contract: a change to a rate, rule or mission keeps them passing, or updates them in the same change and says why. A known gap is marked with `knownGap`, which makes its check a `todo` rather than a failure.
 
 Pushes to `main` deploy to GitHub Pages through `.github/workflows/deploy.yml`, which publishes only `index.html`, `style.css`, `js/`, `sprites/` and `assets/`. **A new top-level file the game loads must be added to that workflow's staging step**, or the deployed game won't find it.
 

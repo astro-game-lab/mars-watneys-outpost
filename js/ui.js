@@ -59,7 +59,6 @@ function makesText(b) {
 }
 
 // ---------- Watney messages ----------
-const lastSaid = {};
 function say(text, kind = "") {
   const box = $("messages");
   const el = document.createElement("div");
@@ -68,12 +67,13 @@ function say(text, kind = "") {
   box.prepend(el);
   while (box.children.length > 4) box.lastChild.remove();
 }
-// Trigger-based line with a cooldown (game seconds).
-function sayOnce(key, cooldown = 45) {
-  const now = state.time;
-  if (lastSaid[key] !== undefined && now - lastSaid[key] < cooldown) return;
-  lastSaid[key] = now;
-  say(WATNEY_LINES[key], key === "night" ? "" : "bad");
+// Show the messages the simulation has queued since the last frame.
+function drainOutbox() {
+  for (const m of state.outbox) {
+    if (m.kind === "line") say(WATNEY_LINES[m.key], m.key === "night" ? "" : "bad");
+    else say(m.text, m.tone);
+  }
+  state.outbox.length = 0;
 }
 
 // ---------- HUD ----------

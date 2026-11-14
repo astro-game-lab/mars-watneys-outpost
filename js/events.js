@@ -5,26 +5,26 @@
 const EVENTS = {
   dust() {
     addEffect("dust", "🌪️ Dust storm: solar −70%", state.events.durations.dust);
-    say("Dust storm incoming! My solar panels are going to hate this.", "bad");
+    emit("Dust storm incoming! My solar panels are going to hate this.", "bad");
   },
   flare() {
     addEffect("flare", `☢️ Solar flare: radiation +${FLARE_RADIATION}%`, state.events.durations.flare);
-    say("Solar flare! Staying inside the shielded areas.", "bad");
+    emit("Solar flare! Staying inside the shielded areas.", "bad");
   },
   meteor() {
     const list = buildings();
     const t = list[Math.floor(rand() * list.length)];
     t.building.disabled = state.events.durations.meteor;
-    say(`Micrometeorite hit the ${BUILDINGS[t.building.type].name}! Repairs will take a while.`, "bad");
+    emit(`Micrometeorite hit the ${BUILDINGS[t.building.type].name}! Repairs will take a while.`, "bad");
   },
   failure() {
     addEffect("failure", "🔧 Pump failure: water −50%", state.events.durations.failure);
-    say("Water pump is acting up. Output's down until I fix it.", "bad");
+    emit("Water pump is acting up. Output's down until I fix it.", "bad");
   },
   supply() {
     const drop = state.events.supply;
     for (const [k, v] of Object.entries(drop)) state.resources[k] += v;
-    say(`Supply drop from NASA! ${Object.entries(drop).map(([k, v]) => `+${v} ${k}`).join(", ")}. Thanks, Earth!`, "good");
+    emit(`Supply drop from NASA! ${Object.entries(drop).map(([k, v]) => `+${v} ${k}`).join(", ")}. Thanks, Earth!`, "good");
   },
 };
 

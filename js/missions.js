@@ -89,7 +89,7 @@ const MISSIONS = [
     briefing: [
       "It's dust storm season. On Mars a storm can keep growing until it wraps the whole planet. In 2018 one blotted out the Sun for months and ended the Opportunity rover's mission.",
       "Ours will be shorter, but there will be a lot of them, and each one cuts solar output by 70%. Batteries buy time. What I really need is power that doesn't care about the weather.",
-      "NASA has approved a Nuclear Generator. It's expensive, but it runs day and night, storm or no storm. Earn 1,000 credits for the science program before Sol 6.",
+      "NASA has approved a Nuclear Generator. It's expensive, but it runs day and night, storm or no storm. Earn 3,000 credits for the science program before Sol 6.",
     ],
     tips: [
       "Save up for a Nuclear Generator: 80 materials and 300 credits.",
@@ -99,8 +99,8 @@ const MISSIONS = [
     seed: 3301,
     start: { resources: { materials: 120 } },
     buildings: null,
-    events: { first: 25, interval: [30, 45], weights: { dust: 6, meteor: 1, supply: 1 }, durations: { dust: 45 } },
-    objectives: [{ type: "credits", value: 1000 }],
+    events: { first: 25, interval: [30, 45], weights: { dust: 6, meteor: 1, supply: 1 }, durations: { dust: 90 } },
+    objectives: [{ type: "credits", value: 3000 }],
     failures: [{ type: "deadline", sol: 6 }],
   },
   {

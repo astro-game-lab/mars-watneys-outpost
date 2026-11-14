@@ -1,6 +1,8 @@
 // Resource simulation: production, consumption, power/water shortages,
 // day/night, radiation, crew health, objectives, win/lose.
-// updateGame() advances exactly one fixed SIM_STEP.
+// updateGame() advances exactly one fixed SIM_STEP. Nothing here touches the
+// DOM or calls the UI: messages go to state.outbox, and the end of a mission
+// is recorded in state.over and state.endCause for the UI to pick up.
 
 function solTime() {
   return (state.time % SOL_SECONDS) / SOL_SECONDS;
@@ -49,16 +51,21 @@ function computeFlows() {
 
   // Water: extractors depend on power. The crew drinks first and isn't
   // throttled, so buildings share only what's left after the crew's needs.
+  // wBuild is what buildings would draw at their power-limited level; the
+  // factor is a fraction of their full demand, because level() takes the
+  // smaller of the power and water factors rather than multiplying them.
   const crewWater = crewNeed("water");
-  let wProd = 0, wBuild = 0;
+  let wProd = 0, wBuild = 0, wFull = 0;
   for (const t of list) {
     const b = BUILDINGS[t.building.type];
     const lv = level(t);
     wProd += (b.produces.water || 0) * outputMultiplier(t) * lv;
-    wBuild += (b.consumes.water || 0) * (t.building.disabled > 0 ? 0 : factor.power);
+    if (t.building.disabled > 0) continue;
+    wBuild += (b.consumes.water || 0) * factor.power;
+    wFull += b.consumes.water || 0;
   }
   if (state.resources.water <= 0.01 && crewWater + wBuild > wProd) {
-    factor.water = wBuild ? Math.max(0, wProd - crewWater) / wBuild : 1;
+    factor.water = wFull ? Math.max(0, wProd - crewWater) / wFull : 1;
   }
 
   // Final flows.
@@ -94,10 +101,10 @@ function updateGame() {
   const newSol = Math.floor(state.time / SOL_SECONDS) + 1;
   if (newSol !== state.sol) {
     state.sol = newSol;
-    say(`Sol ${newSol}. Still alive. Log entry complete.`, "good");
+    emit(`Sol ${newSol}. Still alive. Log entry complete.`, "good");
     if (state.mission.crewArrivals !== false && newSol >= state.nextArrivalSol) tryCrewArrival();
   }
-  if (prevPhase !== dayPhase(solTime()) && dayPhase(solTime()) === "🌑 Night") sayOnce("night");
+  if (prevPhase !== dayPhase(solTime()) && dayPhase(solTime()) === "🌑 Night") emitLine("night");
 
   updateEvents(dt);
 
@@ -166,13 +173,19 @@ function objectivesMet() {
 function checkEnd() {
   if (state.health <= 0) {
     state.health = 0;
-    return endGame("lose", "health");
+    return finish("lose", "health");
   }
-  if (objectivesMet()) return endGame("win", "objectives");
+  if (objectivesMet()) return finish("win", "objectives");
   for (const f of state.mission.failures) {
-    if (f.type === "blackout" && state.resources.power <= 0.01) return endGame("lose", "blackout");
-    if (f.type === "deadline" && state.sol >= f.sol) return endGame("lose", "deadline");
+    if (f.type === "blackout" && state.resources.power <= 0.01) return finish("lose", "blackout");
+    if (f.type === "deadline" && state.sol >= f.sol) return finish("lose", "deadline");
   }
+}
+
+// End the mission. The frame loop sees state.over and shows the end screen.
+function finish(result, cause) {
+  state.over = result;
+  state.endCause = cause;
 }
 
 // Why a new crew member can't arrive right now, or null if they can.
@@ -187,14 +200,14 @@ function arrivalBlocker() {
 function tryCrewArrival() {
   const blocker = arrivalBlocker();
   if (blocker) {
-    say(`NASA postponed the next crew landing: ${blocker}. They'll try again next sol.`, "bad");
+    emit(`NASA postponed the next crew landing: ${blocker}. They'll try again next sol.`, "bad");
     state.nextArrivalSol = state.sol + 1;
     return;
   }
   const name = CREW_NAMES[(state.crew - 1) % CREW_NAMES.length];
   state.crew++;
   state.nextArrivalSol = state.sol + (state.mission.crewArrivalSols || CREW_ARRIVAL_SOLS);
-  say(`${name} just landed! Crew is now ${state.crew}. More science, but more mouths to feed.`, "good");
+  emit(`${name} just landed! Crew is now ${state.crew}. More science, but more mouths to feed.`, "good");
 }
 
 // Seconds until a resource runs out (Infinity if not falling).
@@ -214,10 +227,10 @@ function resourceStatus(key) {
 }
 
 function checkWarnings() {
-  if (resourceStatus("power") !== "good") sayOnce(state.resources.power <= 0.01 ? "noPower" : "lowPower");
-  if (resourceStatus("water") !== "good") sayOnce("lowWater");
-  if (resourceStatus("food") !== "good") sayOnce("lowFood");
-  if (resourceStatus("oxygen") !== "good") sayOnce("lowOxygen");
-  if (state.radiation > 50) sayOnce("highRadiation");
-  if (state.health < 40) sayOnce("lowHealth");
+  if (resourceStatus("power") !== "good") emitLine(state.resources.power <= 0.01 ? "noPower" : "lowPower");
+  if (resourceStatus("water") !== "good") emitLine("lowWater");
+  if (resourceStatus("food") !== "good") emitLine("lowFood");
+  if (resourceStatus("oxygen") !== "good") emitLine("lowOxygen");
+  if (state.radiation > 50) emitLine("highRadiation");
+  if (state.health < 40) emitLine("lowHealth");
 }

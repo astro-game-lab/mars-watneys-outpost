@@ -25,7 +25,7 @@ To run it locally, see [Development](#development) below.
 | **Events** | By default every 40–70 seconds: a dust storm (solar −70%), a solar flare (radiation +40%), a micrometeorite (one building out for 30 s), a pump failure (water −50%), or a NASA supply drop. Missions change the mix, and some script events for a set time. |
 | **Winning** | Each mission has its own objectives: reach a sol, earn credits, grow the crew, store water, or bring radiation down. Every mission is lost if crew health hits zero, and some also end on a blackout or a deadline. |
 
-What isn't here yet: saving a mission in progress, settings, sound, keyboard-only play, touch input, or an in-game tutorial beyond the intro, the briefings and each building's explanation. The code is plain browser JavaScript with no build step, no tests and no CI.
+What isn't here yet: saving a mission in progress, settings, sound, keyboard-only play, touch input, or an in-game tutorial beyond the intro, the briefings and each building's explanation. The code is plain browser JavaScript with no build step. The simulation has automated tests, which run in CI.
 
 The simulation is deterministic. A seeded generator drives all randomness, and the simulation runs on a fixed timestep. So the same seed plus the same moves replays the same mission. The seed is shown on the end screen, and `?seed=N` in the URL replays a map in *The Outpost*. The simulation still calls the UI directly and uses abstract units. See [`docs/PHYSICS.md`](docs/PHYSICS.md#conventions).
 
@@ -51,7 +51,7 @@ The numbers are a game economy, not a life-support model. [`docs/PHYSICS.md`](do
 
 ### Requirements
 
-A browser, and any static file server. There is no build step and nothing to install.
+A browser, and any static file server. There is no build step and nothing to install. Running the tests needs Node 22 or later.
 
 ### Setup
 
@@ -68,7 +68,7 @@ Then open <http://localhost:8000/>. Opening `index.html` straight from disk most
 | Task | Command |
 | --- | --- |
 | Run locally | `python3 -m http.server 8000` |
-| Test | _none yet_ |
+| Test | `npm test` |
 | Lint | _none yet_ |
 | Build | _none — the repository is the site_ |
 
@@ -80,19 +80,22 @@ style.css         HUD and panel styling
 js/data.js        every balance number, terrain, buildings, events, difficulty, Watney's lines
 js/missions.js    the campaign: maps, objectives, briefings, and the intro story
 js/rng.js         the seeded random number generator
-js/hexmap.js      odd-r hex grid, neighbours, connectivity, picking
+js/hexmap.js      odd-r hex grid, neighbours, connectivity
 js/state.js       game state, build / reinforce / demolish rules
 js/events.js      random events and timed effects
 js/simulation.js  resource flows, shortages, day/night, radiation, health, win/lose
-js/render.js      canvas drawing, cached static layer, night overlay, crew
+js/render.js      canvas drawing, layout and picking, cached static layer, night overlay, crew
 js/ui.js          HUD, objectives, build panel, messages
 js/screens.js     intro, mission select and briefing, end screen and debrief, saved progress
 js/main.js        entry point, fixed-step frame loop, input, seeds
 sprites/          building sprites (SVG)
 assets/           map background
+tests/            Node tests of the simulation, run headless, and the balance build orders
 ```
 
 The scripts are classic `<script>` tags that share one global scope. **The order in `index.html` matters.** Tune the game in `js/data.js` and the missions in `js/missions.js`. The rest of the code shouldn't contain balance numbers.
+
+The simulation (`js/data.js` through `js/simulation.js`) never touches the page. It queues messages for the UI and records the end of a mission in its state, so the tests can run it under Node without a browser.
 
 ### Deployment
 

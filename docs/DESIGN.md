@@ -42,7 +42,7 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 - **The campaign is the tutorial.** Each mission isolates one lesson, with a briefing that gives the science, the objectives, how you can lose, the buildings available, and three first moves.
   1. *First Night*: storage. Survive two nights without a blackout, using Solar, Battery, Water and Greenhouse only.
   2. *Ice Line*: water from the ground. Bank 2 000 water before Sol 4 on a handmade map whose ice sits past a ridge. Regolith alone falls short.
-  3. *Dust Season*: nuclear power. Earn 1 000 credits before Sol 6 through constant storms. Solar alone falls short.
+  3. *Dust Season*: nuclear power. Earn 3 000 credits before Sol 6 through near-constant 90 s storms. Solar alone falls short.
   4. *Flare Watch*: shielding. Reach Sol 5 with exposure at 10% or less, through frequent flares and one scripted flare.
   5. *Crew Rotation*: life support for a growing crew. A lander arrives every sol. Reach a crew of six before Sol 9.
   6. *The Outpost*: everything at once, on a fresh random map each run.

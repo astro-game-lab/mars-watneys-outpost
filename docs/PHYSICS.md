@@ -8,7 +8,7 @@ This document says what the simulation claims and how far to trust it. Update it
 | --- | --- |
 | **Model** | A discrete-time resource economy on a hex grid. Fixed production and consumption rates, gated by power and water shortages, with a stepped day/night solar curve, an additive radiation budget and a crew-health integrator. |
 | **Fidelity claim** | **Qualitative only.** The game claims that the *relationships* it shows are real: solar stops at night and in dust storms, water and building materials come from local resources, shielding reduces dose, crew need water, food and oxygen. It claims **no** real quantities. Every number in `js/data.js` is a balance value in made-up units. |
-| **Last validated** | 2026-11-12, by a read-through of the building, story and mission-briefing texts against the references below, and a browser check of determinism. No automated checks exist. |
+| **Last validated** | 2026-11-12, by a read-through of the building, story and mission-briefing texts against the references below. Since 2026-11-14 the model is checked by the automated tests in `tests/` on every pull request and before every deploy. See [Validation](#validation). |
 
 ## Conventions
 
@@ -20,10 +20,10 @@ The org defaults assume a physics core in SI units with a deterministic, fixed-s
 | **Time** | Scalar offset from a defined epoch, in a stated scale | **Deviation.** `state.time` is game seconds since the start of Sol 1, computed as `startTime + tick × SIM_STEP` so it never accumulates rounding. One sol is `SOL_SECONDS` = 120 game seconds. There is no calendar or epoch. |
 | **Timestep** | Fixed, with an accumulator, decoupled from rendering | **Compliant.** `updateGame()` always advances exactly `SIM_STEP` = 0.05 game seconds. `js/main.js` banks each frame's wall-clock delta (capped at 0.1 s, times the 1×/2×/4× speed) and runs as many whole steps as it has banked. Frame rate changes how many steps run per frame, never what a step does. |
 | **Randomness** | One explicitly seeded generator | **Compliant.** All simulation randomness comes from `state.rng`, a mulberry32 generator (`js/rng.js`) seeded per mission: terrain, event timing and choice, and the micrometeorite target. Campaign missions have fixed seeds. *The Outpost* takes a fresh seed per run, from `crypto.getRandomValues` at the UI boundary, or `?seed=N` from the URL. The seed is shown on the end screen. The cosmetic crew walk has its own generator, so it can't shift the simulation's draws. There is no `Math.random` anywhere. |
-| **Separation** | The core has no DOM and no UI calls | **Deviation.** `js/simulation.js` and `js/events.js` call `say()` from `js/ui.js` and `endGame()` from `js/screens.js` directly, and every module shares the global scope. |
+| **Separation** | The core has no DOM and no UI calls | **Compliant.** The simulation files (`data`, `missions`, `rng`, `hexmap`, `state`, `events`, `simulation`) touch no DOM and call no UI. They queue messages on `state.outbox`, which the UI drains each frame, and they end a mission by setting `state.over` and `state.endCause`, which the frame loop turns into the end screen. The tests load these files into an empty JavaScript context and run them headless. All the scripts still share one global scope, as classic `<script>` tags do, so the boundary is enforced by tests (`tests/purity.test.mjs`), not by modules. |
 | **Precision** | Float64 for state | Float64 (JavaScript numbers). Resources are clamped to `≥ 0`, and power to `≤` battery capacity, after each step. |
 
-Separating the simulation from the UI, so that it runs headless and can be tested, is the next step toward org compliance.
+The remaining deviations, abstract units and an epoch-free clock, are deliberate for a game of this scale.
 
 ## Constants
 
@@ -63,14 +63,14 @@ The game's qualitative claims hold for the whole game. Its numbers are valid now
 
 ## Gameplay departures
 
-**Every place the game knowingly departs from reality goes here.** Simplifying is allowed. Hiding it isn't. These all live in `js/data.js`, `js/missions.js`, `js/simulation.js` and `js/events.js`. The repository has no separate core for them to stay out of yet.
+**Every place the game knowingly departs from reality goes here.** Simplifying is allowed. Hiding it isn't. These all live in `js/data.js`, `js/missions.js`, `js/simulation.js` and `js/events.js`. The simulation is now separate from the UI, but the game rules and the model still share those files.
 
 | Departure | Where it lives | Why | Player-visible? |
 | --- | --- | --- | --- |
 | A sol lasts 120 s, about 740× faster than reality | `SOL_SECONDS` | A mission fits in about 16 minutes | Yes, on the clock |
 | Daylight is four flat steps, not a smooth curve | `daylight()` | Readable phases. The HUD names each one. | Yes |
 | Crew arrive every 2 sols, with no transfer windows | `CREW_ARRIVAL_SOLS` | Growth pressure inside one session | Yes |
-| Dust storms last 30 s (45 s in *Dust Season*) and cut solar by 70% | `EVENT_DEFAULTS`, `dust-season` | Real storms last weeks to months. A short one teaches the lesson without ending the run. | Yes |
+| Dust storms last 30 s (90 s in *Dust Season*) and cut solar by 70% | `EVENT_DEFAULTS`, `dust-season` | Real storms last weeks to months. A short one teaches the lesson without ending the run. In *Dust Season* they overlap into a near-continuous storm season, which is closer to reality. | Yes |
 | Solar flares add a flat +40% exposure for 20 s | `FLARE_RADIATION`, `EVENT_DEFAULTS` | Makes shielding matter in a short session | Yes |
 | Micrometeorite strikes disable a random building every few minutes | `EVENTS` | Far more often than reality. It's there for variety. | Yes |
 | NASA supply drops of materials and credits arrive at random | `EVENT_DEFAULTS` | Catch-up mechanic. Real resupply follows launch windows. | Yes |
@@ -110,19 +110,20 @@ Each building's `why` text in `js/data.js` makes a factual claim, and so do the 
 
 ## Validation
 
-There's no test suite. These are the checks the model needs, roughly in priority order:
+The tests in `tests/` run with `npm test` (Node's built-in runner, nothing to install), in CI on every pull request, and before every deploy. They load the simulation into an empty context, with no DOM, and play it with a scripted bot (`tests/bot.mjs`).
 
 | Property | Method | Test |
 | --- | --- | --- |
-| Determinism | Same seed and same inputs give an identical state after N steps | Checked by hand 2026-11-12 in a browser. Every mission was run twice from the same seed for 3 000 steps, with events on, and the full state was identical. A different seed gave a different state. There's no automated test yet. |
-| Resource bookkeeping | Each step, the change in every resource is `rates × dt`, then clamped | _todo_ |
-| Shortage resolution | Throttled consumers never draw more than is supplied, and the power-before-water ordering holds | _todo_ |
-| Connectivity | Demolition never splits the outpost | _todo_ |
+| Determinism | Same seed and same inputs give an identical state after N steps | `tests/determinism.test.mjs`: every mission run twice from the same seed and moves for 3 000 steps on *Martian*, with events on, gives an identical full state. A different seed gives a different state. A second mission in the same context replays the first exactly, so nothing leaks between missions. |
+| Resource bookkeeping | Each step, the change in every resource is `rates × dt`, then clamped | `tests/bookkeeping.test.mjs`: every step of every mission, with events off. Exact, not within a tolerance. |
+| Shortage resolution | Throttled consumers never draw more than is supplied, and the power-before-water ordering holds | `tests/shortages.test.mjs`: power draw equals generation, extractors run no faster than power allows, the crew drinks first, and buildings never draw more water than is left after the crew, including when power and water are both short. That last case was broken until 2026-11-14. See the changelog. |
+| Connectivity | Demolition never splits the outpost | `tests/connectivity.test.mjs`: 400 seeded random builds and demolitions on each of five maps, checked by an independent flood fill, plus a direct case. |
 | Step-size independence | Mission outcome doesn't depend on frame rate | Holds by construction: the simulation only advances in fixed `SIM_STEP` steps |
-| Mission balance | Every mission is winnable at every difficulty, and the strategy it warns against loses | Checked by hand 2026-11-12 with scripted build orders. There's no automated test yet. |
+| Mission balance | Every mission is winnable at every difficulty, and the strategy it warns against loses | `tests/balance.test.mjs`, with the build orders in `tests/strategies.mjs`: every mission at every difficulty, and *The Outpost* on eight seeds. The closest margins: *Dust Season*'s best solar-only build reaches about 79% of its target by the deadline, and *Ice Line*'s regolith-only build loses on *Normal* by a margin of about 1% of the target. |
 
 ## Numerical notes
 
 - **Integrator:** explicit Euler on a fixed step.
 - **Timestep:** `SIM_STEP` = 0.05 game seconds. The frame loop is capped at 30 fps, so it runs about 0.7 steps per frame at 1× and about 2.7 at 4×. A slow frame is capped at 0.1 s of wall time, so at most 8 steps run in one frame.
 - **Known drift:** shortages are detected only once a stock reaches about zero (`≤ 0.01`), so one step of over-draw is clamped away. With the fixed step this is the same at every speed.
+- **Known drift:** power is shared out before water. If a building is also starved of water, the power it was allotted goes unused for that step. Stored power then rises above zero, and the next step has no power shortage. The effect lasts one step at a time.
