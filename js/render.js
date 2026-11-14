@@ -6,15 +6,12 @@ const ctx = canvas.getContext("2d");
 const bg = new Image();
 bg.src = "assets/mars3.png";
 
-// Building sprites, keyed by building type, plus the scaffolding drawn over
-// any building under construction.
+// Building sprites, keyed by building type.
 const SPRITES = Object.fromEntries(BUILD_ORDER.map((k) => {
   const img = new Image();
   img.src = `sprites/${BUILDINGS[k].sprite}.svg`;
   return [k, img];
 }));
-SPRITES.scaffold = new Image();
-SPRITES.scaffold.src = "sprites/scaffold.svg";
 
 // ---------- Layout ----------
 // Pointy-top hexes in odd-r offset layout; js/hexmap.js has the grid itself.
@@ -180,14 +177,13 @@ function drawTileStatic(c, t) {
     const sp = spriteBitmap(t.building.type);
     const site = t.building.construct > 0;
     if (sp) {
-      // A construction site shows the finished building, faint, under scaffolding.
+      // A construction site shows the finished building, faint; its status
+      // marker carries the progress (drawTileDynamic).
       c.globalAlpha = site ? 0.35 : t.building.disabled > 0 || t.building.priority === "off" ? 0.45 : 1;
       const step = dustStep(t.building);
       c.drawImage(step > 0 ? dustyBitmap(sp, step) : sp.canvas, x - sp.w / 2, y - sp.h / 2, sp.w, sp.h);
       c.globalAlpha = 1;
     }
-    const scaffold = site && spriteBitmap("scaffold");
-    if (scaffold) c.drawImage(scaffold.canvas, x - scaffold.w / 2, y - scaffold.h / 2, scaffold.w, scaffold.h);
   }
 }
 
@@ -198,7 +194,7 @@ const BUILDING_CODE = Object.fromEntries(BUILD_ORDER.map((k, i) => [k, i]));
 // including the terrain, which differs between missions and seeds.
 function staticSignature() {
   let sig = `${canvas.width}x${canvas.height}|${view.size}|${bg.complete && bg.naturalWidth ? 1 : 0}|`;
-  for (const k of [...BUILD_ORDER, "scaffold"]) sig += SPRITES[k].naturalWidth ? 1 : 0;
+  for (const k of BUILD_ORDER) sig += SPRITES[k].naturalWidth ? 1 : 0;
   for (const t of state.tiles) {
     const b = t.building;
     sig += `${TERRAIN_CODE[t.terrain]}:`;
@@ -233,22 +229,14 @@ function drawTileDynamic(t) {
     ctx.globalAlpha = 1;
   }
   if (!t.building) return;
+  // One status marker per building, top-right of its hex. A construction site's
+  // marker has a ring around it showing how much of the work is done.
+  let mark = null, color = "rgba(180, 20, 20, 0.85)", progress = null;
   if (t.building.construct > 0) {
-    const total = BUILDINGS[t.building.type].work;
-    const done = 1 - t.building.construct / total;
-    ctx.lineWidth = Math.max(2, size * 0.08);
-    hexPath(x, y, size * 0.92);
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.18)";
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(x, y, size * 0.8, -Math.PI / 2, -Math.PI / 2 + done * Math.PI * 2);
-    ctx.strokeStyle = "rgba(242, 140, 40, 0.95)";
-    ctx.stroke();
-    ctx.lineWidth = 1;
-    return;
-  }
-  let mark = null, color = "rgba(180, 20, 20, 0.85)";
-  if (t.building.disabled > 0) mark = "🔧";
+    mark = "🏗️";
+    color = "rgba(120, 72, 30, 0.9)";
+    progress = 1 - t.building.construct / BUILDINGS[t.building.type].work;
+  } else if (t.building.disabled > 0) mark = "🔧";
   else if (beingWorked(t.building, "clean")) { mark = "🧹"; color = "rgba(46, 90, 122, 0.9)"; }
   else if (t.building.type === "greenhouse" && t.building.tempK < FROST_K) { mark = "❄️"; color = "rgba(46, 90, 122, 0.9)"; }
   else if (t.building.tempK < COLD_K) { mark = "🥶"; color = "rgba(46, 90, 122, 0.9)"; }
@@ -256,13 +244,28 @@ function drawTileDynamic(t) {
   else if (t.building.level !== undefined && t.building.level < 0.99) mark = "⚡";
   if (mark) {
     const text = mark === "OFF";   // plain text needs its own colour; emoji bring theirs
+    const mx = x + size * 0.5, my = y - size * 0.5, r = size * 0.28;
     ctx.font = text ? `bold ${Math.round(size * 0.2)}px system-ui` : `${Math.round(size * 0.45)}px system-ui`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(x + size * 0.5, y - size * 0.5, size * 0.28, 0, Math.PI * 2);
+    ctx.arc(mx, my, r, 0, Math.PI * 2);
     ctx.fill();
+    if (progress !== null) {
+      // The ring: a dark track, and the work done so far, clockwise from the top.
+      const ringR = r + size * 0.07;
+      ctx.lineWidth = Math.max(2, size * 0.07);
+      ctx.beginPath();
+      ctx.arc(mx, my, ringR, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.45)";
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(mx, my, ringR, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2);
+      ctx.strokeStyle = "rgba(242, 140, 40, 0.95)";
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
     if (text) ctx.fillStyle = "#fff";
     ctx.fillText(mark, x + size * 0.5, y - size * (text ? 0.5 : 0.48));
   }

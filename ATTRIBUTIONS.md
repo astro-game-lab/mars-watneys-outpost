@@ -11,7 +11,7 @@ Art, audio, models, fonts, and other authored media.
 | File / directory | Source | Author | Licence | Notes |
 | --- | --- | --- | --- | --- |
 | `assets/mars3.png` | NASA. **Source URL not yet recorded.** | NASA | Public domain. NASA imagery is generally not subject to copyright in the US. NASA's [media usage guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) ask for credit, and they don't allow use that implies NASA endorses the project. | The map background, 1254 × 1254 px. **To do:** record the exact source page and image ID here, and check that the image isn't a third-party contribution hosted by NASA. Those can carry their own copyright. |
-| `sprites/*.svg` | This repository | Mars: Watney's Outpost contributors | [CC BY 4.0](LICENSE-ASSETS.md) | The ten building sprites and the scaffolding overlay for construction sites (`scaffold.svg`), drawn as SVG for this game. Listed so every asset has a row, not because anything here is borrowed. |
+| `sprites/*.svg` | This repository | Mars: Watney's Outpost contributors | [CC BY 4.0](LICENSE-ASSETS.md) | The ten building sprites, drawn as SVG for this game. Listed so every asset has a row, not because anything here is borrowed. |
 | UI icons | The viewer's system emoji font | — | — | The HUD and messages use Unicode emoji, drawn with whatever font the viewer's system has. No font or image is bundled. |
 
 ## Characters and names
