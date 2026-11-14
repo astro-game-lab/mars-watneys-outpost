@@ -248,7 +248,7 @@ function renderPanel() {
           <button data-act="why" data-key="reinforce" class="whybtn">Why?</button>
           ${t.building.reinforced
             ? `<span class="bonus">✓ Reinforced (−${REINFORCE.radiation}% rad)</span>`
-            : t.building.reinforcing > 0 ? `<span class="bonus">🧱 Under way</span>`
+            : t.building.reinforcing > 0 ? `<span class="bonus" id="reinforce-progress"></span>`
             : `<button data-act="reinforce" ${reinforceBlocker(t) ? "disabled" : ""}>Reinforce</button>`}
         </div>
         ${t.building.reinforced ? "" : `<div class="ocost">Cost: ${fmtList(REINFORCE.cost)} · ${REINFORCE.work}s of crew work · Radiation −${REINFORCE.radiation}%, no power needed</div>`}
@@ -323,7 +323,7 @@ function updatePanelLive() {
       return;
     }
     const status = bld.disabled > 0 ? `🔧 Damaged · repairs ${Math.floor(100 * jobProgress(bld, "repair"))}% done · ${workText(bld, "repair", "being repaired")}`
-      : bld.cleaning > 0 && beingWorked(bld, "clean") ? `🧹 Being cleaned by ${bld.working.clean} · ${Math.ceil(bld.cleaning)}s left`
+      : bld.cleaning > 0 && beingWorked(bld, "clean") ? `🧹 Being cleaned by ${bld.working.clean} · ${Math.floor(100 * jobProgress(bld, "clean"))}% done`
       : t.building.priority === "off" ? "💤 Switched off"
       : lv < 0.99 ? `⚡ Short of inputs — running at ${Math.round(lv * 100)}%` : "✅ Running";
     const b = BUILDINGS[t.building.type];
@@ -352,6 +352,12 @@ function updatePanelLive() {
       (drawing ? `<div class="kv"><span>Drawing now</span><span>${drawing}${b.heat ? " incl. heating" : ""}</span></div>` : "") + temp + dust;
     const rbtn = document.querySelector('#panel button[data-act="reinforce"]');
     if (rbtn) rbtn.disabled = !!reinforceBlocker(t);
+    const rprog = $("reinforce-progress");
+    if (rprog) {
+      rprog.textContent = bld.reinforcing > 0
+        ? `🧱 ${Math.floor(100 * jobProgress(bld, "reinforce"))}% · ${workText(bld, "reinforce", "being done")}`
+        : "✓ Reinforced";
+    }
     const cbtn = document.querySelector('#panel button[data-act="clean"]');
     if (cbtn) {
       const blocker = cleanBlocker(t);

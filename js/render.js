@@ -229,20 +229,18 @@ function drawTileDynamic(t) {
     ctx.globalAlpha = 1;
   }
   if (!t.building) return;
-  // One status marker per building, top-right of its hex. Construction and
-  // repair markers have a ring around them showing how much of the work is done.
+  // One status marker per building, top-right of its hex: the most pressing
+  // first. Every crew job (construction, repair, cleaning, reinforcing) has a
+  // ring around its marker showing how much of the work is done, from the
+  // moment it's queued.
+  const b = t.building, blue = "rgba(46, 90, 122, 0.9)";
   let mark = null, color = "rgba(180, 20, 20, 0.85)", progress = null;
-  if (t.building.construct > 0) {
-    mark = "🏗️";
-    color = "rgba(120, 72, 30, 0.9)";
-    progress = jobProgress(t.building, "construct");
-  } else if (t.building.disabled > 0) {
-    mark = "🔧";
-    progress = jobProgress(t.building, "repair");
-  }
-  else if (beingWorked(t.building, "clean")) { mark = "🧹"; color = "rgba(46, 90, 122, 0.9)"; }
-  else if (t.building.type === "greenhouse" && t.building.tempK < FROST_K) { mark = "❄️"; color = "rgba(46, 90, 122, 0.9)"; }
-  else if (t.building.tempK < COLD_K) { mark = "🥶"; color = "rgba(46, 90, 122, 0.9)"; }
+  if (b.construct > 0) { mark = "🏗️"; color = "rgba(120, 72, 30, 0.9)"; progress = jobProgress(b, "construct"); }
+  else if (b.disabled > 0) { mark = "🔧"; progress = jobProgress(b, "repair"); }
+  else if (b.type === "greenhouse" && b.tempK < FROST_K) { mark = "❄️"; color = blue; }
+  else if (b.tempK < COLD_K) { mark = "🥶"; color = blue; }
+  else if (b.cleaning > 0) { mark = "🧹"; color = blue; progress = jobProgress(b, "clean"); }
+  else if (b.reinforcing > 0) { mark = "🧱"; color = "rgba(150, 85, 45, 0.9)"; progress = jobProgress(b, "reinforce"); }
   else if (t.building.priority === "off") { mark = "OFF"; color = "rgba(60, 60, 60, 0.9)"; }
   else if (t.building.level !== undefined && t.building.level < 0.99) mark = "⚡";
   if (mark) {
