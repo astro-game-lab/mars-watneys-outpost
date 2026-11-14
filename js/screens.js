@@ -50,6 +50,14 @@ function recordWin(id, diff) {
 let inMission = false;       // a mission has begun and hasn't ended
 let shownMission = null;     // whose briefing is on the mission screen
 
+// Hide an overlay, and take keyboard focus out of it: a hidden button keeps
+// focus, and Enter would still press it ("Abandon and begin", "Retry").
+function hideScreen(id) {
+  const el = $(id);
+  el.hidden = true;
+  if (el.contains(document.activeElement)) document.activeElement.blur();
+}
+
 function screenOpen() {
   return !$("intro").hidden || !$("missions").hidden || !$("end").hidden;
 }
@@ -66,7 +74,7 @@ function showIntro() {
 function closeIntro() {
   progress.seenIntro = true;
   saveProgress();
-  $("intro").hidden = true;
+  hideScreen("intro");
   if (!inMission) showMissions();
 }
 
@@ -84,7 +92,7 @@ function showMissions(id = progress.last) {
 
 function closeMissions() {
   if (!inMission) return;  // nothing to go back to
-  $("missions").hidden = true;
+  hideScreen("missions");
 }
 
 function renderMissions() {
@@ -131,8 +139,8 @@ function beginMission(id, seed) {
   progress.last = id;
   saveProgress();
   newGame(id, seed);
-  $("missions").hidden = true;
-  $("end").hidden = true;
+  hideScreen("missions");
+  hideScreen("end");
   inMission = true;
 }
 
@@ -274,8 +282,8 @@ function endGame(result, cause) {
 }
 
 $("end-retry").addEventListener("click", () => beginMission(state.mission.id, state.seed));
-$("end-missions").addEventListener("click", () => { $("end").hidden = true; showMissions(state.mission.id); });
+$("end-missions").addEventListener("click", () => { hideScreen("end"); showMissions(state.mission.id); });
 $("end-next").addEventListener("click", () => {
-  $("end").hidden = true;
+  hideScreen("end");
   showMissions(MISSIONS[missionIndex(state.mission.id) + 1].id);
 });

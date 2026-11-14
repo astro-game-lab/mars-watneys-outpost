@@ -19,7 +19,7 @@ function newGame(missionId, seed) {
   $("messages").innerHTML = "";
   endShown = false;
   resetTips();
-  $("end").hidden = true;
+  hideScreen("end");
   selectTile(null);
   refreshFlows();
   say(WATNEY_LINES.start, "good");

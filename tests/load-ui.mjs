@@ -22,7 +22,7 @@ function fakeElement(id) {
   return {
     id, hidden: true, innerHTML: "", textContent: "", className: "", disabled: false, title: "",
     style: {}, dataset: {}, children: [],
-    addEventListener() {}, focus() {}, prepend() {}, remove() {},
+    addEventListener() {}, focus() {}, blur() {}, prepend() {}, remove() {}, contains: () => false,
     querySelector: () => fakeElement(), querySelectorAll: () => [],
   };
 }
@@ -32,6 +32,7 @@ export function loadUi({ storage = {} } = {}) {
   const store = new Map(Object.entries(storage));
   const ctx = vm.createContext({
     document: {
+      activeElement: null,
       getElementById: (id) => elements.get(id) ?? elements.set(id, fakeElement(id)).get(id),
       createElement: () => fakeElement(),
       querySelector: () => null,
