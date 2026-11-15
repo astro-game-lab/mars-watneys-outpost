@@ -11,185 +11,70 @@ they relied on has moved.
 
 ## [Unreleased]
 
+Everything below is measured against the imported prototype: an 11 × 8 hex map, nine
+buildings, regolith reinforcement, crew arrivals, a day/night cycle, five random
+events, and one mission with a win and a lose condition.
+
 ### Added
-- The playable prototype: an 11 × 8 hex map, nine buildings, regolith reinforcement,
-  crew arrivals, a day/night cycle, five random events, and a win and a lose condition.
-- Repository scaffolding from the org conventions: `README.md`, `docs/PHYSICS.md`,
-  `docs/DESIGN.md`, `CLAUDE.md`, `ATTRIBUTIONS.md`, `LICENSE-ASSETS.md`,
-  `.editorconfig`, `.gitattributes` and `.gitignore`.
-- Deployment to GitHub Pages on every push to `main`.
-- An intro screen in Watney's voice: the story, how the outpost works, and the
-  controls. It shows on the first visit and reopens with `H`.
-- A six-mission campaign, each mission teaching one piece of Mars science: *First
-  Night*, *Ice Line*, *Dust Season*, *Flare Watch*, *Crew Rotation* and *The
-  Outpost*. Each has its own map, starting supplies, buildings, events, objectives
-  and ways to lose. Mission select (`M`) shows a briefing for each, and the HUD
-  tracks objectives live.
-- A debrief on the end screen. It names what ended the mission and suggests what
-  to try. The seed is shown, and *Retry* replays it.
+- An eight-mission campaign, each mission teaching one piece of Mars science:
+  *First Night*, *Ice Line*, *Thin Air*, *Dust Season*, *Long Night*, *Flare Watch*,
+  *Crew Rotation* and *The Outpost* (the original mission). Each has its own map,
+  supplies, buildings, events, climate, objectives and ways to lose. Mission select
+  (`M`) shows a briefing for each, and the HUD tracks objectives live. Progress is
+  saved in the browser.
 - Difficulty tiers, *Hard* and *Martian*, unlocked by finishing the campaign.
-- Campaign progress saved in the browser.
-- `?seed=N` in the URL to replay a map and its events in *The Outpost*.
-- Automated tests of the simulation, run with `npm test` (Node's built-in runner,
-  nothing to install): determinism, resource bookkeeping, shortage resolution,
-  connectivity, simulation purity, and mission balance. The balance tests play
-  every mission at every difficulty from scripted build orders
-  (`tests/strategies.mjs`), which are now the campaign's balance contract.
-- CI runs the tests on every pull request, and the deploy runs them first, so a
-  failing test blocks a deploy.
+- An intro screen in Watney's voice, shown on the first visit and reopened with `H`.
+- A debrief on the end screen: what ended the mission, what to try, and the seed,
+  which *Retry* replays. `?seed=N` in the URL replays a map and its events in
+  *The Outpost*.
 - Shortage priorities. Every building that draws power or water is *critical*,
-  *normal* or *low*, set from its panel, and can be switched *off* (except
-  Habitats). The HUD's shortage note shows how much each tier is getting, and a
-  switched-off building is dimmed on the map. *First Night* turns priorities off.
-- The Oxygen Plant, a tenth building. It splits the carbon dioxide in the air
-  into oxygen, using power and no water, like NASA's MOXIE on Perseverance.
-  It's available wherever a mission allows every building.
-- A crew roster in the HUD: one health bar per crew member, with the share of
-  maximum health lost to radiation dose hatched at its end. The debrief names
-  who died or who went home.
-- Construction time and crew labour. Buildings take crew time to put up, drawn
-  faint with a 🔨 status marker ringed by their progress, and a site can be
-  cancelled for a full refund. The crew also repair micrometeorite damage, clean Solar Arrays and
-  reinforce buildings, one job each at a time, repairs first. The HUD shows
-  who's busy and how many jobs are waiting, and crew figures walk to their
-  jobs. Busy crew still count toward the Science Lab bonus.
-- Watney's tips: hints at teachable moments, such as ice within reach, batteries
-  that won't last the night, a Greenhouse heading for frost or jobs piling up.
-  Each shows once a mission, at most one every 20 game seconds, and a tip
-  about a place pulses it on the map. They can be turned off in mission
-  select.
-- Dust devils, a sixth kind of event. One sweeps most of the dust off some
-  of the Solar Arrays. They're in the default mix and in *Dust Season*.
-- A favicon: Mars with a Habitat dome on it, so the game's tab is easy to find.
+  *normal* or *low*, set from its panel, and all but Habitats can be switched off.
+- The Oxygen Plant, a tenth building, which makes oxygen from the air's carbon
+  dioxide using only power, like NASA's MOXIE.
+- A crew roster in the HUD, with each member's health and radiation dose.
+- Construction and crew labour: the crew put up buildings, repair damage, clean
+  Solar Arrays and reinforce, one job each at a time. A site can be cancelled for a
+  full refund.
+- Watney's tips at teachable moments, which can be turned off in mission select.
+- Dust devils, a sixth event, which sweep dust off some Solar Arrays.
+- A favicon.
+- Automated tests of the simulation (`npm test`), including a balance bot that plays
+  every mission at every difficulty from the build orders in `tests/strategies.mjs`.
+  CI runs them on every pull request and before every deploy.
+- Deployment to GitHub Pages on every push to `main`.
 
 ### Changed
-- Tests that set the clock now run at the time they set. The first step used
-  to reset it to the mission's start, so the night-time temperature tests ran
-  in the morning, and the construction and dust tests in the morning rather
-  than at midday. No change for players.
-- The simulation no longer touches the page. It queues messages on
-  `state.outbox` for the UI and ends a mission by setting `state.over`, so it
-  runs headless under Node. Hex layout, pixel picking and sprite loading moved
-  to `js/render.js`. No change for players. See `docs/PHYSICS.md` § Conventions.
-
-### Changed (missions)
-- Two new missions, for an eight-mission campaign. *Thin Air* (after *Ice Line*):
-  the Habitats' oxygen generators were wrecked in the landing, so Oxygen Plants
-  have to make the air while the crew grows to three. *Long Night* (after *Dust
-  Season*): a winter night at a northern site like Viking 2's, down to −113 °C
-  with weak sun, where solar alone can't keep the outpost warm. Missions can now
-  override a building's specification, the outside climate and the sunlight.
-  Players who had reached later missions keep them unlocked.
-- *The Outpost* asks for 4 000 credits instead of 1 000. With every mechanic in
-  play, a sound outpost was earning five to seven times the old target, so the
-  science economy no longer mattered.
-- *Ice Line* starts with 260 water instead of 60, for room on *Martian*, where
-  Watney now builds everything alone. Regolith alone still falls short.
-- *Flare Watch* is lost if anyone's radiation dose passes 70% of the career
-  limit. Its exposure objective could be met by shielding at the last moment,
-  while the real cost, dose, built up unseen. The HUD shows the highest dose
-  against the cap, and the debrief names who passed it.
-- The intro story gives the Earth–Mars distance as 55 to 400 million kilometres
-  (NSSDCA). It used to say about 225 million, a widely quoted average that is
-  really the midpoint of that range: averaged over time, the planets are about
-  253 million km apart.
-- *Dust Season*'s briefing mentions dust on the panels, and *Crew Rotation*'s
-  warns that anyone sent home at the dose limit lowers the crew count.
+- *The Outpost* asks for 4 000 credits instead of 1 000. With every mechanic in play,
+  a sound outpost earned five to seven times the old target.
+- The simulation no longer touches the page, so it runs headless under Node. See
+  `docs/PHYSICS.md` § Conventions.
 
 ### Fixed
-- Pressing Enter after closing the mission screen with Escape, or after
-  starting a mission with Begin or Retry, restarted the mission: the hidden
-  button kept keyboard focus.
-- A Habitat the crew needed for beds could be demolished once a micrometeorite
-  had damaged it. Beds now count in every finished Habitat.
-- With a construction site selected, the panel kept its site layout after the
-  building was finished, with a Cancel button that did nothing and no Clean,
-  Reinforce, Demolish or priority controls.
-- The build menu kept showing "Not enough resources" once a building became
-  affordable, and the Demolish button didn't notice when the crew came to need
-  a Habitat's beds.
-- Shortage priorities can be set on a construction site, as the balance build
-  orders assume. The buttons used to appear only once it was finished.
-- At 1280 × 720 the two top-right tiles were under the clock box and couldn't
-  be clicked. The map now shrinks to stay clear of it.
-- The clock's solar share ignored *Long Night*'s weak sun, reading 100% at
-  midday while the arrays made 60%.
-- Demolishing a building while the crew were still reinforcing it now refunds
-  half the regolith's materials, as it does once the regolith is piled on.
-- Advice that didn't hold: a *Thin Air* debrief told the player that Habitats
-  make oxygen, which they don't there; the night-power tip said to set the Lab
-  to Low, which it already is and which only matters once the batteries are
-  flat; and Watney said everything runs at half speed with the batteries dead.
+- At 1280 × 720 the two top-right tiles were under the clock box and couldn't be
+  clicked.
 
 ### Physics
-- Timers end on the step they're due. The clock now counts whole steps, and
-  countdowns end when less than half a step is left. Before, rounding could
-  leave a sliver, so the first random event of every mission came one step
-  (0.05 s) late. See `docs/PHYSICS.md` § Numerical notes.
-- A purchase no longer waits a step because the stores fall a rounding error
-  short of its cost: a Mine's 0.075 a step could reach 29.9999999999996 rather
-  than 30. Costs are affordable within a relative 1e-9, and spending clamps
-  stocks at zero.
-- Buildings are no longer instant: each takes 6 to 18 seconds of one crew
-  member's work, and damage stays until someone repairs it. *First Night*'s
-  winning build now puts both Solar Arrays up before the Battery Banks. See
-  `docs/PHYSICS.md` § What is modelled and § Gameplay departures.
-- Health is per crew member, and radiation dose adds up. Everyone takes the
-  same harm from shortages and acute radiation, but each member builds up a
-  dose that never heals. It lowers their maximum health, and at the career
-  limit they go home. If anyone dies, or Watney reaches the limit, the
-  mission is lost. Unshielded, the limit arrives around Sol 7 of *The
-  Outpost*, so its winning build now shields early. See `docs/PHYSICS.md`
-  § What is modelled.
-- Dust settles on Solar Arrays and cuts their output: 4% a sol, five times
-  faster in a dust storm, up to 60%. That's about 20 times the real rate, so
-  it shows within a mission. Clean an array by hand (10 s offline) or let a
-  dust devil do it. Solar-only builds now lose ground over a mission. See
-  `docs/PHYSICS.md` § What is modelled and § Gameplay departures.
-- Heating and building temperature. Habitats, Greenhouses and Science Labs
-  have a temperature, held at 20 °C by a thermostat that heats against the
-  outside air: a smooth daily curve between −89 °C before dawn and −31 °C in
-  the afternoon, the Viking 1 range. A building short of power cools, and
-  rewarming it costs power. A frozen Greenhouse loses its crop and regrows it
-  over a sol, a cold Lab stops, and crew sleeping in a cold Habitat get hurt.
-  The clock box shows the outside temperature, and building panels show their
-  temperature. Nights cost more power, so in *First Night* one extra Solar
-  Array and one Battery Bank are no longer enough. See `docs/PHYSICS.md`
-  § What is modelled.
-- Power and water shortages are shared out by priority instead of evenly:
-  critical buildings first, then normal, then low. Habitats and Water
-  Extractors default to critical, Greenhouses and Radiation Shields to normal,
-  and Mines and Science Labs to low. With every building in one tier, the
-  result is the same as before. See `docs/PHYSICS.md` § What is modelled.
-- When power and water ran short at the same time, buildings could draw more
-  water than was left after the crew's share: the water factor was a fraction
-  of power-limited demand, but it was applied to full demand. Buildings now
-  share exactly what's left. Found by the new shortage tests. See
-  `docs/PHYSICS.md` § What is modelled and § Validation.
-- *Dust Season* now asks for 3 000 credits instead of 1 000, and its storms last
-  90 s instead of 45 s, so they run into each other. Before, a solar-only
-  build won on *Normal* and *Hard*, and the mission didn't teach its lesson.
-  Now, with heating as well, the best solar-only build tested reaches about a
-  quarter of the target by the deadline, and a build that puts up a Nuclear
-  Generator first wins on Sol 3. See
-  `docs/PHYSICS.md` § Gameplay departures.
-- Water shortages now feed the crew first. Buildings share only the water left
-  after the crew's needs, and shortage detection counts every crew member's
-  water, not just one. Water, food and oxygen hurt health only when the stock is
-  empty *and* production can't cover the crew. Previously a shortage could hold
-  water at zero and keep damaging the crew even when production covered them.
-  See `docs/PHYSICS.md` § What is modelled.
-- The simulation is deterministic. All randomness comes from a seeded generator
-  (`js/rng.js`), and the simulation advances in fixed 0.05 s steps instead of by
-  frame time, so results no longer depend on frame rate. See `docs/PHYSICS.md`
-  § Conventions and § Numerical notes.
-- New game rules, each listed in `docs/PHYSICS.md` § Gameplay departures: mission
-  objectives, blackout and deadline failures, mission-specific event rates, a
-  crew landing every sol in *Crew Rotation*, and difficulty scaling of crew
-  consumption, starting water, food and oxygen, and event frequency.
-- The original mission is now *The Outpost*, the campaign's last. Its rules are
-  unchanged.
+- The simulation is deterministic: all randomness comes from a seeded generator
+  (`js/rng.js`), and it advances in fixed 0.05 s steps rather than by frame time.
+  Timers end on the step they're due, and a purchase no longer waits a step for a
+  rounding error. See `docs/PHYSICS.md` § Conventions and § Numerical notes.
+- Water shortages feed the crew first, and water, food and oxygen hurt health only
+  when the stock is empty *and* production can't cover the crew.
+- When power and water ran short together, buildings could draw more water than was
+  left after the crew. They now share exactly what's left. See `docs/PHYSICS.md`
+  § Validation.
+- Power and water shortages are shared out by priority tier instead of evenly. With
+  every building in one tier, the result is unchanged.
+- Buildings take 6 to 18 seconds of crew work to build, and damage stays until
+  someone repairs it.
+- Health is per crew member, and radiation dose accumulates: it lowers maximum
+  health, and at the career limit a member goes home.
+- Habitats, Greenhouses and Science Labs are heated against an outside temperature
+  that runs from −89 °C before dawn to −31 °C in the afternoon (Viking 1). A building
+  short of power cools; a frozen Greenhouse loses its crop, a cold Lab stops, and a
+  cold Habitat hurts its sleepers.
+- Dust settles on Solar Arrays and cuts their output, up to 60%, about 20 times the
+  real rate so it shows within a mission.
 
-### Known gaps
-- Mission balance is checked with scripted build orders, not with players.
-- No lint.
+New rules, rates and simplifications are listed in `docs/PHYSICS.md` § What is
+modelled and § Gameplay departures.
