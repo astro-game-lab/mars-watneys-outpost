@@ -25,7 +25,7 @@ To run it locally, see [Development](#development) below.
 | **Events** | By default every 40–70 seconds: a dust storm (solar −70%), a solar flare (radiation +40%), a micrometeorite (one building out until a crew member repairs it), a pump failure (water −50%), a dust devil (sweeps dust off some Solar Arrays), or a NASA supply drop. Missions change the mix, and some script events for a set time. |
 | **Winning** | Each mission has its own objectives: reach a sol, earn credits, grow the crew, store water, or bring radiation down. Every mission is lost if any crew member dies or Watney reaches the career dose limit, and some also end on a blackout or a deadline. |
 
-What isn't here yet: saving a mission in progress, settings beyond turning Watney's tips on and off, sound, keyboard-only play, or touch input. Beyond the intro, the briefings and each building's explanation, Watney's tips are the only tutorial: hints at teachable moments, each shown once a mission. The code is plain browser JavaScript with no build step. The simulation has automated tests, which run in CI.
+What isn't here yet: saving a mission in progress, settings beyond turning Watney's tips on and off, sound, keyboard-only play, or touch input. Beyond the intro, the briefings and each building's explanation, Watney's tips are the only tutorial: hints at teachable moments, each shown once a mission. The code is plain browser JavaScript with no build step. The simulation, and the UI's text and campaign rules, have automated tests, which run in CI.
 
 The simulation is deterministic. A seeded generator drives all randomness, and the simulation runs on a fixed timestep. So the same seed plus the same moves replays the same mission. The seed is shown on the end screen, and `?seed=N` in the URL replays a map in *The Outpost*. The simulation is separate from the UI and runs headless under Node, but its units are abstract. See [`docs/PHYSICS.md`](docs/PHYSICS.md#conventions).
 
@@ -91,7 +91,7 @@ js/screens.js     intro, mission select and briefing, end screen and debrief, sa
 js/main.js        entry point, fixed-step frame loop, input, seeds
 sprites/          building sprites (SVG)
 assets/           map background
-tests/            Node tests of the simulation, run headless, and the balance build orders
+tests/            Node tests of the simulation and the UI's logic, run headless, and the balance build orders
 ```
 
 The scripts are classic `<script>` tags that share one global scope. **The order in `index.html` matters.** Tune the game in `js/data.js` and the missions in `js/missions.js`. The rest of the code shouldn't contain balance numbers.
