@@ -1,5 +1,6 @@
 {
   "name": "mars-watneys-outpost",
+  "version": "0.1.0",
   "private": true,
   "description": "Keep a Mars outpost alive. The game itself needs no build and no install; this file only names the test command.",
   "license": "MIT",

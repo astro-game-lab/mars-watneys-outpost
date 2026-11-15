@@ -11,9 +11,11 @@ they relied on has moved.
 
 ## [Unreleased]
 
-Everything below is measured against the imported prototype: an 11 × 8 hex map, nine
-buildings, regolith reinforcement, crew arrivals, a day/night cycle, five random
-events, and one mission with a win and a lose condition.
+## [0.1.0] - 2026-11-15
+
+The first release. Everything below is measured against the imported prototype: an
+11 × 8 hex map, nine buildings, regolith reinforcement, crew arrivals, a day/night
+cycle, five random events, and one mission with a win and a lose condition.
 
 ### Added
 - An eight-mission campaign, each mission teaching one piece of Mars science:
@@ -84,3 +86,6 @@ events, and one mission with a win and a lose condition.
 
 New rules, rates and simplifications are listed in `docs/PHYSICS.md` § What is
 modelled and § Gameplay departures.
+
+[Unreleased]: https://github.com/astro-game-lab/mars-watneys-outpost/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/astro-game-lab/mars-watneys-outpost/releases/tag/v0.1.0
