@@ -42,6 +42,8 @@ events, and one mission with a win and a lose condition.
   every mission at every difficulty from the build orders in `tests/strategies.mjs`.
   CI runs them on every pull request and before every deploy.
 - Deployment to GitHub Pages on every push to `main`.
+- A 30-second demo video, `media/demo.mp4`, published with the site and linked from
+  the README.
 
 ### Changed
 - *The Outpost* asks for 4 000 credits instead of 1 000. With every mechanic in play,

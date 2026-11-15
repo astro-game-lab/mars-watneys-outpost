@@ -69,14 +69,14 @@ Tests don't cover drawing, input or the frame loop, so also verify changes by pl
 
 Balance is checked by `tests/balance.test.mjs`. Every mission must be winnable at every difficulty, and the strategy its briefing warns against must lose. The build orders in `tests/strategies.mjs` are that contract: a change to a rate, rule or mission keeps them passing, or updates them in the same change and says why. A known gap is marked with `knownGap`, which makes its check a `todo` rather than a failure.
 
-Pushes to `main` deploy to GitHub Pages through `.github/workflows/deploy.yml`, which publishes only `index.html`, `favicon.ico`, `style.css`, `js/`, `sprites/` and `assets/`. **A new top-level file the game loads must be added to that workflow's staging step**, or the deployed game won't find it.
+Pushes to `main` deploy to GitHub Pages through `.github/workflows/deploy.yml`, which publishes only `index.html`, `favicon.ico`, `style.css`, `js/`, `sprites/`, `assets/` and `media/`. **A new top-level file the game loads must be added to that workflow's staging step**, or the deployed game won't find it. `media/demo.mp4`, the 30-second demo video, is published at <https://astro-game-lab.github.io/mars-watneys-outpost/media/demo.mp4> and linked from the README. Its recording scripts live outside the repo, in `files/design/mars-watneys-outpost/demo-video/`.
 
 ## Conventions
 
 - Commit messages in the imperative mood, subject under 72 characters.
 - Keep the diff minimal and focused.
 - Third-party assets go in `ATTRIBUTIONS.md` in the same commit that adds them.
-- Large binaries: `assets/mars3.png` (2.8 MB) is committed raw. If more art arrives, enable the Git LFS patterns in `.gitattributes` instead of adding more raw images.
+- Large binaries: `assets/mars3.png` (2.8 MB) and `media/demo.mp4` (6.6 MB) are committed raw. The video is a deliberate exception to the org's LFS rule: one small file that rarely changes isn't worth making contributors install `git-lfs` or spending LFS bandwidth on every deploy. Every re-recording adds its full size to the history for good, so replace it rarely. If more art or video arrives, enable the Git LFS patterns in `.gitattributes` instead of adding more raw binaries.
 
 ## Attribution — DO NOT ADD
 

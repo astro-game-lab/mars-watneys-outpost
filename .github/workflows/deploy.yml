@@ -39,7 +39,7 @@ jobs:
       - name: Stage site files
         run: |
           mkdir _site
-          cp -r index.html favicon.ico style.css js sprites assets _site/
+          cp -r index.html favicon.ico style.css js sprites assets media _site/
 
       # A missing script or image fails silently in the browser, so check that
       # every local file index.html and the scripts reference made it in.
