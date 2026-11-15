@@ -38,12 +38,16 @@ events, and one mission with a win and a lose condition.
 - Watney's tips at teachable moments, which can be turned off in mission select.
 - Dust devils, a sixth event, which sweep dust off some Solar Arrays.
 - A favicon.
+- A fan-work notice on the intro screen, so players who only see the game, not the
+  README, know it's unofficial.
+- A link preview: a page description, Open Graph and Twitter Card tags, and a
+  1280 × 640 screenshot, `media/screenshot.png`.
 - Automated tests of the simulation (`npm test`), including a balance bot that plays
   every mission at every difficulty from the build orders in `tests/strategies.mjs`.
   CI runs them on every pull request and before every deploy.
 - Deployment to GitHub Pages on every push to `main`.
 - A 30-second demo video, `media/demo.mp4`, published with the site and linked from
-  the README.
+  the README, and an animated GIF of it, `media/demo.gif`, at the top of the README.
 
 ### Changed
 - *The Outpost* asks for 4 000 credits instead of 1 000. With every mechanic in play,

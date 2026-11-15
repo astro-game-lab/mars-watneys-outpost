@@ -2,6 +2,8 @@
 
 Keep a Mars outpost alive. A browser base-building game about power, water, air and radiation on the Red Planet.
 
+[![A late game of The Outpost: building an Oxygen Plant, a micrometeorite strike, and nightfall over the outpost.](media/demo.gif)](https://astro-game-lab.github.io/mars-watneys-outpost/)
+
 ## Play
 
 **<https://astro-game-lab.github.io/mars-watneys-outpost/>** — no install, no account.
@@ -90,7 +92,7 @@ js/screens.js     intro, mission select and briefing, end screen and debrief, sa
 js/main.js        entry point, fixed-step frame loop, input, seeds
 sprites/          building sprites (SVG)
 assets/           map background
-media/            the demo video
+media/            the demo video, its GIF, and the link-preview screenshot
 tests/            Node tests of the simulation and the UI's logic, run headless, and the balance build orders
 ```
 
@@ -100,7 +102,7 @@ The simulation (`js/data.js` through `js/simulation.js`) never touches the page.
 
 ### Deployment
 
-Every push to `main` deploys to GitHub Pages through [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). The workflow publishes only the files the game loads and the demo video, not the docs.
+Every push to `main` deploys to GitHub Pages through [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). The workflow publishes only the files the game loads and the `media/` files, not the docs.
 
 ## Documentation
 
