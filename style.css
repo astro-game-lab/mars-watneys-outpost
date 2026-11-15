@@ -196,6 +196,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 .card { padding: 8px 10px; background: rgba(255, 200, 160, 0.07); border: 1px solid rgba(255, 200, 160, 0.18); border-radius: 6px; font-size: 13px; }
 .card b { display: block; margin-bottom: 2px; }
 .note { margin-top: 10px !important; font-size: 13px; opacity: 0.9; }
+.fineprint { margin: 14px 0 0; font-size: 11px; opacity: 0.6; }
 .controls { border-collapse: collapse; font-size: 13px; }
 .controls td { padding: 2px 16px 2px 0; }
 .controls td:first-child { font-weight: bold; white-space: nowrap; }
