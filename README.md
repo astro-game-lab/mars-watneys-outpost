@@ -2,8 +2,6 @@
 
 Keep a Mars outpost alive. A browser base-building game about power, water, air and radiation on the Red Planet.
 
-An [astro-game-lab](https://github.com/astro-game-lab) game.
-
 ## Play
 
 **<https://astro-game-lab.github.io/mars-watneys-outpost/>** — no install, no account.
