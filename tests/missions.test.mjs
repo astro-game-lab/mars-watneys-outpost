@@ -45,3 +45,17 @@ test("Long Night's sunlight multiplier scales Solar Array output", () => {
   const solar = (sim) => sim.outputMultiplier(sim.state.tiles.find((t) => t.building && t.building.type === "solar"));
   assert.ok(Math.abs(solar(cold) - solar(normal) * cold.missionById("long-night").sunlight) < 1e-9);
 });
+
+test("every heater can still hold its setpoint on the coldest night of every mission", () => {
+  const sim = loadSim();
+  for (const m of sim.MISSIONS) {
+    sim.createState(m, m.seed ?? 1, "normal");
+    const coldest = { ...sim.OUTSIDE_K, ...m.climate }.min;
+    for (const key of sim.BUILD_ORDER) {
+      const b = sim.spec(key);
+      if (!b.heat) continue;
+      const need = sim.heatLoss(b) * (sim.SETPOINT_K - coldest);
+      assert.ok(need < b.heat, `${m.id}: a ${b.name} needs ${need.toFixed(3)} of its ${b.heat} at ${coldest} K`);
+    }
+  }
+});

@@ -13,8 +13,9 @@ const FLARE_RADIATION = 40;     // % exposure added during a solar flare
 // proportion to the difference from the outside temperature, which follows a
 // smooth daily curve between the Viking 1 extremes: its low just before dawn,
 // its high in the early afternoon. A heater can deliver HEATER_HEADROOM times
-// the loss on the coldest night, which sets each building's heat loss per
-// kelvin. THERMAL_TAU sets how fast a building cools with no heat at all: an
+// the loss on the coldest default night (OUTSIDE_K.min), which sets each
+// building's heat loss per kelvin. A mission's colder climate doesn't change
+// it, so there the heaters have less to spare. THERMAL_TAU sets how fast a building cools with no heat at all: an
 // unpowered building at night reaches FROST_K in about two minutes.
 const SETPOINT_K = 293;            // 20 °C
 const COLD_K = 283;                // 10 °C: crew in a colder Habitat get hurt, and Labs stop
