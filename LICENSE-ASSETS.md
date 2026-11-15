@@ -11,7 +11,7 @@ Copyright (c) 2026 astro-game-lab
 
 Art, textures, sprites, models, audio, music, fonts we authored, and authored content such as scenario, level, and narrative files — here, the building sprites in `sprites/`, plus any equivalent content elsewhere in the tree.
 
-The map background, `assets/mars3.png`, is **not** ours and is not covered by this licence. It is NASA imagery; see [`ATTRIBUTIONS.md`](ATTRIBUTIONS.md).
+The map background, `assets/mars3.png`, is **not** covered by this licence. It was generated with OpenAI's ChatGPT image model, and no third-party rights are claimed in it; see [`ATTRIBUTIONS.md`](ATTRIBUTIONS.md).
 
 Source code, build tooling, and the simulation itself are code, not assets, and are MIT.
 

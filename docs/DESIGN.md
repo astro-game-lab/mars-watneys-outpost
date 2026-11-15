@@ -56,7 +56,7 @@ Each departure here also appears in [`PHYSICS.md`](PHYSICS.md#gameplay-departure
 
 ## Presentation
 
-- **Visual approach:** a NASA Mars surface image under a translucent hex grid, SVG building sprites, small crew figures wandering between buildings, and a night overlay.
+- **Visual approach:** an AI-generated Mars surface image under a translucent hex grid, SVG building sprites, small crew figures wandering between buildings, and a night overlay.
 - **Audio:** none yet.
 - **Accessibility:** **not yet addressed.** Resource status is shown mainly by colour. Play needs a mouse. The canvas has no text alternative.
 
