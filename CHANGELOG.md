@@ -96,6 +96,31 @@ they relied on has moved.
 - *Dust Season*'s briefing mentions dust on the panels, and *Crew Rotation*'s
   warns that anyone sent home at the dose limit lowers the crew count.
 
+### Fixed
+- Pressing Enter after closing the mission screen with Escape, or after
+  starting a mission with Begin or Retry, restarted the mission: the hidden
+  button kept keyboard focus.
+- A Habitat the crew needed for beds could be demolished once a micrometeorite
+  had damaged it. Beds now count in every finished Habitat.
+- With a construction site selected, the panel kept its site layout after the
+  building was finished, with a Cancel button that did nothing and no Clean,
+  Reinforce, Demolish or priority controls.
+- The build menu kept showing "Not enough resources" once a building became
+  affordable, and the Demolish button didn't notice when the crew came to need
+  a Habitat's beds.
+- Shortage priorities can be set on a construction site, as the balance build
+  orders assume. The buttons used to appear only once it was finished.
+- At 1280 × 720 the two top-right tiles were under the clock box and couldn't
+  be clicked. The map now shrinks to stay clear of it.
+- The clock's solar share ignored *Long Night*'s weak sun, reading 100% at
+  midday while the arrays made 60%.
+- Demolishing a building while the crew were still reinforcing it now refunds
+  half the regolith's materials, as it does once the regolith is piled on.
+- Advice that didn't hold: a *Thin Air* debrief told the player that Habitats
+  make oxygen, which they don't there; the night-power tip said to set the Lab
+  to Low, which it already is and which only matters once the batteries are
+  flat; and Watney said everything runs at half speed with the batteries dead.
+
 ### Physics
 - Timers end on the step they're due. The clock now counts whole steps, and
   countdowns end when less than half a step is left. Before, rounding could
